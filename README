@@ -1,0 +1,8 @@
+# Coleus
+
+## Extensions
+
+1. `vite.config.ts`: Add a new alias.
+2. Update `resolvePageComponent` in `resources/js/app.ts`.
+3. Update `path` in `tsconfig.json`.
+4. Update `types` in `tsconfig.json`.

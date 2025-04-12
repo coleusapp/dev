@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Extensions\Health\Casts;
+
+use App\Settings\GeneralSettings;
+use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
+
+class TimezoneDatetimeCast implements CastsAttributes
+{
+    public function get(Model $model, string $key, mixed $value, array $attributes): mixed
+    {
+        return Carbon::parse($value)->tz('America/Denver');
+    }
+
+    public function set(Model $model, string $key, mixed $value, array $attributes): mixed
+    {
+        return Carbon::parse($value)->tz('UTC');
+    }
+}
