@@ -15,4 +15,12 @@ abstract class Table implements Columns
      * }>
      */
     public abstract static function columns(): array;
+
+    public static function column($label, $value): array
+    {
+        return [
+            'label' => $label,
+            'value' => $value,
+        ];
+    }
 }

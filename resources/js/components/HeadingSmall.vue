@@ -8,7 +8,7 @@ defineProps<Props>();
 </script>
 
 <template>
-    <header class="flex items-end justify-between">
+    <header class="flex items-center justify-between">
         <div>
             <h3 v-if="title" class="text-sm font-semibold">{{ title }}</h3>
             <p v-if="description" class="text-sm text-muted-foreground">

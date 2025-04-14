@@ -21,6 +21,7 @@ class WeightController extends Controller
             'table' => [
                 'records' => WeightResource::collection(WeightTable::query()->paginate()),
                 'columns' => WeightTable::columns(),
+                'config' => ['search_query' => WeightTable::$searchQuery, 'sort_query' => WeightTable::$sortQuery],
             ],
         ]);
     }

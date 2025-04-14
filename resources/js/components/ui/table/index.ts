@@ -1,6 +1,5 @@
-export { default as Columns } from './Columns.vue';
-export { default as Records } from './Records.vue';
 export { default as Table } from './Table.vue';
+export { default as ActionLink } from './ActionLink.vue';
 
 export interface IColumn {
     label: string;

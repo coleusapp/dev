@@ -42,27 +42,19 @@ class WeightTable extends Table
     public static function columns(): array
     {
         return [
-            [
-                'label' => 'Date',
-                'value' => 'date_string',
-                'sort' => [
-                    ['label' => 'Asc', 'value' => 'date'],
-                    ['label' => 'Desc', 'value' => '-date'],
-                ],
-            ],
-             [
-                'label' => 'Weight',
-                 'value' => 'weight',
-                'sort' => [
-                    ['label' => 'Asc', 'value' => 'weight'],
-                    ['label' => 'Desc', 'value' => '-weight']
-                ],
-            ],
+            static::sortableColumn('Date', 'date_string', 'date'),
+            static::column('Weight', 'weight'),
         ];
     }
 
     protected static function sortQuery(Builder $query): Builder
     {
-        return $query->orderBy('weight', 'desc');
+        return match (request(static::$sortQuery)) {
+            'date' => $query->orderBy('date', 'desc'),
+            '-date' => $query->orderBy('date'),
+            'weight' => $query->orderBy('weight', 'desc'),
+            '-weight' => $query->orderBy('weight'),
+            default => $query->orderBy('created_at', 'desc'),
+        };
     }
 }

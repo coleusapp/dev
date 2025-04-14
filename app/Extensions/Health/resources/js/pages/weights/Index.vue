@@ -24,7 +24,7 @@ defineProps<{
                 <HeadingSmall title="Weights">
                     <ButtonLink :href="route('health.weights.create')" icon="Plus" size="sm">New Weight</ButtonLink>
                 </HeadingSmall>
-                <WeightTable :headers="table?.headers || []" :records="table?.records || []" :columns="table?.columns || []" />
+                <WeightTable :table="table" />
             </div>
         </HealthLayout>
     </AppLayout>

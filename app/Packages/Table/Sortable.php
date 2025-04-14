@@ -4,6 +4,9 @@ namespace App\Packages\Table;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @mixin \App\Packages\Table\Table
+ */
 trait Sortable
 {
     public static string $sortQuery = 'sort';
@@ -14,4 +17,17 @@ trait Sortable
     }
 
     protected abstract static function sortQuery(Builder $query): Builder;
+
+    protected static function sortableColumn($label, $value, $sortValue = null): array
+    {
+        $sortValue = $sortValue ?? $value;
+
+        return [
+            ...static::column($label, $sortValue),
+            'sort' => [
+                ['label' => 'Ascending', 'value' => "$sortValue"],
+                ['label' => 'Descending', 'value' => "-$sortValue"],
+            ],
+        ];
+    }
 }

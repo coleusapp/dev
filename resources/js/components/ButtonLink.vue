@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { InertiaLinkProps, Link } from '@inertiajs/vue3';
 import { Button, type ButtonVariants } from '@/components/ui/button';
 import Icon from "@/components/Icon.vue";
 
 interface Props {
-    href: string;
+    href: string|InertiaLinkProps['href'];
     icon?: string;
     tabindex?: number;
     method?: string;
