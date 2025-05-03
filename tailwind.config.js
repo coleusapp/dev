@@ -10,6 +10,7 @@ export default {
         './resources/js/**/*.{vue,js,ts,jsx,tsx}',
         './app/Extensions/**/resources/views/**/*.blade.php',
         './app/Extensions/**/resources/js/**/*.{vue,js,ts,jsx,tsx}',
+        'formkit.theme.ts',
     ],
     theme: {
         extend: {

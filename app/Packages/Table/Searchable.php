@@ -13,5 +13,10 @@ trait Searchable
         return request()->has(static::$searchQuery) && strlen(request(static::$searchQuery));
     }
 
-    protected abstract static function searchQuery(Builder $query): Builder;
+    protected static function searchQuery(Builder $query): Builder
+    {
+        return $query->where(function (Builder $builder) {
+            //
+        });
+    }
 }

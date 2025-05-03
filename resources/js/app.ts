@@ -7,6 +7,9 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
+import ui from '@nuxt/ui/vue-plugin';
+import { plugin as formkitPlugin } from '@formkit/vue';
+import formkitConfig from "../../formkit.config";
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -40,10 +43,13 @@ createInertiaApp({
         return resolvePageComponent(paths, pages);
     },
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
-            .mount(el);
+            .use(ui)
+            .use(formkitPlugin, formkitConfig);
+        app.config.globalProperties.$toast = useToast();
+        app.mount(el);
     },
     progress: {
         color: '#4B5563',

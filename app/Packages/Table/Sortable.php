@@ -16,7 +16,12 @@ trait Sortable
         return request()->has(static::$sortQuery) && strlen(request(static::$sortQuery));
     }
 
-    protected abstract static function sortQuery(Builder $query): Builder;
+    protected static function sortQuery(Builder $query): Builder
+    {
+        return match (request(static::$sortQuery)) {
+            default => $query->orderBy('created_at', 'desc'),
+        };
+    }
 
     protected static function sortableColumn($label, $value, $sortValue = null): array
     {

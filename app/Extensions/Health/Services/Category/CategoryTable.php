@@ -12,4 +12,9 @@ class CategoryTable extends Table
         return Category::query()
             ->orderBy('created_at', 'desc');
     }
+
+    public static function columns(): array
+    {
+        return [];
+    }
 }

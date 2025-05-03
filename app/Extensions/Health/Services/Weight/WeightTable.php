@@ -2,18 +2,32 @@
 
 namespace App\Extensions\Health\Services\Weight;
 
+use App\Extensions\Health\Http\Resources\WeightResource;
 use App\Extensions\Health\Models\Weight;
 use App\Packages\Table\Searchable;
 use App\Packages\Table\Sortable;
 use App\Packages\Table\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class WeightTable extends Table
 {
     use Searchable;
-    use Sortable;
 
-    public static function query()
+    public static function columns(): array
+    {
+        return [
+            static::sortableColumn('Date', 'date_string', 'date'),
+            static::column('Weight', 'weight'),
+        ];
+    }
+
+    public static function records(): AnonymousResourceCollection
+    {
+        return WeightResource::collection(WeightTable::query()->paginate());
+    }
+
+    public static function query(): Builder
     {
         return Weight::query()
             ->when(static::hasSearchQuery(), fn ($query) => static::searchQuery($query))
@@ -31,20 +45,6 @@ class WeightTable extends Table
                 ->orWhereYear('date', request(static::$searchQuery))
                 ->orWhereTime('date', request(static::$searchQuery));
         });
-    }
-
-    /**
-     * @return array<string, array{
-     *     label: string,
-     *     sort: array<array{label: string, value: string}>
-     * }>
-     */
-    public static function columns(): array
-    {
-        return [
-            static::sortableColumn('Date', 'date_string', 'date'),
-            static::column('Weight', 'weight'),
-        ];
     }
 
     protected static function sortQuery(Builder $query): Builder

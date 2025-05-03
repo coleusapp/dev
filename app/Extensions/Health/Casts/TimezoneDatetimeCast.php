@@ -11,11 +11,11 @@ class TimezoneDatetimeCast implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return Carbon::parse($value)->tz('America/Denver');
+        return Carbon::parse($value)->setTimezone('America/Denver');
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return Carbon::parse($value)->tz('UTC');
+        return Carbon::parse($value, 'America/Denver')->setTimezone('UTC');
     }
 }

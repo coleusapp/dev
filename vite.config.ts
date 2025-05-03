@@ -1,13 +1,14 @@
 import vue from '@vitejs/plugin-vue';
-import autoprefixer from 'autoprefixer';
 import laravel from 'laravel-vite-plugin';
 import path from 'path';
-import tailwindcss from 'tailwindcss';
+import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
+import ui from '@nuxt/ui/vite'
 
 export default defineConfig({
     plugins: [
+        tailwindcss(),
         laravel({
             input: ['resources/js/app.ts'],
             ssr: 'resources/js/ssr.ts',
@@ -21,6 +22,50 @@ export default defineConfig({
                 },
             },
         }),
+        ui({
+            prefix: 'Ui',
+            dts: true,
+            ui: {
+                colors: {
+                    primary: 'indigo',
+                    neutral: 'slate',
+                },
+                table: {
+                    slots: {
+                        th: 'px-2 py-3.5',
+                        td: 'p-2',
+                    }
+                },
+                slideover: {
+                    slots: {
+                        content: 'bg-transparent backdrop-blur-xs sm:ring-0 divide-none',
+                        body: 'px-2 py-2 sm:px-2 sm:py-2',
+                    },
+                    variants: {
+                        side: {
+                            right: {
+                                content: 'max-w-sm',
+                            },
+                            left: {
+                                content: 'max-w-sm',
+                            }
+                        }
+                    }
+                },
+                toast: {
+                    defaultVariants: {
+                        color: 'neutral'
+                    }
+                },
+                card: {
+                    slots: {
+                        header: 'p-2 sm:px-3 flex items-center justify-between',
+                        body: 'p-2 sm:p-3',
+                        footer: 'p-2 sm:px-3'
+                    }
+                },
+            }
+        })
     ],
     resolve: {
             alias: {
@@ -28,10 +73,5 @@ export default defineConfig({
                 '@health': path.resolve(__dirname, './app/Extensions/Health/resources/js'),
                 'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
             },
-    },
-    css: {
-        postcss: {
-            plugins: [tailwindcss, autoprefixer],
-        },
     },
 });

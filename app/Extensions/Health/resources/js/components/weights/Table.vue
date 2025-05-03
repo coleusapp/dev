@@ -1,17 +1,30 @@
 <script setup lang="ts">
-import { Table } from '@/components/ui/table';
-import ActionLink from '@/components/ui/table/ActionLink.vue';
-import { WeightTable } from '@health/types/weight';
+import type { TableColumn } from '@nuxt/ui';
+import { h } from 'vue';
+import TableActions from '@health/components/weights/parts/TableActions.vue';
+import { Collection, Data } from '@health/components/weights/type';
 
 defineProps<{
-    table?: any;
+    collection?: Collection;
 }>();
+
+const columns: TableColumn<Data>[] = [
+    {
+        accessorKey: 'date',
+        cell: ({ row }) => `${row.original.date_for_humans}`,
+        header: 'Date',
+    },
+    {
+        accessorKey: 'weight',
+        header: 'Weight',
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => h(TableActions, { weightId: row?.original?.id }),
+    },
+];
 </script>
+
 <template>
-    <Table :table="table">
-        <template #actions="{ record }">
-            <ActionLink :href="route('health.weights.edit', { weight: record })">Edit</ActionLink>
-            <ActionLink :href="route('health.weights.destroy', { weight: record })" method="delete"> Delete</ActionLink>
-        </template>
-    </Table>
+    <UiTable :data="collection?.data" :columns="columns" />
 </template>

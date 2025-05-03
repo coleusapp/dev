@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { Table, TableActionLink } from '@/components/ui/table';
-import { WorkoutTable } from '@health/types/workout';
+import { Table } from '@/components/ui/table';
+import ActionLink from '@/components/ui/table/ActionLink.vue';
 
 defineProps<{
-    table?: WorkoutTable;
+    table?: any;
 }>();
 </script>
 <template>
-    <Table :headers="table?.headers || []" :records="table?.records || []" :columns="table?.columns || []" #default="{ record }">
-        <TableActionLink :href="route('health.workouts.edit', { workout: record })">Edit</TableActionLink>
-        <TableActionLink :href="route('health.workouts.destroy', { workout: record })" method="delete">Delete </TableActionLink>
+    <Table :table="table">
+        <template #actions="{ record }">
+            <ActionLink :href="route('health.workouts.edit', { workout: record })">Edit</ActionLink>
+            <ActionLink :href="route('health.workouts.destroy', { workout: record })" method="delete"> Delete</ActionLink>
+        </template>
     </Table>
 </template>

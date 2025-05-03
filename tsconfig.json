@@ -125,11 +125,15 @@
     "include": [
         "resources/js/**/*.ts",
         "resources/js/**/*.d.ts",
-        "resources/js/**/*.tsx", 
+        "resources/js/**/*.tsx",
         "resources/js/**/*.vue",
         "app/Extensions/**/resources/js/**/*.ts",
         "app/Extensions/**/resources/js/**/*.d.ts",
         "app/Extensions/**/resources/js/**/*.tsx",
-        "app/Extensions/**/resources/js/**/*.vue"
+        "app/Extensions/**/resources/js/**/*.vue",
+        "./auto-imports.d.ts",
+        "./components.d.ts",
+        "node_modules/lucide-vue-next/dist/lucide-vue-next.d.ts",
+        "node_modules/unplugin-auto-import/auto-imports.d.ts"
     ]
 }
