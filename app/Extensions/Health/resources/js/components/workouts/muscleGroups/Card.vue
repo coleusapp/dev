@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {Link} from "@inertiajs/vue3";
-import WeightTable from '@health/components/weights/Table.vue';
-import { Collection } from '@health/components/weights/type';
+import WeightTable from '@health/components/workouts/muscleGroups/Table.vue';
+import { Collection } from '@health/components/workouts/muscleGroups/type';
+import { Link } from '@inertiajs/vue3';
 
 defineProps<{
     collection?: Collection;
@@ -10,8 +10,8 @@ defineProps<{
 <template>
     <UiCard>
         <template #header>
-            Weights
-            <Link :href="route('health.weights.create')">
+            muscleGroups
+            <Link :href="route('health.workouts.muscle-groups.create')">
                 <UiButton icon="lucide-plus">New</UiButton>
             </Link>
         </template>

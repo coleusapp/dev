@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Extensions\Health\Http\Requests\Categories;
+namespace App\Extensions\Health\Http\Requests\WorkoutCategory;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,7 +18,10 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|unique:categories,name',
+            'name' => [
+                'required',
+                Rule::unique('categories', 'name')->ignore($this->route('category')->id),
+            ],
         ];
     }
 }

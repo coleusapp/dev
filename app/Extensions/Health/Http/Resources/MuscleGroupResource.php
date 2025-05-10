@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Extensions\Health\Models\Category
+ * @mixin \App\Extensions\Health\Models\WorkoutCategory
  */
-class CategoryResource extends JsonResource
+class MuscleGroupResource extends JsonResource
 {
     public function toArray(Request $request): array
     {

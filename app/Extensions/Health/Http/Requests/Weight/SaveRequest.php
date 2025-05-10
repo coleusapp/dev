@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Extensions\Health\Http\Requests\Weights;
+namespace App\Extensions\Health\Http\Requests\Weight;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

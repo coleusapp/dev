@@ -2,7 +2,7 @@
 
 namespace App\Extensions\Health\Http\Controllers;
 
-use App\Extensions\Health\Http\Requests\Weights\SaveRequest;
+use App\Extensions\Health\Http\Requests\Weight\SaveRequest;
 use App\Extensions\Health\Http\Resources\WeightResource;
 use App\Extensions\Health\Models\Weight;
 use App\Extensions\Health\Services\Weight\WeightTable;
