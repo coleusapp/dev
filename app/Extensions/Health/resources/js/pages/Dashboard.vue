@@ -5,16 +5,19 @@ import WeightCard from '@health/components/weights/Card.vue';
 import WorkoutCategoryCard from '@health/components/workoutCategories/Card.vue';
 import MuscleGroupCard from '@health/components/workouts/muscleGroups/Card.vue';
 import ToothpasteTypeCard from '@health/components/toothpasteTypes/Card.vue';
+import ExerciseCard from '@health/components/exercises/Card.vue';
 import { Collection as WeightCollection } from '@health/components/weights/type';
 import { Collection as WorkoutCategoryCollection } from '@health/components/workoutCategories/type';
 import { Collection as MuscleGroupCollection } from '@health/components/workouts/muscleGroups/type';
 import { Collection as ToothpasteTypeCollection } from '@health/components/toothpasteTypes/type';
+import { Collection as ExerciseCollection } from '@health/components/exercises/type';
 
 defineProps<{
     weights: WeightCollection;
     workout_categories: WorkoutCategoryCollection;
     muscle_groups: MuscleGroupCollection;
     toothpaste_types: ToothpasteTypeCollection;
+    exercises: ExerciseCollection;
 }>();
 </script>
 
@@ -23,6 +26,8 @@ defineProps<{
 
     <HealthLayout>
         <div class="flex flex-wrap gap-4 w-full">
+            <ExerciseCard class="w-full" :collection="exercises" />
+
             <WeightCard class="w-full" :collection="weights" />
             <WorkoutCategoryCard class="w-full" :collection="workout_categories" />
             <MuscleGroupCard class="w-full" :collection="muscle_groups" />

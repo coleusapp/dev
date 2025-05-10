@@ -71,6 +71,7 @@ class Exercise extends Model
         'has_rep' => 'bool',
         'has_weight' => 'bool',
         'has_distance' => 'bool',
+        'has_calorie' => 'bool',
         'has_duration' => 'bool',
     ];
 
