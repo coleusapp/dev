@@ -17,7 +17,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|unique:categories,name',
+            'name' => 'required|unique:toothpaste_types,name',
         ];
     }
 }

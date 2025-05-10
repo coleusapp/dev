@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Extensions\Health\Http\Requests\WorkoutCategory;
+namespace App\Extensions\Health\Http\Requests\ToothpasteType;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdateRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -18,10 +17,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
-                'required',
-                Rule::unique('toothpaste_types', 'name')->ignore($this->route('toothpaste_type')->id),
-            ],
+            'name' => 'required|unique:categories,name',
         ];
     }
 }
