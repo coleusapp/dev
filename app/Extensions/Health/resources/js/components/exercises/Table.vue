@@ -5,6 +5,7 @@ import TableActions from '@health/components/exercises/parts/TableActions.vue';
 import { Collection, Data } from '@health/components/exercises/type';
 import type { TableColumn } from '@nuxt/ui';
 import { h } from 'vue';
+import BadgeColumn from '@/components/ui/table/columns/BadgeColumn.vue';
 
 defineProps<{
     collection?: Collection;
@@ -36,6 +37,7 @@ const columns: TableColumn<Data>[] = [
     {
         accessorKey: 'distance_unit',
         header: 'Distance Unit',
+        cell: ({ row }) => h(BadgeColumn, row?.original?.distance_unit),
     },
     {
         accessorKey: 'has_calorie',
@@ -50,6 +52,7 @@ const columns: TableColumn<Data>[] = [
     {
         accessorKey: 'duration_unit',
         header: 'Duration Unit',
+        cell: ({ row }) => h(BadgeColumn, row?.original?.distance_unit),
     },
     {
         id: 'actions',
