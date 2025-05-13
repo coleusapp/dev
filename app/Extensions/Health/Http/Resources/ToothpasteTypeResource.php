@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Extensions\Health\Models\WorkoutCategory
+ * @mixin \App\Extensions\Health\Models\Category
  */
 class ToothpasteTypeResource extends JsonResource
 {

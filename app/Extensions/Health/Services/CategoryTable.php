@@ -2,15 +2,15 @@
 
 namespace App\Extensions\Health\Services;
 
-use App\Extensions\Health\Models\WorkoutCategory;
+use App\Extensions\Health\Models\Category;
 use App\Packages\Table\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class WorkoutCategoryTable extends Table
+class CategoryTable extends Table
 {
     public static function query(): Builder
     {
-        return WorkoutCategory::query()
+        return Category::query()
             ->orderBy('created_at', 'desc');
     }
 }

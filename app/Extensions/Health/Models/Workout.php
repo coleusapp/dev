@@ -3,7 +3,7 @@
 namespace App\Extensions\Health\Models;
 
 use App\Extensions\Health\Casts\TimezoneDatetimeCast;
-use App\Packages\Core\Concerns\AutoAssignUser;
+use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

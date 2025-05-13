@@ -4,7 +4,7 @@ namespace App\Extensions\Health\Models;
 
 use App\Casts\DistanceCast;
 use App\Casts\WeightCast;
-use App\Packages\Core\Concerns\AutoAssignUser;
+use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 

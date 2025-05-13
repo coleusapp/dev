@@ -2,19 +2,19 @@
 import HealthLayout from '@health/layouts/HealthLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import WeightCard from '@health/components/weights/Card.vue';
-import WorkoutCategoryCard from '@health/components/workoutCategories/Card.vue';
+import CategoryCard from '@health/components/workoutCategories/Card.vue';
 import MuscleGroupCard from '@health/components/workouts/muscleGroups/Card.vue';
 import ToothpasteTypeCard from '@health/components/toothpasteTypes/Card.vue';
 import ExerciseCard from '@health/components/exercises/Card.vue';
 import { Collection as WeightCollection } from '@health/components/weights/type';
-import { Collection as WorkoutCategoryCollection } from '@health/components/workoutCategories/type';
+import { Collection as CategoryCollection } from '@health/components/workoutCategories/type';
 import { Collection as MuscleGroupCollection } from '@health/components/workouts/muscleGroups/type';
 import { Collection as ToothpasteTypeCollection } from '@health/components/toothpasteTypes/type';
 import { Collection as ExerciseCollection } from '@health/components/exercises/type';
 
 defineProps<{
     weights: WeightCollection;
-    workout_categories: WorkoutCategoryCollection;
+    categories: CategoryCollection;
     muscle_groups: MuscleGroupCollection;
     toothpaste_types: ToothpasteTypeCollection;
     exercises: ExerciseCollection;
@@ -29,7 +29,7 @@ defineProps<{
             <ExerciseCard class="w-full" :collection="exercises" />
 
             <WeightCard class="w-full" :collection="weights" />
-            <WorkoutCategoryCard class="w-full" :collection="workout_categories" />
+            <CategoryCard class="w-full" :collection="categories" />
             <MuscleGroupCard class="w-full" :collection="muscle_groups" />
             <ToothpasteTypeCard class="w-full" :collection="toothpaste_types" />
         </div>

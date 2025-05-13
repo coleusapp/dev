@@ -2,7 +2,7 @@
 
 namespace App\Extensions\Health\Models;
 
-use App\Packages\Core\Concerns\AutoAssignUser;
+use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -73,6 +73,19 @@ class Exercise extends Model
         'has_distance' => 'bool',
         'has_calorie' => 'bool',
         'has_duration' => 'bool',
+    ];
+
+    protected $fillable = [
+        'name',
+        'description',
+        'has_rep',
+        'has_weight',
+        'has_distance',
+        'has_calorie',
+        'weight_unit',
+        'distance_unit',
+        'has_duration',
+        'duration_unit',
     ];
 
     public function exerciseMuscleGroups(): HasMany

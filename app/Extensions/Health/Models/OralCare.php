@@ -2,7 +2,7 @@
 
 namespace App\Extensions\Health\Models;
 
-use App\Packages\Core\Concerns\AutoAssignUser;
+use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;

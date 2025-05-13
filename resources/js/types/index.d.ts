@@ -35,4 +35,13 @@ export interface User {
     updated_at: string;
 }
 
+export type Option = {
+    label: string;
+    value: string;
+}
+
+export type OptionCollection = {
+    data: WeightUnit[];
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;

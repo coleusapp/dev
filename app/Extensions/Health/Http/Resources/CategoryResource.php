@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin \App\Extensions\Health\Models\Category
  */
-class MuscleGroupResource extends JsonResource
+class CategoryResource extends JsonResource
 {
     public function toArray(Request $request): array
     {

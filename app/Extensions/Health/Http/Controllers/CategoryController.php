@@ -6,34 +6,34 @@ use App\Extensions\Health\Http\Requests\Category\StoreRequest;
 use App\Extensions\Health\Http\Requests\Category\UpdateRequest;
 use App\Extensions\Health\Http\Resources\CategoryResource;
 use App\Extensions\Health\Models\Category;
-use App\Extensions\Health\Services\Workout\MuscleGroup\MuscleGroupTable;
+use App\Extensions\Health\Services\CategoryTable;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 
-class MuscleGroupController extends Controller
+class CategoryController extends Controller
 {
     public function index()
     {
-        return Inertia::render('@health/workouts/muscleGroups/Index', [
-            'collection' => CategoryResource::collection(MuscleGroupTable::query()->paginate()),
+        return Inertia::render('@health/workouts/categories/Index', [
+            'collection' => CategoryResource::collection(CategoryTable::query()->paginate()),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('@health/workouts/muscleGroups/Create');
+        return Inertia::render('@health/workouts/categories/Create');
     }
 
     public function store(StoreRequest $request)
     {
         $category = Category::create($request->validated());
 
-        return to_route('health.muscleGroups.edit', ['resource' => $category]);
+        return to_route('health.categories.edit', ['resource' => $category]);
     }
 
     public function edit(Category $category)
     {
-        return Inertia::render('@health/workouts/muscleGroups/Edit', [
+        return Inertia::render('@health/workouts/categories/Edit', [
             'resource' => CategoryResource::make($category),
         ]);
     }
@@ -49,6 +49,6 @@ class MuscleGroupController extends Controller
     {
         $category->delete();
 
-        return to_route('health.muscleGroups.index');
+        return to_route('health.categories.index');
     }
 }

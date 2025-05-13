@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Extensions\Health\Http\Requests\WorkoutCategory;
+namespace App\Extensions\Health\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 

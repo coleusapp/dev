@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Extensions\Health\Models\WorkoutCategory $category
+ * @property-read \App\Extensions\Health\Models\Category $category
  * @property-read \App\Extensions\Health\Models\Exercise $exercise
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryExercise newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryExercise newQuery()
@@ -41,7 +41,7 @@ class CategoryExercise extends Pivot
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(WorkoutCategory::class);
+        return $this->belongsTo(Category::class);
     }
 
     public function exercise(): BelongsTo
