@@ -12,7 +12,7 @@ defineProps<{
 }>();
 </script>
 <template>
-    <FormKit type="text" name="name" label="Name" validation="required" />
+     <FormKit type="text" name="name" label="Name" validation="required" />
     <div class="grid grid-cols-2 gap-4">
         <FormKit name="muscle_groups" type="repeater" label="Muscle Groups" add-label="+ Add Muscle Group" min="0">
             <FormKit type="select" name="muscle_group_id" label="Muscle group" :options="muscleGroups?.data" />
@@ -42,7 +42,7 @@ defineProps<{
             />
         </div>
         <div class="flex flex-col">
-            <FormKit type="checkbox" name="has_duration" label="Has Distance" />
+            <FormKit type="checkbox" name="has_duration" label="Has Duration" />
             <FormKit
                 v-if="value?.has_duration"
                 type="select"

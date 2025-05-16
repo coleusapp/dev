@@ -4,6 +4,7 @@ export type Data = {
     description: string | null;
     has_rep: boolean;
     has_weight: boolean;
+    weight_unit: string | null,
     has_distance: boolean;
     distance_unit: string | null,
     has_calorie: boolean;

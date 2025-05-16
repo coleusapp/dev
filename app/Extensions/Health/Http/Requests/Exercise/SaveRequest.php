@@ -25,19 +25,22 @@ class SaveRequest extends FormRequest
             'description' => 'nullable',
             'has_rep' => 'boolean',
             'has_weight' => 'boolean',
-            'has_distance' => 'boolean',
-            'has_calorie' => 'boolean',
+            'has_distance' => 'nullable|boolean',
+            'has_calorie' => 'nullable|boolean',
             'weight_unit' => [
-                'required_if:has_weight,true',
+                'nullable',
+                Rule::requiredIf($this->request->get('has_weight')),
                 Rule::enum(WeightEnum::class)
             ],
             'distance_unit' => [
-                'required_if:has_distance,true',
+                'nullable',
+                Rule::requiredIf($this->request->get('has_distance')),
                 Rule::enum(DistanceEnum::class)
             ],
-            'has_duration' => 'boolean',
+            'has_duration' => 'nullable|boolean',
             'duration_unit' => [
-                'required_if:has_duration,true',
+                'nullable',
+                Rule::requiredIf($this->request->get('has_duration')),
                 Rule::enum(DurationEnum::class)
             ]
         ];

@@ -4,7 +4,7 @@ import { useForm } from '@formkit/inertia';
 import ExerciseForm from '@health/components/exercises/parts/Form.vue';
 import { Data } from '@health/components/exercises/type';
 
-defineProps<{
+const props = defineProps<{
     weightUnits: OptionCollection;
     distanceUnits: OptionCollection;
     durationUnits: OptionCollection;
@@ -18,6 +18,7 @@ const form = useForm<Omit<Data, 'id'>>({
     has_rep: true,
     has_calorie: false,
     has_weight: true,
+    weight_unit: null,
     has_distance: false,
     distance_unit: null,
     has_duration: false,

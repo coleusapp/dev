@@ -28,18 +28,10 @@ class ExerciseController extends Controller
 
     public function create()
     {
-        return [
-            // 'weight_units' => EnumResource::collection(WeightEnum::cases()),
-            // 'distance_units' => EnumResource::collection(DistanceEnum::cases()),
-            'duration_units' => EnumResource::collectionWithNull(DurationEnum::cases()),
-            // 'muscle_groups' => MuscleGroupAsOptionResource::collection(MuscleGroup::get()),
-            // 'categories' => CategoryAsOptionResource::collection(Category::get()),
-        ];
-
         return Inertia::render('@health/exercises/Create', [
-            'weight_units' => EnumResource::collection(WeightEnum::cases()),
-            'distance_units' => EnumResource::collection(DistanceEnum::cases()),
-            'duration_units' => EnumResource::collection(DurationEnum::cases())->additional(['label' => '-- select --', 'value' => null]),
+            'weight_units' => EnumResource::collectionWithNull(WeightEnum::cases()),
+            'distance_units' => EnumResource::collectionWithNull(DistanceEnum::cases()),
+            'duration_units' => EnumResource::collectionWithNull(DurationEnum::cases()),
             'muscle_groups' => MuscleGroupAsOptionResource::collection(MuscleGroup::get()),
             'categories' => CategoryAsOptionResource::collection(Category::get()),
         ]);
@@ -49,16 +41,16 @@ class ExerciseController extends Controller
     {
         $exercise = Exercise::create($request->validated());
 
-        return to_route('health.categories.edit', ['exercise' => $exercise]);
+        return to_route('health.workouts.exercises.edit', ['exercise' => $exercise]);
     }
 
     public function edit(Exercise $exercise)
     {
         return Inertia::render('@health/exercises/Edit', [
             'resource' => ExerciseResource::make($exercise),
-            'weight_units' => EnumResource::collection(WeightEnum::cases()),
-            'distance_units' => EnumResource::collection(DistanceEnum::cases()),
-            'duration_units' => EnumResource::collection(DurationEnum::cases()),
+            'weight_units' => EnumResource::collectionWithNull(WeightEnum::cases()),
+            'distance_units' => EnumResource::collectionWithNull(DistanceEnum::cases()),
+            'duration_units' => EnumResource::collectionWithNull(DurationEnum::cases()),
             'muscle_groups' => MuscleGroupAsOptionResource::collection(MuscleGroup::get()),
             'categories' => CategoryAsOptionResource::collection(Category::get()),
         ]);

@@ -2,13 +2,14 @@
 
 namespace App\Packages\Support\Resources;
 
+use App\Packages\Support\Contracts\HasLabel;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class EnumResource extends JsonResource
 {
-    public $addNull;
-
     public function toArray(Request $request): array
     {
         return [
@@ -17,10 +18,21 @@ class EnumResource extends JsonResource
         ];
     }
 
-    public static function collectionWithNull($resource)
+    public static function collectionWithNull(mixed $resource): AnonymousResourceCollection
     {
-        $this->addNull = true;
+        $resourceCollection = parent::collection($resource);
 
-        parent::collection($resource);
+        $resourceCollection->collection->prepend(
+            new static(new class implements HasLabel {
+                public null $value = null;
+
+                public function getLabel(): string|Htmlable|null
+                {
+                    return __('-- Select One --');
+                }
+            })
+        );
+
+        return $resourceCollection;
     }
 }
