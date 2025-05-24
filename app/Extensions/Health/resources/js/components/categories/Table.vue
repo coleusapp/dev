@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
 import { h } from 'vue';
-import TableActions from '@health/components/workoutCategories/parts/TableActions.vue';
-import { Collection, Data } from '@health/components/workoutCategories/type';
+import TableActions from '@health/components/categories/parts/TableActions.vue';
+import { CategoryCollection, CategoryData } from '@health/components/categories/category';
 
 defineProps<{
-    collection?: Collection;
+    collection?: CategoryCollection;
 }>();
 
-const columns: TableColumn<Data>[] = [
+const columns: TableColumn<CategoryData>[] = [
     {
         accessorKey: 'name',
         header: 'Name',

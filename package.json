@@ -23,6 +23,7 @@
         "vue-tsc": "^2.2.4"
     },
     "dependencies": {
+        "@formkit/auto-animate": "^0.8.2",
         "@formkit/icons": "^1.6.9",
         "@formkit/inertia": "^0.1.5",
         "@formkit/pro": "^0.127.23",

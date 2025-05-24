@@ -154,7 +154,7 @@ const items = ref<DropdownMenuItem[]>([
                             <slot name="header" />
                         </div>
                     </div>
-                    <div class="p-2">
+                    <div class="p-2 overflow-scroll h-full">
                         <slot />
                     </div>
                 </main>

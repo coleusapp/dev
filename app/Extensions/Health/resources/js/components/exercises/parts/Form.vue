@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { OptionCollection } from '@/types';
+import { FormKit } from '@formkit/vue';
 import { Data } from '@health/components/exercises/type';
 
 defineProps<{
@@ -12,13 +13,13 @@ defineProps<{
 }>();
 </script>
 <template>
-     <FormKit type="text" name="name" label="Name" validation="required" />
+    <FormKit type="text" name="name" label="Name" validation="required" />
     <div class="grid grid-cols-2 gap-4">
-        <FormKit name="muscle_groups" type="repeater" label="Muscle Groups" add-label="+ Add Muscle Group" min="0">
-            <FormKit type="select" name="muscle_group_id" label="Muscle group" :options="muscleGroups?.data" />
+        <FormKit name="muscle_groups" type="repeater" label="Muscle Groups" add-label="+ Add Muscle Group" :min="0" :max="muscleGroups?.data.length">
+            <FormKit type="select" name="id" label="Muscle group" :options="muscleGroups?.data" />
         </FormKit>
-        <FormKit name="categories" type="repeater" label="Categories" add-label="+ Add Category" min="0">
-            <FormKit type="select" name="category_id" label="Category" :options="categories?.data" />
+        <FormKit name="categories" type="repeater" label="Categories" add-label="+ Add Category" :min="0" :max="categories?.data.length">
+            <FormKit type="select" name="id" label="Category" :options="categories?.data" />
         </FormKit>
     </div>
     <FormKit type="textarea" name="description" label="description" />

@@ -49,6 +49,6 @@ class CategoryController extends Controller
     {
         $category->delete();
 
-        return to_route('health.categories.index');
+        return back();
     }
 }

@@ -24,8 +24,6 @@ const form = useForm<Omit<Data, 'id'>>({
     distance_unit: props.resource.data.distance_unit,
     has_duration: props.resource.data.has_duration,
     duration_unit: props.resource.data.duration_unit,
-    categories: props.resource.data?.categories,
-    muscle_groups: props.resource.data?.muscle_groups,
 });
 </script>
 <template>

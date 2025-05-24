@@ -5,6 +5,7 @@ namespace App\Extensions\Health\Models;
 use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -46,7 +47,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $duration_unit
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Extensions\Health\Models\CategoryExercise> $categoryExercises
  * @property-read int|null $category_exercises_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Extensions\Health\Models\ExerciseMuscleGroup> $exerciseMuscleGroups
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Extensions\Health\Models\MuscleGroup> $muscleGroups
  * @property-read int|null $exercise_muscle_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Extensions\Health\Models\ExerciseWorkout> $exerciseWorkouts
  * @property-read int|null $exercise_workouts_count
@@ -88,9 +89,9 @@ class Exercise extends Model
         'duration_unit',
     ];
 
-    public function exerciseMuscleGroups(): HasMany
+    public function muscleGroups(): BelongsToMany
     {
-        return $this->hasMany(ExerciseMuscleGroup::class);
+        return $this->belongsToMany(MuscleGroup::class);
     }
 
     public function exerciseWorkouts(): HasMany
@@ -98,8 +99,8 @@ class Exercise extends Model
         return $this->hasMany(ExerciseWorkout::class);
     }
 
-    public function categoryExercises(): HasMany
+    public function categories(): BelongsToMany
     {
-        return $this->hasMany(CategoryExercise::class);
+        return $this->belongsToMany(Category::class);
     }
 }

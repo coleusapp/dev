@@ -41,13 +41,16 @@ class ExerciseController extends Controller
     {
         $exercise = Exercise::create($request->validated());
 
+        $exercise->categories()->attach($request->flatten('categories'));
+        $exercise->muscleGroups()->attach($request->flatten('muscle_groups'));
+
         return to_route('health.workouts.exercises.edit', ['exercise' => $exercise]);
     }
 
     public function edit(Exercise $exercise)
     {
         return Inertia::render('@health/exercises/Edit', [
-            'resource' => ExerciseResource::make($exercise),
+            'resource' => ExerciseResource::make($exercise->load('muscleGroups', 'categories')),
             'weight_units' => EnumResource::collectionWithNull(WeightEnum::cases()),
             'distance_units' => EnumResource::collectionWithNull(DistanceEnum::cases()),
             'duration_units' => EnumResource::collectionWithNull(DurationEnum::cases()),
@@ -60,13 +63,16 @@ class ExerciseController extends Controller
     {
         $exercise->update($request->validated());
 
+        $exercise->categories()->sync($request->flatten('categories'));
+        $exercise->muscleGroups()->sync($request->flatten('muscle_groups'));
+
         return back();
     }
 
     public function destroy(Exercise $exercise)
     {
-        $category->delete();
+        $exercise->delete();
 
-        return to_route('health.workouts.exercises.index');
+        return back();
     }
 }

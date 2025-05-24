@@ -5,11 +5,16 @@ namespace App\Extensions\Health\Http\Requests\Exercise;
 use App\Extensions\Health\Enums\DistanceEnum;
 use App\Extensions\Health\Enums\DurationEnum;
 use App\Extensions\Health\Enums\WeightEnum;
+use App\Extensions\Health\Models\Category;
+use App\Extensions\Health\Models\MuscleGroup;
+use App\Packages\Support\Concerns\FlattenArray;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class SaveRequest extends FormRequest
 {
+    use FlattenArray;
+
     public function authorize(): bool
     {
         return true;
@@ -42,7 +47,17 @@ class SaveRequest extends FormRequest
                 'nullable',
                 Rule::requiredIf($this->request->get('has_duration')),
                 Rule::enum(DurationEnum::class)
-            ]
+            ],
+            'categories.*.id' => [
+                'numeric',
+                'gt:0',
+                Rule::exists(Category::class, 'id')
+            ],
+            'muscle_groups.*.id' => [
+                'numeric',
+                'gt:0',
+                Rule::exists(MuscleGroup::class, 'id')
+            ],
         ];
     }
 }

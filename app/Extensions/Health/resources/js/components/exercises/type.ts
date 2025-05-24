@@ -1,3 +1,6 @@
+import { CategoryCollection } from '@health/components/categories/category';
+import { MuscleGroupCollection } from '@health/components/muscleGroups/muscleGroup';
+
 export type Data = {
     id: number;
     name: string | null;
@@ -10,6 +13,8 @@ export type Data = {
     has_calorie: boolean;
     has_duration: boolean;
     duration_unit: string | null;
+    categories?: CategoryCollection,
+    muscle_groups?: MuscleGroupCollection,
 };
 
 export type Resource = {

@@ -6,6 +6,7 @@ use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -48,6 +49,12 @@ class MuscleGroup extends Model
     use SoftDeletes;
     use AutoAssignUser;
 
+    protected $fillable = [
+        'name',
+        'description',
+        'muscle_group_id',
+    ];
+
     public function muscleGroups(): HasMany
     {
         return $this->hasMany(MuscleGroup::class);
@@ -63,8 +70,8 @@ class MuscleGroup extends Model
         return $this->hasMany(MuscleGroup::class, 'muscle_group_id');
     }
 
-    public function exerciseMuscleGroups(): HasMany
+    public function exercises(): BelongsToMany
     {
-        return $this->hasMany(exerciseMuscleGroups::class);
+        return $this->belongsToMany(Exercise::class);
     }
 }

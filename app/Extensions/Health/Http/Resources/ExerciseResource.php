@@ -24,6 +24,8 @@ class ExerciseResource extends JsonResource
             'distance_unit' => $this->distance_unit,
             'has_duration' => $this->has_duration,
             'duration_unit' => $this->duration_unit,
+            'categories' => CategoryResource::collection($this->whenLoaded('categories')),
+            'muscle_groups' => MuscleGroupResource::collection($this->whenLoaded('muscleGroups')),
         ];
     }
 }

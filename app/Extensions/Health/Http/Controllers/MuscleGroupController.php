@@ -2,10 +2,9 @@
 
 namespace App\Extensions\Health\Http\Controllers;
 
-use App\Extensions\Health\Http\Requests\Category\StoreRequest;
-use App\Extensions\Health\Http\Requests\Category\UpdateRequest;
-use App\Extensions\Health\Http\Resources\CategoryResource;
-use App\Extensions\Health\Models\Category;
+use App\Extensions\Health\Http\Requests\MuscleGroup\SaveRequest;
+use App\Extensions\Health\Http\Resources\MuscleGroupResource;
+use App\Extensions\Health\Models\MuscleGroup;
 use App\Extensions\Health\Services\Workout\MuscleGroup\MuscleGroupTable;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
@@ -15,40 +14,43 @@ class MuscleGroupController extends Controller
     public function index()
     {
         return Inertia::render('@health/workouts/muscleGroups/Index', [
-            'collection' => CategoryResource::collection(MuscleGroupTable::query()->paginate()),
+            'collection' => MuscleGroupResource::collection(MuscleGroupTable::query()->paginate()),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('@health/workouts/muscleGroups/Create');
-    }
-
-    public function store(StoreRequest $request)
-    {
-        $category = Category::create($request->validated());
-
-        return to_route('health.muscleGroups.edit', ['resource' => $category]);
-    }
-
-    public function edit(Category $category)
-    {
-        return Inertia::render('@health/workouts/muscleGroups/Edit', [
-            'resource' => CategoryResource::make($category),
+        return MuscleGroupResource::collection(MuscleGroup::all());
+        return Inertia::render('@health/muscleGroups/Create', [
+            'muscle_groups' => MuscleGroupResource::collection(MuscleGroup::all()),
         ]);
     }
 
-    public function update(UpdateRequest $request, Category $category)
+    public function store(SaveRequest $request)
     {
-        $category->update($request->validated());
+        $muscleGroup = MuscleGroup::create($request->validated());
+
+        return to_route('health.workouts.muscle-groups.edit', ['muscle_group' => $muscleGroup]);
+    }
+
+    public function edit(MuscleGroup $muscleGroup)
+    {
+        return Inertia::render('@health/workouts/muscleGroups/Edit', [
+            'resource' => MuscleGroupResource::make($muscleGroup),
+        ]);
+    }
+
+    public function update(SaveRequest $request, MuscleGroup $muscleGroup)
+    {
+        $muscleGroup->update($request->validated());
 
         return back();
     }
 
-    public function destroy(Category $category)
+    public function destroy(MuscleGroup $muscleGroup)
     {
-        $category->delete();
+        $muscleGroup->delete();
 
-        return to_route('health.muscleGroups.index');
+        return back();
     }
 }

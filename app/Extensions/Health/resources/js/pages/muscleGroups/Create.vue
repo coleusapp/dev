@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import MuscleGroupCreate from '@health/components/muscleGroups/Create.vue';
 import HealthLayout from '@health/layouts/HealthLayout.vue';
-import Create from '@health/components/workouts/muscleGroups/Create.vue';
 </script>
 
 <template>
     <HealthLayout>
-        <Create class="space-y-6" />
+        <MuscleGroupCreate />
     </HealthLayout>
 </template>
