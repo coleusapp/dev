@@ -1,7 +1,7 @@
 import { CategoryCollection } from '@health/components/categories/category';
 import { MuscleGroupCollection } from '@health/components/muscleGroups/muscleGroup';
 
-export type Data = {
+export type ExerciseData = {
     id: number;
     name: string | null;
     description: string | null;
@@ -17,10 +17,10 @@ export type Data = {
     muscle_groups?: MuscleGroupCollection,
 };
 
-export type Resource = {
-    data: Data;
+export type ExerciseResource = {
+    data: ExerciseData;
 }
 
-export type Collection = {
-    data: Data[];
+export type ExerciseCollection = {
+    data: ExerciseData[];
 };

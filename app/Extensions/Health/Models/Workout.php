@@ -6,6 +6,7 @@ use App\Extensions\Health\Casts\TimezoneDatetimeCast;
 use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -62,8 +63,10 @@ class Workout extends Model
         ];
     }
 
-    // public function exerciseWorkouts(): HasMany
-    // {
-    //     return $this->hasMany(ExerciseWorkout::class);
-    // }
+    public function exercises(): BelongsToMany
+    {
+        return $this->belongsToMany(Exercise::class)
+            ->withPivot('id', 'reps', 'weight', 'distance', 'duration', 'calorie')
+            ->withTimestamps();
+    }
 }

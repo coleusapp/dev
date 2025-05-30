@@ -17,6 +17,7 @@ class WorkoutResource extends JsonResource
             'date' => $this->date->format('Y-m-d\TH:i'),
             'date_string' => $this->date->toDateString(),
             'date_for_humans' => $this->date->diffForHumans(),
+            'exercises' => ExerciseWorkoutResource::collection($this->whenLoaded('exercises')),
         ];
     }
 }

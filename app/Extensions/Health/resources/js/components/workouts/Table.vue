@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { Table } from '@/components/ui/table';
-import ActionLink from '@/components/ui/table/ActionLink.vue';
+import TableActions from '@health/components/workouts/parts/TableActions.vue';
+import { WorkoutCollection, WorkoutData } from '@health/components/workouts/workout';
+import type { TableColumn } from '@nuxt/ui';
+import { h } from 'vue';
 
 defineProps<{
-    table?: any;
+    collection?: WorkoutCollection;
 }>();
+const columns: TableColumn<WorkoutData>[] = [
+    {
+        accessorKey: 'date',
+        header: 'Date',
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => h(TableActions, { workoutId: row?.original?.id }),
+    },
+];
 </script>
+
 <template>
-    <Table :table="table">
-        <template #actions="{ record }">
-            <ActionLink :href="route('health.workouts.edit', { workout: record })">Edit</ActionLink>
-            <ActionLink :href="route('health.workouts.destroy', { workout: record })" method="delete"> Delete</ActionLink>
-        </template>
-    </Table>
+    <UiTable :data="collection?.data" :columns="columns" />
 </template>

@@ -5,6 +5,7 @@ namespace App\Extensions\Health\Models;
 use App\Packages\Support\Concerns\AutoAssignUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -94,9 +95,11 @@ class Exercise extends Model
         return $this->belongsToMany(MuscleGroup::class);
     }
 
-    public function exerciseWorkouts(): HasMany
+    public function workouts(): BelongsToMany
     {
-        return $this->hasMany(ExerciseWorkout::class);
+        return $this->belongsToMany(Workout::class)
+            ->withPivot('id', 'reps', 'weight', 'distance', 'duration', 'calorie')
+            ->withTimestamps();
     }
 
     public function categories(): BelongsToMany

@@ -7,11 +7,13 @@ use App\Extensions\Health\Http\Resources\MuscleGroupResource;
 use App\Extensions\Health\Http\Resources\ToothpasteTypeResource;
 use App\Extensions\Health\Http\Resources\WeightResource;
 use App\Extensions\Health\Http\Resources\CategoryResource;
+use App\Extensions\Health\Http\Resources\WorkoutResource;
 use App\Extensions\Health\Services\ExerciseTable;
 use App\Extensions\Health\Services\ToothpasteTypeTable;
 use App\Extensions\Health\Services\Weight\WeightTable;
 use App\Extensions\Health\Services\Workout\MuscleGroup\MuscleGroupTable;
 use App\Extensions\Health\Services\CategoryTable;
+use App\Extensions\Health\Services\WorkoutTable;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,6 +28,7 @@ class DashboardController extends Controller
             'muscle_groups' => MuscleGroupResource::collection(MuscleGroupTable::query()->paginate()),
             'toothpaste_types' => ToothpasteTypeResource::collection(ToothpasteTypeTable::query()->paginate()),
             'exercises' => ExerciseResource::collection(ExerciseTable::query()->paginate()),
+            'workouts' => WorkoutResource::collection(WorkoutTable::query()->paginate()),
         ]);
     }
 }

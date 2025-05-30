@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 Route::name('health.')->prefix('health')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::resource('weights', WeightController::class);
+    Route::resource('workouts', WorkoutController::class)->except('show');
     Route::name('workouts.')->prefix('workouts')->group(function () {
-        Route::resource('/', WorkoutController::class)->except('show');
         Route::resource('categories', CategoryController::class)->except('show');
         Route::resource('muscle-groups', MuscleGroupController::class)->except('show');
         Route::resource('exercises', ExerciseController::class)->except('show');
