@@ -1,6 +1,5 @@
 import '../css/app.css';
 
-import { resolve as healthResolve } from '@health/app';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
@@ -28,16 +27,18 @@ declare module 'vite/client' {
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: async (name) => {
+    title: (title: string) => `${title} - ${appName}`,
+    resolve: async (name: string) => {
         const paths = [`./pages/${name}.vue`];
         let pages = { ...import.meta.glob<DefineComponent>('./pages/**/*.vue') };
 
-        // @todo not happy
-        const healthConfig = healthResolve(name);
-        if (healthConfig) {
-            paths.push(healthConfig.path);
-            pages = { ...healthConfig.pages, ...pages };
+        if (name.startsWith('@')) {
+            name = name.replace(/^@[A-Za-z_]+\//, '');
+            paths.push(`/vendor/coleus/health/resources/js/pages/${name}.vue`);
+            pages = {
+                ...import.meta.glob<DefineComponent>('/vendor/coleus/health/resources/js/pages/**/*.vue'),
+                ...pages
+            }
         }
 
         return resolvePageComponent(paths, pages);

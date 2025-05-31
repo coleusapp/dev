@@ -3,7 +3,9 @@ import Calendar from '@/components/Calendar.vue';
 import Time from '@/components/Time.vue';
 import Weather from '@/components/Weather.vue';
 import type { DropdownMenuItem } from '@nuxt/ui';
-import { ref } from 'vue';
+import { ref, useTemplateRef } from 'vue';
+import { useDraggable } from '@vueuse/core'
+import Resizable from '@/components/Resizable.vue';
 
 const items = ref<DropdownMenuItem[]>([
     {
@@ -19,6 +21,10 @@ const items = ref<DropdownMenuItem[]>([
         icon: 'i-lucide-log-out',
     },
 ]);
+const el = useTemplateRef<HTMLElement>('el')
+const { x, y, style } = useDraggable(el, {
+    initialValue: { x: 40, y: 40 },
+})
 </script>
 <template>
     <UiApp :toaster="{ position: 'top-right' }" :tooltip="{ delayDuration: 0 }" overlat>
@@ -154,7 +160,7 @@ const items = ref<DropdownMenuItem[]>([
                             <slot name="header" />
                         </div>
                     </div>
-                    <div class="p-2 overflow-scroll h-full">
+                    <div class="p-2 overflow-scroll h-[calc(100vh-5.25rem)]">
                         <slot />
                     </div>
                 </main>

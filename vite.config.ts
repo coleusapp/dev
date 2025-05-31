@@ -70,8 +70,8 @@ export default defineConfig({
     resolve: {
             alias: {
                 '@': path.resolve(__dirname, './resources/js'),
-                '@health': path.resolve(__dirname, './app/Extensions/Health/resources/js'),
                 'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
+                '@health': path.resolve(__dirname, './packages/health/resources/js')
             },
     },
 });
