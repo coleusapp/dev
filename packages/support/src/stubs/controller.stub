@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Extensions\Health\Http\Controllers;
+namespace {{ namespace }};
 
+use {{ rootNamespace }}Http\Controllers\Controller;
 use App\Extensions\Health\Http\Requests\WorkoutSaveRequest;
 use App\Extensions\Health\Http\Resources\ExerciseAsOptionResource;
 use App\Extensions\Health\Http\Resources\WorkoutResource;
 use App\Extensions\Health\Models\Exercise;
 use App\Extensions\Health\Models\Workout;
 use App\Extensions\Health\Services\WorkoutTable;
-use App\Http\Controllers\Controller;
 use DB;
 use Inertia\Inertia;
 
