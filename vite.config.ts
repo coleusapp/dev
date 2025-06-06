@@ -71,7 +71,7 @@ export default defineConfig({
             alias: {
                 '@': path.resolve(__dirname, './resources/js'),
                 'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
-                '@health': path.resolve(__dirname, './packages/health/resources/js')
+                '@health': path.resolve(__dirname, 'vendor/coleus/health/resources/js'),
             },
     },
 });

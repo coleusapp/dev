@@ -37,7 +37,7 @@
             /* Specify a set of entries that re-map imports to additional lookup locations. */
             "@/*": ["./resources/js/*"],
             "ziggy-js": ["./vendor/tightenco/ziggy"],
-            "@health/*": ["./packages/health/resources/js/*"]
+            "@health/*": ["./vendor/coleus/health/resources/js/*"],
         },
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
         // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
@@ -45,7 +45,6 @@
             "vite/client",
             "vue/tsx",
             "./resources/js/types",
-            "./packages/resources/*/js/types"
         ] /* Specify type package names to be included without being referenced in a source file. */,
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
@@ -127,13 +126,13 @@
         "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx",
         "resources/js/**/*.vue",
-        "app/Extensions/**/resources/js/**/*.ts",
-        "app/Extensions/**/resources/js/**/*.d.ts",
-        "app/Extensions/**/resources/js/**/*.tsx",
-        "app/Extensions/**/resources/js/**/*.vue",
         "./auto-imports.d.ts",
         "./components.d.ts",
         "node_modules/lucide-vue-next/dist/lucide-vue-next.d.ts",
-        "node_modules/unplugin-auto-import/auto-imports.d.ts"
+        "node_modules/unplugin-auto-import/auto-imports.d.ts",
+        "packages/**/resources/js/**/*.ts",
+        "packages/**/resources/js/**/*.d.ts",
+        "packages/**/resources/js/**/*.tsx",
+        "packages/**/resources/js/**/*.vue"
     ]
 }
