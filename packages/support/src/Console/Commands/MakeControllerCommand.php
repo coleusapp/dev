@@ -9,9 +9,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
-#[AsCommand(name: 'make:coleus-controller', aliases: [
-    'coleus:controller',
-])]
 class MakeControllerCommand extends Command
 {
     use CanAskForPackage;

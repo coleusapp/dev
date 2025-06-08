@@ -20,6 +20,8 @@
         "@formkit/inertia": "catalog:dep",
         "@formkit/pro": "catalog:dep",
         "@formkit/vue": "catalog:dep",
+        "@inertiajs/core": "catalog:dep",
+        "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/vue3": "catalog:dep",
         "@mdi/js": "catalog:dep",
         "@nuxt/ui": "catalog:dep",
@@ -40,9 +42,9 @@
         "tailwindcss": "catalog:dep",
         "tailwindcss-animate": "catalog:dep",
         "typescript": "catalog:dep",
-        "vue-router": "^4.5.1",
         "vite": "catalog:dep",
         "vue": "catalog:dep",
+        "vue-router": "^4.5.1",
         "ziggy-js": "catalog:dep"
     },
     "devDependencies": {

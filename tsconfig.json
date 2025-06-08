@@ -36,8 +36,8 @@
         "paths": {
             /* Specify a set of entries that re-map imports to additional lookup locations. */
             "@/*": ["./resources/js/*"],
-            "ziggy-js": ["./vendor/tightenco/ziggy"],
-            "@health/*": ["./vendor/coleus/health/resources/js/*"],
+            "@coleus/health/*": ["./vendor/coleus/health/resources/js/*"],
+            "@coleus/support/*": ["./vendor/coleus/support/resources/js/*"]
         },
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
         // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

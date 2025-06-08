@@ -1,10 +1,9 @@
+import ui from '@nuxt/ui/vite';
+import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 import path from 'path';
-import tailwindcss from '@tailwindcss/vite';
-import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
-import ui from '@nuxt/ui/vite'
 
 export default defineConfig({
     plugins: [
@@ -34,7 +33,7 @@ export default defineConfig({
                     slots: {
                         th: 'px-2 py-3.5',
                         td: 'p-2',
-                    }
+                    },
                 },
                 slideover: {
                     slots: {
@@ -48,30 +47,30 @@ export default defineConfig({
                             },
                             left: {
                                 content: 'max-w-sm',
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 },
                 toast: {
                     defaultVariants: {
-                        color: 'neutral'
-                    }
+                        color: 'neutral',
+                    },
                 },
                 card: {
                     slots: {
                         header: 'p-2 sm:px-3 flex items-center justify-between',
                         body: 'p-2 sm:p-3',
-                        footer: 'p-2 sm:px-3'
-                    }
+                        footer: 'p-2 sm:px-3',
+                    },
                 },
-            }
-        })
+            },
+        }),
     ],
     resolve: {
-            alias: {
-                '@': path.resolve(__dirname, './resources/js'),
-                'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
-                '@health': path.resolve(__dirname, 'vendor/coleus/health/resources/js'),
-            },
+        alias: {
+            '@': path.resolve(__dirname, './resources/js'),
+            '@coleus/support': path.resolve(__dirname, 'vendor/coleus/support/resources/js'),
+            '@coleus/health': path.resolve(__dirname, 'vendor/coleus/health/resources/js'),
+        },
     },
 });

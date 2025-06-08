@@ -16,7 +16,7 @@ class {{ class }} extends Controller
 {
     public function index()
     {
-        return Inertia::render('@health/workouts/Index', [
+        return Inertia::render('@coleus/health/workouts/Index', [
             'collection' => WorkoutResource::collection(WorkoutTable::query()->paginate()),
         ]);
     }
@@ -33,14 +33,14 @@ class {{ class }} extends Controller
         $default = Workout::latest('created_at')->first() ?? new Workout(['workout' => 1]);
         $default->date = now('America/Denver');
 
-        return Inertia::render('@health/workouts/Create', [
+        return Inertia::render('@coleus/health/workouts/Create', [
             'resource' => new WorkoutResource($default),
         ]);
     }
 
     public function edit(Workout $workout)
     {
-        return Inertia::render('@health/workouts/Edit', [
+        return Inertia::render('@coleus/health/workouts/Edit', [
             'resource' => WorkoutResource::make($workout->load('exercises')),
             'exercises' => ExerciseAsOptionResource::collection(Exercise::all()),
         ]);

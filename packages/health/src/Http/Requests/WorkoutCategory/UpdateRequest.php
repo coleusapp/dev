@@ -20,7 +20,7 @@ class UpdateRequest extends FormRequest
         return [
             'name' => [
                 'required',
-                Rule::unique('toothpaste_types', 'name')->ignore($this->route('toothpaste_type')->id),
+                Rule::unique('categories', 'name')->ignore($this->route('category')->id),
             ],
         ];
     }
