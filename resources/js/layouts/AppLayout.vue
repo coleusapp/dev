@@ -3,9 +3,7 @@ import Calendar from '@/components/Calendar.vue';
 import Time from '@/components/Time.vue';
 import Weather from '@/components/Weather.vue';
 import type { DropdownMenuItem } from '@nuxt/ui';
-import { ref, useTemplateRef } from 'vue';
-import { useDraggable } from '@vueuse/core'
-import Resizable from '@/components/Resizable.vue';
+import { ref } from 'vue';
 
 const items = ref<DropdownMenuItem[]>([
     {
@@ -21,13 +19,9 @@ const items = ref<DropdownMenuItem[]>([
         icon: 'i-lucide-log-out',
     },
 ]);
-const el = useTemplateRef<HTMLElement>('el')
-const { x, y, style } = useDraggable(el, {
-    initialValue: { x: 40, y: 40 },
-})
 </script>
 <template>
-    <UiApp :toaster="{ position: 'top-right' }" :tooltip="{ delayDuration: 0 }" overlat>
+    <UiApp :toaster="{ position: 'top-right' }" :tooltip="{ delayDuration: 0 }">
         <div class="flex h-screen w-screen flex-col bg-zinc-50">
             <div class="flex h-8 w-screen items-center bg-white/30 px-4 py-2 backdrop-blur-sm">
                 <div class="flex w-full items-center justify-between">
@@ -151,12 +145,12 @@ const { x, y, style } = useDraggable(el, {
                     </div>
                 </aside>
                 <main class="mr-2 mb-2 w-full rounded-lg border border-zinc-200 bg-white">
-                    <div class="flex items-center gap-5 border-b border-b-zinc-200 p-2 text-sm">
-                        <div>
+                    <div class="flex items-center justify-between gap-5 border-b border-b-zinc-200 p-2 text-sm">
+                        <div class="w-full max-w-[48px]">
                             <UiButton icon="i-lucide-x" size="xs" variant="ghost" color="neutral" class="rounded-full"></UiButton>
                             <UiButton icon="i-lucide-minus" size="xs" variant="ghost" color="neutral" class="rounded-full"></UiButton>
                         </div>
-                        <div>
+                        <div class="w-full">
                             <slot name="header" />
                         </div>
                     </div>
