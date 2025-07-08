@@ -145,18 +145,19 @@ const items = ref<DropdownMenuItem[]>([
                     </div>
                 </aside>
                 <main class="mr-2 mb-2 w-full rounded-lg border border-zinc-200 bg-white">
-                    <div class="flex items-center justify-between gap-5 border-b border-b-zinc-200 p-2 text-sm">
-                        <div class="w-full max-w-[48px]">
-                            <UiButton icon="i-lucide-x" size="xs" variant="ghost" color="neutral" class="rounded-full"></UiButton>
-                            <UiButton icon="i-lucide-minus" size="xs" variant="ghost" color="neutral" class="rounded-full"></UiButton>
-                        </div>
-                        <div class="w-full">
-                            <slot name="header" />
-                        </div>
-                    </div>
-                    <div class="p-2 overflow-scroll h-[calc(100vh-5.25rem)]">
-                        <slot />
-                    </div>
+                    <slot />
+                    <!--<div class="flex items-center justify-between gap-5 border-b border-b-zinc-200 p-2 text-sm">-->
+                    <!--    <div class="w-full max-w-[48px]">-->
+                    <!--        <UiButton icon="i-lucide-x" size="xs" variant="ghost" color="neutral" class="rounded-full"></UiButton>-->
+                    <!--        <UiButton icon="i-lucide-minus" size="xs" variant="ghost" color="neutral" class="rounded-full"></UiButton>-->
+                    <!--    </div>-->
+                    <!--    <div class="w-full">-->
+                    <!--        <slot name="header" />-->
+                    <!--    </div>-->
+                    <!--</div>-->
+                    <!--<div class="p-2 overflow-scroll h-[calc(100vh-5.25rem)]">-->
+                    <!--    <slot />-->
+                    <!--</div>-->
                 </main>
             </div>
         </div>

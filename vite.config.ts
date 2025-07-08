@@ -35,6 +35,11 @@ export default defineConfig({
                         td: 'p-2',
                     },
                 },
+                button: {
+                    slots: {
+                        base: 'hover:cursor-pointer',
+                    }
+                },
                 slideover: {
                     slots: {
                         content: 'bg-transparent backdrop-blur-xs sm:ring-0 divide-none',
