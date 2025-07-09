@@ -13,7 +13,7 @@ declare module 'vue' {
     UiApp: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/App.vue')['default']
     UiAvatar: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Avatar.vue')['default']
     UiBadge: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.27.4_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__33d3d545c3241a46e2d6cbfeb3b11ead/node_modules/@nuxt/ui/dist/runtime/components/Badge.vue')['default']
-    UiBreadcrumb: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.27.4_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__33d3d545c3241a46e2d6cbfeb3b11ead/node_modules/@nuxt/ui/dist/runtime/components/Breadcrumb.vue')['default']
+    UiBreadcrumb: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Breadcrumb.vue')['default']
     UiButton: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Button.vue')['default']
     UiCalendar: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Calendar.vue')['default']
     UiCard: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Card.vue')['default']

@@ -10,7 +10,9 @@ defineProps<{
             <slot :value="value" />
         </template>
         <template #submit>
-            <UiButton type="submit" :disabled="form.processing.value">Save</UiButton>
+            <slot name="actions" :form="form">
+                <UiButton type="submit" :disabled="form.processing.value">Save</UiButton>
+            </slot>
         </template>
     </FormKit>
 </template>
