@@ -26,6 +26,7 @@ catalogs:
     '@mdi/js': ^7.4.47
     '@nuxt/ui': ^3.0.2
     '@tailwindcss/vite': ^4.1.4
+    '@tanstack/vue-table': ^8.21.3
     '@vitejs/plugin-vue': ^5.2.1
     '@vueuse/core': ^12.8.2
     'autoprefixer': ^10.4.20

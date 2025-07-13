@@ -26,6 +26,7 @@
         "@mdi/js": "catalog:dep",
         "@nuxt/ui": "catalog:dep",
         "@tailwindcss/vite": "catalog:dep",
+        "@tanstack/vue-table": "catalog:dep",
         "@vitejs/plugin-vue": "catalog:dep",
         "@vueuse/core": "catalog:dep",
         "autoprefixer": "catalog:dep",
