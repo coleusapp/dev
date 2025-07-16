@@ -23,37 +23,37 @@ const items = ref<DropdownMenuItem[]>([
 <template>
     <UiApp :toaster="{ position: 'top-right' }" :tooltip="{ delayDuration: 0 }">
         <div class="flex h-screen w-screen flex-col bg-zinc-50">
-            <div class="flex h-8 w-screen items-center bg-white/30 px-4 py-2 backdrop-blur-sm">
-                <div class="flex w-full items-center justify-between">
-                    <div class="flex items-center justify-start">
-                        <span class="font-bold"><slot name="name"></slot></span>
-                        <slot name="left"></slot>
-                    </div>
-                    <div class="flex items-center justify-end gap-2">
-                        <slot name="right">
-                            <UiButton variant="ghost" icon="lucide-settings-2" size="xs" color="neutral" />
-                            <UiSlideover :overlay="false" :close="false">
-                                <UiButton variant="ghost" size="xs" color="neutral">
-                                    <Time />
-                                </UiButton>
-                                <template #body>
-                                    <div class="flex items-center justify-between gap-2">
-                                        <Weather class="max-w-1/2" />
-                                        <Calendar class="max-w-1/2" />
-                                    </div>
-                                </template>
-                                <template #footer>
-                                    <div class="flex w-full items-center justify-center gap-2">
-                                        <UiButton color="neutral" variant="outline" class="rounded-full" size="xs">Edit Widgets </UiButton>
-                                    </div>
-                                </template>
-                            </UiSlideover>
-                        </slot>
-                    </div>
-                </div>
-            </div>
-            <div class="flex h-full max-h-[calc(100vh-calc(var(--spacing)*8))] w-full">
-                <aside class="my-2 flex w-12 flex-col justify-between">
+            <!--<div class="flex h-8 w-screen items-center bg-white/30 px-4 py-2 backdrop-blur-sm">-->
+            <!--    <div class="flex w-full items-center justify-between">-->
+            <!--        <div class="flex items-center justify-start">-->
+            <!--            <span class="font-bold"><slot name="name"></slot></span>-->
+            <!--            <slot name="left"></slot>-->
+            <!--        </div>-->
+            <!--        <div class="flex items-center justify-end gap-2">-->
+            <!--            <slot name="right">-->
+            <!--                <UiButton variant="ghost" icon="lucide-settings-2" size="xs" color="neutral" />-->
+            <!--                <UiSlideover :overlay="false" :close="false">-->
+            <!--                    <UiButton variant="ghost" size="xs" color="neutral">-->
+            <!--                        <Time />-->
+            <!--                    </UiButton>-->
+            <!--                    <template #body>-->
+            <!--                        <div class="flex items-center justify-between gap-2">-->
+            <!--                            <Weather class="max-w-1/2" />-->
+            <!--                            <Calendar class="max-w-1/2" />-->
+            <!--                        </div>-->
+            <!--                    </template>-->
+            <!--                    <template #footer>-->
+            <!--                        <div class="flex w-full items-center justify-center gap-2">-->
+            <!--                            <UiButton color="neutral" variant="outline" class="rounded-full" size="xs">Edit Widgets </UiButton>-->
+            <!--                        </div>-->
+            <!--                    </template>-->
+            <!--                </UiSlideover>-->
+            <!--            </slot>-->
+            <!--        </div>-->
+            <!--    </div>-->
+            <!--</div>-->
+            <div class="flex h-full max-h-screen w-full">
+                <aside class="py-2 flex w-12 flex-col justify-between">
                     <div class="flex flex-col items-center gap-2 overflow-scroll">
                         <UiTooltip :content="{ side: 'right' }" text="Apps">
                             <UiButton class="rounded-full" icon="i-lucide-layout-grid" variant="ghost" color="neutral"></UiButton>
@@ -144,7 +144,7 @@ const items = ref<DropdownMenuItem[]>([
                         </UiDropdownMenu>
                     </div>
                 </aside>
-                <main class="mr-2 mb-2 w-full rounded-lg border border-zinc-200 bg-white flex max-h-full flex-col">
+                <main class="w-full bg-white flex max-h-full flex-col">
                     <slot />
                 </main>
             </div>
