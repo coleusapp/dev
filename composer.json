@@ -24,7 +24,8 @@
         "coleus/support": "self.version",
         "coleus/table": "self.version",
         "coleus/health": "self.version",
-        "coleus/widgets": "self.version"
+        "coleus/widgets": "self.version",
+        "coleus/users": "self.version"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",

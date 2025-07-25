@@ -2,11 +2,11 @@
 
 namespace Coleus\Support\Concerns;
 
-use App\Models\User;
+use Coleus\Users\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @mixin \App\Models\User
+ * @mixin \Coleus\Users\Models\User
  */
 trait AutoAssignUser
 {

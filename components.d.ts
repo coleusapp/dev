@@ -26,6 +26,7 @@ declare module 'vue' {
     UiOverlayProvider: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/OverlayProvider.vue')['default']
     UiPagination: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Pagination.vue')['default']
     UiPopover: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Popover.vue')['default']
+    UiSelect: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Select.vue')['default']
     UiSlideover: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Slideover.vue')['default']
     UiTable: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Table.vue')['default']
     UiTooltip: typeof import('./node_modules/.pnpm/@nuxt+ui@3.1.3_@babel+parser@7.28.0_@inertiajs+vue3@2.0.11_vue@3.5.16_typescript@5.8.3__9fe15abbb572b1ac9df8a32795f3b71e/node_modules/@nuxt/ui/dist/runtime/components/Tooltip.vue')['default']

@@ -1,0 +1,33 @@
+{
+    "name": "coleus/users",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "illuminate/console": "^10.45|^11.0|^12.0",
+        "illuminate/contracts": "^10.45|^11.0|^12.0",
+        "illuminate/database": "^10.45|^11.0|^12.0",
+        "illuminate/filesystem": "^10.45|^11.0|^12.0",
+        "illuminate/support": "^10.45|^11.0|^12.0",
+        "illuminate/validation": "^10.45|^11.0|^12.0",
+        "illuminate/view": "^10.45|^11.0|^12.0",
+        "spatie/laravel-package-tools": "^1.9",
+        "spatie/laravel-permission": "^6.20"
+    },
+    "autoload": {
+        "psr-4": {
+            "Coleus\\Users\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Coleus\\Users\\UsersServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
