@@ -73,4 +73,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * @return \Coleus\Users\Models\User|\Illuminate\Contracts\Auth\Authenticatable|static|null
+     */
+    public static function user(): User|\Illuminate\Contracts\Auth\Authenticatable|null|static
+    {
+        return static::find(auth()->id());
+    }
 }
