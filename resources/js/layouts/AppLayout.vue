@@ -19,7 +19,7 @@ const items = ref<DropdownMenuItem[]>([
 const team = ref('Team 1');
 </script>
 <template>
-    <UiApp :toaster="{ position: 'top-right' }" :tooltip="{ delayDuration: 0 }">
+    <UiApp :toaster="{ position: 'top-right', expand: false }" :tooltip="{ delayDuration: 0 }">
         <div class="min-h-screen flex flex-col">
             <!-- Header -->
             <header class="bg-gray-950 text-white py-2 px-4 flex justify-between items-center">
