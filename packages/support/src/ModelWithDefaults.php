@@ -25,7 +25,7 @@ abstract class ModelWithDefaults extends Model
     public function getTable(): string
     {
         $prefix = config(static::$tablePrefix);
-        if (!$prefix || !is_string($prefix)) {
+        if (!$prefix || !is_string($prefix) || Str::startsWith(parent::getTable(), $prefix)) {
             return parent::getTable();
         }
 
