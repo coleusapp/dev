@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
             $table->timestamp('date');
             $table->unsignedInteger('duration')->nullable();
-            $table->boolean('brushed')->default(false);
-            $table->boolean('flossed')->default(false);
-            $table->boolean('fluoride_taken')->default(false);
+            $table->boolean('brushed')->default(false)->nullable();
+            $table->boolean('flossed')->default(false)->nullable();
+            $table->boolean('fluoride_taken')->default(false)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
