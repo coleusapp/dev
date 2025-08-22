@@ -38,7 +38,7 @@ const items = ref<DropdownMenuItem[]>([
             <!--    </div>-->
             <!--</header>-->
 
-            <main class="flex h-screen overflow-scroll bg-gray-100">
+            <main class="flex h-screen overflow-scroll bg-gray-100 dark:bg-gray-900">
                 <slot />
             </main>
         </div>
