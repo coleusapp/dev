@@ -16,30 +16,29 @@ const items = ref<DropdownMenuItem[]>([
         icon: 'i-lucide-log-out',
     },
 ]);
-const team = ref('Team 1');
 </script>
 <template>
-    <UiApp :toaster="{ position: 'top-right', expand: false }" :tooltip="{ delayDuration: 0 }">
+    <UiApp :toaster="{ position: 'top-center', duration: 2500 }" :tooltip="{ delayDuration: 0 }">
         <div class="min-h-screen flex flex-col">
             <!-- Header -->
-            <header class="bg-gray-950 text-white py-2 px-4 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-menu" variant="link" color="neutral" size="lg"></UiButton>
-                </div>
-                <div class="flex items-center gap-2">
-                    <UiTooltip :content="{ side: 'bottom' }" text="Health">
-                        <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-heart-pulse" variant="link" color="neutral" size="lg"></UiButton>
-                    </UiTooltip>
-                    <UiTooltip :content="{ side: 'bottom' }" text="Settings">
-                        <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-settings" variant="link" color="neutral" size="lg"></UiButton>
-                    </UiTooltip>
-                    <UiTooltip :content="{ side: 'bottom' }" text="Apps">
-                        <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-grip" variant="link" color="neutral" size="lg"></UiButton>
-                    </UiTooltip>
-                </div>
-            </header>
+            <!--<header class="bg-gray-950 text-white py-2 px-4 flex justify-between items-center">-->
+            <!--    <div class="flex items-center gap-2">-->
+            <!--        <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-menu" variant="link" color="neutral" size="lg"></UiButton>-->
+            <!--    </div>-->
+            <!--    <div class="flex items-center gap-2">-->
+            <!--        <UiTooltip :content="{ side: 'bottom' }" text="Health">-->
+            <!--            <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-heart-pulse" variant="link" color="neutral" size="lg"></UiButton>-->
+            <!--        </UiTooltip>-->
+            <!--        <UiTooltip :content="{ side: 'bottom' }" text="Settings">-->
+            <!--            <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-settings" variant="link" color="neutral" size="lg"></UiButton>-->
+            <!--        </UiTooltip>-->
+            <!--        <UiTooltip :content="{ side: 'bottom' }" text="Apps">-->
+            <!--            <UiButton class="rounded-full text-white hover:text-white hover:bg-white/30" icon="i-lucide-grip" variant="link" color="neutral" size="lg"></UiButton>-->
+            <!--        </UiTooltip>-->
+            <!--    </div>-->
+            <!--</header>-->
 
-            <main class="flex h-[calc(100vh-52px)] overflow-scroll">
+            <main class="flex h-screen overflow-scroll bg-gray-100">
                 <slot />
             </main>
         </div>

@@ -21,10 +21,12 @@ catalogs:
     '@formkit/inertia': ^0.1.5
     '@formkit/pro': ^0.127.23
     '@formkit/vue': ^1.6.9
+    '@formkit/themes': ^1.6.9
     '@headlessui/tailwindcss': ^0.2.2
     '@headlessui/vue': ^1.7.23
     '@inertiajs/core': ^2.0.11
     '@inertiajs/vue3': ^2.0.0-beta.3
+    '@inertiajs/inertia-vue3': ^0.6.0
     '@mdi/js': ^7.4.47
     '@nuxt/ui': ^3.0.2
     '@tailwindcss/vite': ^4.1.4

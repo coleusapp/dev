@@ -18,18 +18,18 @@ catalogs:
     '@formkit/pro':
       specifier: ^0.127.23
       version: 0.127.23
+    '@formkit/themes':
+      specifier: ^1.6.9
+      version: 1.6.9
     '@formkit/vue':
       specifier: ^1.6.9
       version: 1.6.9
-    '@headlessui/tailwindcss':
-      specifier: ^0.2.2
-      version: 0.2.2
-    '@headlessui/vue':
-      specifier: ^1.7.23
-      version: 1.7.23
     '@inertiajs/core':
       specifier: ^2.0.11
       version: 2.0.11
+    '@inertiajs/inertia-vue3':
+      specifier: ^0.6.0
+      version: 0.6.0
     '@inertiajs/vue3':
       specifier: ^2.0.0-beta.3
       version: 2.0.11
@@ -169,20 +169,17 @@ importers:
       '@formkit/pro':
         specifier: catalog:dep
         version: 0.127.23(@formkit/core@1.6.9)(@formkit/inputs@1.6.9)(@formkit/utils@1.6.9)
+      '@formkit/themes':
+        specifier: catalog:dep
+        version: 1.6.9(tailwindcss@4.1.8)
       '@formkit/vue':
         specifier: catalog:dep
         version: 1.6.9(tailwindcss@4.1.8)(vue@3.5.16(typescript@5.8.3))
-      '@headlessui/tailwindcss':
-        specifier: catalog:dep
-        version: 0.2.2(tailwindcss@4.1.8)
-      '@headlessui/vue':
-        specifier: catalog:dep
-        version: 1.7.23(vue@3.5.16(typescript@5.8.3))
       '@inertiajs/core':
         specifier: catalog:dep
         version: 2.0.11
       '@inertiajs/inertia-vue3':
-        specifier: ^0.6.0
+        specifier: catalog:dep
         version: 0.6.0(@inertiajs/inertia@0.11.1)(vue@3.5.16(typescript@5.8.3))
       '@inertiajs/vue3':
         specifier: catalog:dep
@@ -807,18 +804,6 @@ packages:
     resolution: {integrity: sha512-WrjAtEsKnFJzxQuATWsWKMpTAyJE15PUmRh9hwEAqgTDy2yMog1gxqxfZv3rEAdIdgXNp08tWmRVnQgDIF3vAQ==}
     peerDependencies:
       vue: ^3.4.0
-
-  '@headlessui/tailwindcss@0.2.2':
-    resolution: {integrity: sha512-xNe42KjdyA4kfUKLLPGzME9zkH7Q3rOZ5huFihWNWOQFxnItxPB3/67yBI8/qBfY8nwBRx5GHn4VprsoluVMGw==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      tailwindcss: ^3.0 || ^4.0
-
-  '@headlessui/vue@1.7.23':
-    resolution: {integrity: sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      vue: ^3.2.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3386,15 +3371,6 @@ snapshots:
       - tailwindcss
       - unocss
       - windicss
-
-  '@headlessui/tailwindcss@0.2.2(tailwindcss@4.1.8)':
-    dependencies:
-      tailwindcss: 4.1.8
-
-  '@headlessui/vue@1.7.23(vue@3.5.16(typescript@5.8.3))':
-    dependencies:
-      '@tanstack/vue-virtual': 3.13.12(vue@3.5.16(typescript@5.8.3))
-      vue: 3.5.16(typescript@5.8.3)
 
   '@humanfs/core@0.19.1': {}
 

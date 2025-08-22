@@ -16,8 +16,5 @@ export default defaultConfig({
     },
     config: {
         rootClasses,
-        classes: {
-            // form: '-mb-4',
-        },
     }
 });

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import SimpleLayout from '@/layouts/SimpleLayout.vue';
-import {useForm} from "@formkit/inertia";
 import { FormKitNode } from '@formkit/core';
+import { useForm } from '@formkit/inertia';
 
 type LoginForm = {
     email: string;
@@ -21,19 +21,11 @@ const submit = (field: LoginForm, node: FormKitNode) => {
 <template>
     <SimpleLayout>
         <template #header>Log in</template>
-        <FormKit type="form" @submit="submit" submit-label="Log In" :plugins="[form.plugin]">
-            <FormKit
-                type="email"
-                name="email"
-                label="Email"
-                validation="required|email"
-            />
-            <FormKit
-                type="password"
-                name="password"
-                label="Password"
-                validation="required"
-            />
-        </FormKit>
+        <div class="mx-auto max-w-md overflow-hidden rounded-lg bg-white shadow p-8">
+            <FormKit type="form" @submit="submit" submit-label="Log In" :plugins="[form.plugin]">
+                <FormKit type="email" name="email" label="Email" validation="required|email" />
+                <FormKit type="password" name="password" label="Password" validation="required" />
+            </FormKit>
+        </div>
     </SimpleLayout>
 </template>
