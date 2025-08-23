@@ -53,7 +53,7 @@ git tag $VERSION
 git push origin --tags
 
 # Tag Components
-for REMOTE in account ui notes system calculator music bucket
+for REMOTE in support users table widget health
 do
     echo ""
     echo ""
