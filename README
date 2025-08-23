@@ -6,3 +6,5 @@
 2. Update `resolvePageComponent` in `resources/js/app.ts`.
 3. Update `path` in `tsconfig.json`.
 4. Update `types` in `tsconfig.json`.
+
+
