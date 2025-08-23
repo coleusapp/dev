@@ -24,8 +24,8 @@ remote table git@github.com:coleusapp/table.git
 remote widget git@github.com:coleusapp/widget.git
 remote health git@github.com:coleusapp/health.git
 
-split 'src/Coleus/Support' support
-split 'src/Coleus/Users' users
-split 'src/Coleus/Table' table
-split 'src/Coleus/Widget' widget
-split 'src/Coleus/Health' health
+split 'packages/support' support
+split 'packages/users' users
+split 'packages/table' table
+split 'packages/widget' widget
+split 'packages/health' health
