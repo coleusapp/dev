@@ -21,11 +21,11 @@ git pull origin $CURRENT_BRANCH
 remote support git@github.com:coleusapp/support.git
 remote users git@github.com:coleusapp/users.git
 remote table git@github.com:coleusapp/table.git
-remote widget git@github.com:coleusapp/widget.git
+remote widgets git@github.com:coleusapp/widgets.git
 remote health git@github.com:coleusapp/health.git
 
 split 'packages/support' support
 split 'packages/users' users
 split 'packages/table' table
-split 'packages/widget' widget
+split 'packages/widgets' widgets
 split 'packages/health' health
