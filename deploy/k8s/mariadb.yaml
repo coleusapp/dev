@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: coleus-db
+  labels:
+    app: coleus
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: coleus
+    tier: db
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pv-claim
+  labels:
+    app: coleus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coleus-db
+  labels:
+    app: coleus
+spec:
+  selector:
+    matchLabels:
+      app: coleus
+      tier: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: coleus
+        tier: db
+    spec:
+      containers:
+        - image: mariadb:11.4
+          name: db
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pass
+                  key: password
+            - name: MYSQL_DATABASE
+              value: coleus
+            - name: MYSQL_USER
+              value: coleus
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pass
+                  key: password
+          ports:
+            - containerPort: 3306
+              name: db
+          volumeMounts:
+            - name: db-persistent-storage
+              mountPath: /var/lib/db
+      volumes:
+        - name: db-persistent-storage
+          persistentVolumeClaim:
+            claimName: db-pv-claim

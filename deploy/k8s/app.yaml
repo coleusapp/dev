@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: coleus
+  labels:
+    app: coleus
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: coleus
+    tier: frontend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pv-claim
+  labels:
+    app: coleus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coleus
+  labels:
+    app: coleus
+spec:
+  selector:
+    matchLabels:
+      app: coleus
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: coleus
+        tier: frontend
+    spec:
+      containers:
+        - image: coleus:latest
+          imagePullPolicy: IfNotPresent
+          name: coleus
+          env:
+            - name: APP_ENV
+              value: "production"
+            - name: APP_DEBUG
+              value: "false"
+            - name: DB_HOST
+              value: "coleus-mysql"
+            - name: APP_KEY
+              value: "base64:Hgbtfy1Di2andR3NQJKErC/wnD/nmjK6Jor2TkcEz6M="
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-pass
+                  key: password
+            - name: DB_USERNAME
+              value: "coleus"
+          ports:
+            - containerPort: 8000
+              name: coleus
+          volumeMounts:
+            - name: coleus-persistent-storage
+              mountPath: /var/www/html
+      volumes:
+        - name: coleus-persistent-storage
+          persistentVolumeClaim:
+            claimName: wp-pv-claim
