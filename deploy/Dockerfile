@@ -22,5 +22,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 
+EXPOSE 8000
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
