@@ -31,7 +31,7 @@
 .editorconfig
 .env.example
 LICENSE
-README.md
+*.md
 
 tests/
 phpunit.xml
