@@ -130,9 +130,5 @@
         "./components.d.ts",
         "node_modules/lucide-vue-next/dist/lucide-vue-next.d.ts",
         "node_modules/unplugin-auto-import/auto-imports.d.ts",
-        "packages/**/resources/js/**/*.ts",
-        "packages/**/resources/js/**/*.d.ts",
-        "packages/**/resources/js/**/*.tsx",
-        "packages/**/resources/js/**/*.vue"
     ]
 }

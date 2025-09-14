@@ -1,7 +1,7 @@
 {
     "private": true,
     "version": "1.0.0",
-    "packageManager": "pnpm@10.11.0",
+    "packageManager": "pnpm@10.15.1",
     "type": "module",
     "scripts": {
         "build": "vite build",
@@ -19,8 +19,8 @@
         "@formkit/icons": "catalog:dep",
         "@formkit/inertia": "catalog:dep",
         "@formkit/pro": "catalog:dep",
-        "@formkit/vue": "catalog:dep",
         "@formkit/themes": "catalog:dep",
+        "@formkit/vue": "catalog:dep",
         "@inertiajs/core": "catalog:dep",
         "@inertiajs/inertia-vue3": "catalog:dep",
         "@inertiajs/vue3": "catalog:dep",

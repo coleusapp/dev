@@ -8,11 +8,11 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     plugins: [
         tailwindcss(),
-        laravel({
-            input: ['resources/js/app.ts'],
-            ssr: 'resources/js/ssr.ts',
-            refresh: true,
-        }),
+        // laravel({
+        //     input: ['resources/js/app.ts'],
+        //     ssr: 'resources/js/ssr.ts',
+        //     refresh: true,
+        // }),
         vue({
             template: {
                 transformAssetUrls: {
@@ -73,7 +73,7 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './resources/js'),
+            // '@': path.resolve(__dirname, './resources/js'),
             '@coleus/support': path.resolve(__dirname, 'vendor/coleus/support/resources/js'),
             '@coleus/health': path.resolve(__dirname, 'vendor/coleus/health/resources/js'),
         },
