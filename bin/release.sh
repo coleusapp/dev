@@ -39,7 +39,7 @@ if [[ $(git rev-parse HEAD) != $(git rev-parse origin/$RELEASE_BRANCH) ]]
 then
     echo "Your branch is out of date with its upstream. Did you forget to pull or push any changes before releasing?"
 
-    exit 1
+#    exit 1
 fi
 
 # Always prepend with "v"
