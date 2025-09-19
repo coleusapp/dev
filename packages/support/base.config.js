@@ -9,11 +9,6 @@ export default defineConfig({
     build: { outDir: 'resources/dist' },
     plugins: [
         tailwindcss(),
-        laravel({
-            input: ['resources/js/app.ts'],
-            ssr: 'resources/js/ssr.ts',
-            refresh: true,
-        }),
         vue({
             template: {
                 transformAssetUrls: {
