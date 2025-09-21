@@ -1,0 +1,85 @@
+{
+  "_loader-circle-zk0l3URJ.js": {
+    "file": "assets/loader-circle-zk0l3URJ.js",
+    "name": "loader-circle",
+    "imports": [
+      "resources/js/app.ts"
+    ]
+  },
+  "resources/js/app.ts": {
+    "file": "assets/app-BkVOuczp.js",
+    "name": "app",
+    "src": "resources/js/app.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/ConfirmPassword.vue",
+      "resources/js/pages/ForgotPassword.vue",
+      "resources/js/pages/Login.vue",
+      "resources/js/pages/Register.vue",
+      "resources/js/pages/ResetPassword.vue",
+      "resources/js/pages/VerifyEmail.vue"
+    ],
+    "css": [
+      "assets/app-BftRctf7.css"
+    ]
+  },
+  "resources/js/pages/ConfirmPassword.vue": {
+    "file": "assets/ConfirmPassword-1mbaB8JO.js",
+    "name": "ConfirmPassword",
+    "src": "resources/js/pages/ConfirmPassword.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_loader-circle-zk0l3URJ.js"
+    ]
+  },
+  "resources/js/pages/ForgotPassword.vue": {
+    "file": "assets/ForgotPassword-ADv7Abwx.js",
+    "name": "ForgotPassword",
+    "src": "resources/js/pages/ForgotPassword.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_loader-circle-zk0l3URJ.js"
+    ]
+  },
+  "resources/js/pages/Login.vue": {
+    "file": "assets/Login-Ci9T_SCZ.js",
+    "name": "Login",
+    "src": "resources/js/pages/Login.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ]
+  },
+  "resources/js/pages/Register.vue": {
+    "file": "assets/Register-BaZUS83Q.js",
+    "name": "Register",
+    "src": "resources/js/pages/Register.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_loader-circle-zk0l3URJ.js"
+    ]
+  },
+  "resources/js/pages/ResetPassword.vue": {
+    "file": "assets/ResetPassword-BqoTRe3z.js",
+    "name": "ResetPassword",
+    "src": "resources/js/pages/ResetPassword.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_loader-circle-zk0l3URJ.js"
+    ]
+  },
+  "resources/js/pages/VerifyEmail.vue": {
+    "file": "assets/VerifyEmail-Cqti6qc_.js",
+    "name": "VerifyEmail",
+    "src": "resources/js/pages/VerifyEmail.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_loader-circle-zk0l3URJ.js"
+    ]
+  }
+}

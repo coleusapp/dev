@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SimpleLayout from '@/layouts/SimpleLayout.vue';
+import SimpleLayout from '@coleus/support/layouts/SimpleLayout.vue';
 import { FormKitNode } from '@formkit/core';
 import { useForm } from '@formkit/inertia';
 

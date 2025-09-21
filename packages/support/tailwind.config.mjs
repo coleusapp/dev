@@ -5,8 +5,11 @@ export default {
     darkMode: ['class'],
     content: [
         './resources/views/**/*.blade.php',
+        '../support/resources/views/**/*.blade.php',
         './resources/js/**/*.{vue,js,ts,jsx,tsx}',
-        'formkit.theme.ts',
+        '../support/resources/js/**/*.{vue,js,ts,jsx,tsx}',
+        './formkit.theme.ts',
+        '../support/formkit.theme.ts',
     ],
     theme: {
         extend: {

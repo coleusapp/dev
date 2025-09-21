@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace Coleus\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +16,7 @@ class PasswordResetLinkController extends Controller
      */
     public function create(Request $request): Response
     {
-        return Inertia::render('auth/ForgotPassword', [
+        return Inertia::render('ForgotPassword', [
             'status' => $request->session()->get('status'),
         ]);
     }

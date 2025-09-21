@@ -19,9 +19,10 @@ yarn-error.log
 /auth.json
 /.fleet
 /.idea
-/.nova
 /.vscode
 /.zed
 **/caddy
 frankenphp
 frankenphp-worker.php
+auto-imports.d.ts
+components.d.ts

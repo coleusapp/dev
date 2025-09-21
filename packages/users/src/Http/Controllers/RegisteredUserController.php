@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace Coleus\Users\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Coleus\Users\Models\User;
@@ -20,7 +20,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('auth/Register');
+        return Inertia::render('Register');
     }
 
     /**
