@@ -26,7 +26,9 @@ class UsersServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
-        class_alias($this->getUserAliasClass(), 'Coleus\Users\Models\UserAlias');
+        if (!class_exists('Coleus\Users\Models\UserAlias')) {
+            class_alias($this->getUserAliasClass(), 'Coleus\Users\Models\UserAlias');
+        }
 
         if (Str::of(request()?->path())->startsWith([config('users.route_prefix'), 'login', 'register'])) {
             app('router')
