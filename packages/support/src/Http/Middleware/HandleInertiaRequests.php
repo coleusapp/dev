@@ -2,7 +2,7 @@
 
 namespace Coleus\Support\Http\Middleware;
 
-use App\Settings\GeneralSettings;
+// use App\Settings\GeneralSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -16,7 +16,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @var string
      */
-    protected $rootView = 'health::app';
+    protected $rootView = 'app';
 
     /**
      * Determines the current asset version.
@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'config' => [
-                'timezone' => app(GeneralSettings::class)?->timezone ?? config('app.timezone', 'UTC'),
+                'timezone' => config('app.timezone', 'UTC'), // app(GeneralSettings::class)?->timezone ??
             ],
             'auth' => [
                 'user' => $request->user(),
