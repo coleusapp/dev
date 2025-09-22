@@ -26,6 +26,12 @@ class UsersServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
+        // config_class_alias('auth.providers.users.model', 'Coleus\Users\Models\UserAlias');
+        function get_parent() {
+            return config('auth.providers.users.model');
+        }
+        class_alias(get_parent(), 'Coleus\Users\Models\UserAlias');
+
         if (Str::of(request()?->path())->startsWith([config('users.route_prefix'), 'login', 'register'])) {
             app('router')
                 ->pushMiddlewareToGroup('web', HandleInertiaRequests::class);
