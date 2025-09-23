@@ -2,6 +2,7 @@
 
 namespace Coleus\Users;
 
+use Coleus\Users\Console\Commands\ManageUsers;
 use Coleus\Users\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
@@ -13,6 +14,7 @@ class UsersServiceProvider extends PackageServiceProvider
     {
         $package->name('users')
             ->hasConfigFile()
+            ->hasCommand(ManageUsers::class)
             ->hasMigrations([
                 'create_teams_table',
                 'create_model_has_users_table',
