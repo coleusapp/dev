@@ -66,9 +66,9 @@ export default defineConfig({
                 },
                 card: {
                     slots: {
-                        header: 'p-2 sm:px-3 flex items-center justify-between',
-                        body: 'p-2 sm:p-3',
-                        footer: 'p-2 sm:px-3',
+                        header: 'p-2 sm:px-2 flex items-center justify-between',
+                        body: 'p-2 sm:p-2',
+                        footer: 'p-2 sm:px-2',
                     },
                 },
             },

@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('model_has_teams', function (Blueprint $table) {
             $table->foreignIdFor(Team::class);
             $table->morphs('model');
-            $table->index(['user_id', 'model_id', 'model_type']);
+            $table->index(['team_id', 'model_id', 'model_type']);
             $table->index(['model_id', 'model_type']);
         });
     }
