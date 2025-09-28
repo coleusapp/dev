@@ -141,7 +141,7 @@
             "dist": {
                 "type": "path",
                 "url": "./packages/health",
-                "reference": "e4ede481583ca517f8f985045a6f2e8829a84b0b"
+                "reference": "d8f7cea3b8aee09fd7b921e2868a80daca8f2d16"
             },
             "require": {
                 "coleus/support": "^1.0",
@@ -164,7 +164,10 @@
                 "laravel": {
                     "providers": [
                         "Coleus\\Health\\HealthServiceProvider"
-                    ]
+                    ],
+                    "aliases": {
+                        "Calculator": "Coleus\\Health\\Facades\\Health"
+                    }
                 }
             },
             "autoload": {
