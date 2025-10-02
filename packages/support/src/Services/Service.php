@@ -2,6 +2,7 @@
 
 namespace Coleus\Support\Services;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
@@ -34,16 +35,25 @@ abstract class Service
 
     public function store(mixed $payload)
     {
-        $data = $this->data::from($payload);
+        if (method_exists($this, 'save')) {
+            return $this->save($payload);
+        }
 
-        return $this->model::create($data->toArray());
+        return $this->model::create($this->data::from($payload)->toArray());
     }
 
-    public function update(mixed $model, mixed $payload): bool
+    /**
+     * @param  mixed  $model
+     * @param  mixed  $payload
+     * @return bool | TModel
+     */
+    public function update(mixed $model, mixed $payload): Model|bool
     {
-        $data = $this->data::from($payload);
+        if (method_exists($this, 'save')) {
+            return $this->save($payload, $model);
+        }
 
-        return $model->update($data->toArray());
+        return $model->update($this->data::from($payload)->toArray());
     }
 
     public function destroy(mixed $model): bool
