@@ -24,11 +24,12 @@ abstract class ModelWithDefaults extends Model
 
     public function getTable(): string
     {
-        $prefix = config(static::$tablePrefix);
+        $prefix = config(static::$tablePrefix, '');
+
         if (!$prefix || !is_string($prefix) || Str::startsWith(parent::getTable(), $prefix)) {
             return parent::getTable();
         }
 
-        return config(static::$tablePrefix).parent::getTable();
+        return $prefix.parent::getTable();
     }
 }

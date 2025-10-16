@@ -2,6 +2,7 @@
 
 namespace Coleus\Support\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -20,20 +21,34 @@ abstract class Service
     }
 
     /**
-     * @var class-string<TModel>
+     * @var class-string<TData>
      */
     abstract protected $data {
         get;
         set;
     }
 
+    /**
+     * @return \Illuminate\Pagination\LengthAwarePaginator<int, \Illuminate\Database\Eloquent\Model>
+     */
     public function index(): LengthAwarePaginator
     {
-        return $this->model::orderBy('created_at', 'desc')
-            ->paginate();
+        return $this->defaultQuery()->paginate();
     }
 
-    public function store(mixed $payload)
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model>
+     */
+    public function defaultQuery(): Builder
+    {
+        return $this->model::orderBy('created_at', 'desc');
+    }
+
+    /**
+     * @param  mixed  $payload
+     * @return mixed|TModel|bool
+     */
+    public function store(mixed $payload): mixed
     {
         if (method_exists($this, 'save')) {
             return $this->save($payload);
@@ -43,11 +58,11 @@ abstract class Service
     }
 
     /**
-     * @param  mixed  $model
+     * @param  TModel  $model
      * @param  mixed  $payload
-     * @return bool | TModel
+     * @return mixed|bool|TModel
      */
-    public function update(mixed $model, mixed $payload): Model|bool
+    public function update(mixed $model, mixed $payload): mixed
     {
         if (method_exists($this, 'save')) {
             return $this->save($payload, $model);
@@ -56,7 +71,11 @@ abstract class Service
         return $model->update($this->data::from($payload)->toArray());
     }
 
-    public function destroy(mixed $model): bool
+    /**
+     * @param  TModel  $model
+     * @return bool|null
+     */
+    public function destroy(mixed $model): bool|null
     {
         return $model->delete();
     }

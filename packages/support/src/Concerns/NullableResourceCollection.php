@@ -3,7 +3,6 @@
 namespace Coleus\Support\Concerns;
 
 use Coleus\Support\Contracts\HasLabel;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
@@ -16,10 +15,10 @@ trait NullableResourceCollection
         $resourceCollection = parent::collection($resource);
 
         $resourceCollection->collection->prepend(
-            new static(new class implements HasLabel {
+            new self(new class implements HasLabel {
                 public null $value = null;
 
-                public function getLabel(): string|Htmlable|null
+                public function getLabel(): string
                 {
                     return __('-- Select One --');
                 }

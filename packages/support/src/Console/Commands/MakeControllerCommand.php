@@ -36,6 +36,6 @@ class MakeControllerCommand extends Command
             (string) str($controller)->beforeLast('\\') :
             '';
 
-        dd($package, $controllerClass, $controllerNamespace);
+        // dd($package, $controllerClass, $controllerNamespace);
     }
 }

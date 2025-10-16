@@ -17,7 +17,12 @@ abstract class PivotWithDefaults extends Pivot
     {
         parent::__construct($attributes);
 
+        if (!is_array($this->guarded)) {
+            $this->guarded = [];
+        }
         $this->guarded[] = $this->primaryKey;
-        $this->table = config(static::$tablePrefix).$this->getTable() ?: parent::getTable();
+
+        $prefix = config(static::$tablePrefix, '');
+        $this->table = (is_string($prefix) ? $prefix : '').$this->getTable() ?: parent::getTable();
     }
 }

@@ -1,0 +1,10 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+parameters:
+    paths:
+        - packages/health/src
+        - packages/support/src
+    excludePaths:
+        - packages/support/src/Console/Commands/*
+    level: 10
