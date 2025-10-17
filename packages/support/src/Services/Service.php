@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+
 /**
  * @template TModel of \Illuminate\Database\Eloquent\Model
  * @template TData of \Spatie\LaravelData\Data
@@ -29,7 +30,7 @@ abstract class Service
     }
 
     /**
-     * @return \Illuminate\Pagination\LengthAwarePaginator<int, \Illuminate\Database\Eloquent\Model>
+     * @return LengthAwarePaginator<int, TModel> | LengthAwarePaginator<int, Model>
      */
     public function index(): LengthAwarePaginator
     {
@@ -37,11 +38,11 @@ abstract class Service
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model>
+     * @return Builder<TModel> | Builder<Model>
      */
     public function defaultQuery(): Builder
     {
-        return $this->model::orderBy('created_at', 'desc');
+        return $this->model::query()->orderBy('created_at', 'desc');
     }
 
     /**
@@ -50,11 +51,9 @@ abstract class Service
      */
     public function store(mixed $payload): mixed
     {
-        if (method_exists($this, 'save')) {
-            return $this->save($payload);
-        }
-
-        return $this->model::create($this->data::from($payload)->toArray());
+        return method_exists($this, 'save')
+            ? $this->save($payload)
+            : $this->model::create($this->data::from($payload)->toArray());
     }
 
     /**
