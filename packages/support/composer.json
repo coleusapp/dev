@@ -16,7 +16,10 @@
     "autoload": {
         "psr-4": {
             "Coleus\\Support\\": "src/"
-        }
+        },
+        "files": [
+            "src/PestHelpers.php"
+        ]
     },
     "extra": {
         "laravel": {
