@@ -47,9 +47,9 @@ abstract class Service
 
     /**
      * @param  mixed  $payload
-     * @return mixed|TModel|bool
+     * @return ?TModel
      */
-    public function store(mixed $payload): mixed
+    public function store(mixed $payload): ?Model
     {
         return method_exists($this, 'save')
             ? $this->save($payload)
