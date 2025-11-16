@@ -1,0 +1,47 @@
+{
+    "name": "coleus/music",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "coleus/support": "^1.0",
+        "coleus/table": "^1.0",
+        "coleus/users": "^1.0",
+        "illuminate/console": "^10.45|^11.0|^12.0",
+        "illuminate/contracts": "^10.45|^11.0|^12.0",
+        "illuminate/database": "^10.45|^11.0|^12.0",
+        "illuminate/filesystem": "^10.45|^11.0|^12.0",
+        "illuminate/support": "^10.45|^11.0|^12.0",
+        "illuminate/validation": "^10.45|^11.0|^12.0",
+        "illuminate/view": "^10.45|^11.0|^12.0",
+        "inertiajs/inertia-laravel": "^2.0",
+        "spatie/laravel-data": "^4.17",
+        "spatie/laravel-package-tools": "^1.9",
+        "tightenco/ziggy": "^v2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Coleus\\Music\\": "src/",
+            "Coleus\\Music\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Coleus\\Music\\MusicServiceProvider"
+            ],
+            "aliases": {
+                "Calculator": "Coleus\\Music\\Facades\\Music"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

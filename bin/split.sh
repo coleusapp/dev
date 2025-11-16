@@ -23,9 +23,11 @@ remote users git@github.com:coleusapp/users.git
 remote table git@github.com:coleusapp/table.git
 remote widgets git@github.com:coleusapp/widgets.git
 remote health git@github.com:coleusapp/health.git
+remote music git@github.com:coleusapp/music.git
 
 split 'packages/support' support
 split 'packages/users' users
 split 'packages/table' table
 split 'packages/widgets' widgets
 split 'packages/health' health
+split 'packages/music' music
