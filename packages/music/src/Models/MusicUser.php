@@ -1,6 +1,6 @@
 <?php
 
-namespace Coleus\Health\Models;
+namespace Coleus\Music\Models;
 
 use Coleus\Users\Models\UserAlias;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -20,23 +20,23 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Coleus\Health\Models\Weight> $weights
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Coleus\Music\Models\Weight> $weights
  * @property-read int|null $weights_count
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser permission($permissions, $without = false)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser role($roles, $guard = null, $without = false)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereEmailVerifiedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser wherePassword($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser withoutPermission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|HealthUser withoutRole($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser permission($permissions, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser role($roles, $guard = null, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereEmailVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser withoutPermission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MusicUser withoutRole($roles, $guard = null)
  * @mixin \Eloquent
  * @mixin \Coleus\Users\Models\User
  */
