@@ -5,63 +5,12 @@ import { ref } from 'vue';
 
 const items = ref<NavigationMenuItem[]>([
     {
-        label: 'Health',
-        icon: 'i-lucide-heart-pulse',
-        to: route('health.dashboard'),
-        active: route().current('health.dashboard'),
+        label: 'Music',
+        icon: 'i-lucide-music',
+        to: route('music.dashboard'),
+        active: route().current('music.dashboard'),
         target: '_self',
     },
-    {
-        label: 'Weights',
-        icon: 'i-lucide-weight',
-        to: route('health.weights.index'),
-        active: route().current('health.weights.*'),
-        target: '_self',
-    },
-    {
-        label: 'Workouts',
-        icon: 'i-lucide-dumbbell',
-        to: route('health.workouts.index'),
-        active: route().current('health.workouts.*'),
-        open: route().current('health.workouts.*') || route().current('health.categories.*') || route().current('health.muscle-groups.*') || route().current('health.exercises.*'),
-        target: '_self',
-        children: [
-            {
-                label: 'Categories',
-                to: route('health.categories.index'),
-                active: route().current('health.categories.*'),
-                target: '_self',
-            },
-            {
-                label: 'Muscle Groups',
-                to: route('health.muscle-groups.index'),
-                active: route().current('health.muscle-groups.*'),
-                target: '_self',
-            },
-            {
-                label: 'Exercises',
-                to: route('health.exercises.index'),
-                active: route().current('health.exercises.*'),
-                target: '_self',
-            },
-        ]
-    },
-    {
-        label: 'Oral Cares',
-        icon: 'i-lucide-ghost',
-        to: route('health.oral-cares.index'),
-        active: route().current('health.oral-cares.*'),
-        target: '_self',
-        open: route().current('health.oral-cares.*') || route().current('health.toothpastes.*'),
-        children: [
-            {
-                label: 'Toothpastes',
-                to: route('health.toothpastes.index'),
-                active: route().current('health.toothpastes.*'),
-                target: '_self',
-            }
-        ]
-    }
 ]);
 </script>
 
