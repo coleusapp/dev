@@ -33,6 +33,7 @@
         "lucide": "catalog:dep",
         "lucide-vue-next": "catalog:dep",
         "luxon": "catalog:dep",
+        "plyr": "^3.8.3",
         "reka-ui": "catalog:dep",
         "tailwind-merge": "catalog:dep",
         "tailwindcss": "catalog:dep",

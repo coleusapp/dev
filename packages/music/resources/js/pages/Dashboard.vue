@@ -2,17 +2,26 @@
 import MusicLayout from '@/layouts/MusicLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import "plyr/dist/plyr.css";
 
-defineProps<{
+const props = defineProps<{
     files: Array<string>;
 }>();
 
 const playing = ref(null);
+const index = ref(-1);
 const src = ref(null);
-const play = (file: string) => {
+const play = (file: string, i: number) => {
     playing.value = file;
+    index.value = i;
     src.value = `/music/stream/${file}`;
+}
+const next = () => {
+    if (!props.files.length) return;
 
+    index.value = (index.value + 1) % props.files.length;
+
+    play(props.files[index.value], index.value);
 }
 </script>
 
@@ -20,9 +29,9 @@ const play = (file: string) => {
     <Head title="Dashboard" />
 
     <MusicLayout>
-        <audio v-if="src" class="w-full mb-5 rounded-xl bg-indigo-400" controls :src="src" autoplay loop></audio>
+        <audio v-if="src" class="w-full mb-5 rounded-xl bg-indigo-400" controls :src="src" autoplay @ended="next"></audio>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            <button v-for="file in files" :key="file" type="button" class="cursor-pointer" @click="() => play(file)">
+            <button v-for="(file, index) in files" :key="index" type="button" class="cursor-pointer" @click="() => play(file, index)">
                 <div class="relative transition duration-300 h-full w-full aspect-square bg-linear-to-t flex flex-col justify-end items-center rounded-lg shadow"
                     :class="[
                         playing === file ? 'from-green-900 to-green-300' : 'from-indigo-900 to-indigo-300',
@@ -36,3 +45,9 @@ const play = (file: string) => {
         </div>
     </MusicLayout>
 </template>
+
+<style>
+:root {
+    --plyr-color-main: var(--color-purple-600);
+}
+</style>

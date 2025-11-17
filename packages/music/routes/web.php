@@ -10,14 +10,18 @@ Route::middleware(['web', 'auth'])
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('/stream/{file}', function ($file) {
             $path = Storage::path($file);
+            $size = filesize($path);
 
             return response()->stream(function () use ($path) {
-                $stream = fopen($path, 'rb');
-                fpassthru($stream);
-                fclose($stream);
+                $fh = fopen($path, 'rb');
+                while (!feof($fh)) {
+                    echo fread($fh, 8192);
+                    flush();
+                }
+                fclose($fh);
             }, 200, [
                 "Content-Type" => "audio/mpeg",
-                "Accept-Ranges" => "bytes",
+                "Content-Length" => $size
             ]);
         })->where('file', '.*');
     });
