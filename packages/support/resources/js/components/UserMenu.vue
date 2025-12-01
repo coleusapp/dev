@@ -2,6 +2,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { useColorMode } from '@vueuse/core';
 import { computed, ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 defineProps<{
     collapsed?: boolean;
@@ -32,10 +33,10 @@ const colors = [
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone'];
 
 const user = ref({
-    name: 'Benjamin Canac',
+    name: usePage().props.auth?.user?.name,
     avatar: {
-        src: 'https://github.com/benjamincanac.png',
-        alt: 'Benjamin Canac',
+        src: 'https://cdn.pixabay.com/photo/2020/05/17/20/21/cat-5183427_1280.jpg',
+        alt: usePage().props.auth?.user?.name,
     },
 });
 

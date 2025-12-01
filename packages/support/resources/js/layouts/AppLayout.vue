@@ -4,8 +4,11 @@ import UserMenu from '@coleus/support/components/UserMenu.vue';
 import type { NavigationMenuItem } from '@nuxt/ui';
 import { computed, ref } from 'vue';
 
-const open = ref(false);
+defineProps<{
+    title?: string;
+}>();
 
+const collapsed = ref(false);
 const links = [
     [
         {
@@ -13,58 +16,92 @@ const links = [
             icon: 'i-lucide-house',
             to: '/',
             exact: true,
-            onSelect: () => {
-                open.value = false;
-            },
         },
         {
             label: 'Files',
             icon: 'i-lucide-archive',
             to: '/files',
-            onSelect: () => {
-                open.value = false;
-            },
         },
         {
             label: 'Calendar',
             icon: 'i-lucide-calendar',
             to: '/calendar',
-            onSelect: () => {
-                open.value = false;
-            },
         },
         {
             label: 'Mail',
             icon: 'i-lucide-mail',
             to: '/mail',
             badge: '4',
-            onSelect: () => {
-                open.value = false;
-            },
         },
         {
             label: 'Health',
             icon: 'i-lucide-heart-pulse',
             to: '/health',
-            onSelect: () => {
-                open.value = false;
-            },
+            exact: true,
+            open: route().current('health.*'),
+            children: [
+                {
+                    label: 'Weights',
+                    to: route('health.weights.index', [], false),
+                },
+                {
+                    label: 'Workouts',
+                    to: route('health.workouts.index', [], false),
+                    open:
+                        route().current('health.workouts.*') ||
+                        route().current('health.categories.*') ||
+                        route().current('health.muscle-groups.*') ||
+                        route().current('health.exercises.*'),
+                    children: [
+                        {
+                            label: 'Categories',
+                            to: route('health.categories.index', [], false),
+                            onSelect: () => {
+                                open.value = false;
+                            },
+                        },
+                        {
+                            label: 'Muscle Groups',
+                            to: route('health.muscle-groups.index', [], false),
+                            onSelect: () => {
+                                open.value = false;
+                            },
+                        },
+                        {
+                            label: 'Exercises',
+                            to: route('health.exercises.index', [], false),
+                            onSelect: () => {
+                                open.value = false;
+                            },
+                        },
+                    ],
+                },
+                {
+                    label: 'Oral Cares',
+                    to: route('health.oral-cares.index', [], false),
+                    open: route().current('health.oral-cares.*') || route().current('health.toothpastes.*'),
+                    children: [
+                        {
+                            label: 'Toothpastes',
+                            to: route('health.toothpastes.index', [], false),
+                        },
+                    ],
+                },
+                {
+                    label: 'Settings',
+                    to: route('health.settings.general', [], false),
+                },
+            ],
         },
         {
             label: 'Music',
             icon: 'i-lucide-music',
             to: '/music',
-            onSelect: () => {
-                open.value = false;
-            },
         },
         {
             label: 'Finance',
             icon: 'i-lucide-wallet-minimal',
             to: '/music',
-            onSelect: () => {
-                open.value = false;
-            },
         },
         {
             label: 'Settings',
@@ -77,37 +114,22 @@ const links = [
                     label: 'General',
                     to: '/settings',
                     exact: true,
-                    onSelect: () => {
-                        open.value = false;
-                    },
                 },
                 {
                     label: 'Members',
                     to: '/settings/members',
-                    onSelect: () => {
-                        open.value = false;
-                    },
                 },
                 {
                     label: 'Notifications',
                     to: '/settings/notifications',
-                    onSelect: () => {
-                        open.value = false;
-                    },
                 },
                 {
                     label: 'Security',
                     to: '/settings/security',
-                    onSelect: () => {
-                        open.value = false;
-                    },
                 },
                 {
                     label: 'Users',
                     to: '/settings/users',
-                    onSelect: () => {
-                        open.value = false;
-                    },
                 },
             ],
         },
@@ -145,15 +167,8 @@ const groups = computed(() => [
 </script>
 <template>
     <UiApp :toaster="{ position: 'top-center', duration: 2500 }" :tooltip="{ delayDuration: 0 }">
-        <UiDashboardGroup unit="rem" storage="local">
-            <UiDashboardSidebar
-                id="default"
-                v-model:open="open"
-                collapsible
-                resizable
-                class="bg-elevated/25"
-                :ui="{ footer: 'lg:border-t lg:border-default' }"
-            >
+        <UiDashboardGroup>
+            <UiDashboardSidebar v-model:collapsed="collapsed" mode="drawer" id="default">
                 <template #header="{ collapsed }">
                     <TeamMenu :collapsed="collapsed" />
                 </template>
@@ -171,11 +186,19 @@ const groups = computed(() => [
                 </template>
             </UiDashboardSidebar>
 
+            <UiDashboardPanel>
+                <template #header>
+                    <UiDashboardNavbar :title="title">
+                        <template #leading>
+                            <UiDashboardSidebarCollapse variant="ghost" />
+                        </template>
+                    </UiDashboardNavbar>
+                </template>
+                <template #body>
+                    <slot />
+                </template>
+            </UiDashboardPanel>
             <UiDashboardSearch :groups="groups" />
-
-            <slot />
-
-            <NotificationsSlideover />
         </UiDashboardGroup>
     </UiApp>
 </template>
