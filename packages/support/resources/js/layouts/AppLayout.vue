@@ -101,7 +101,7 @@ const links = [
         {
             label: 'Finance',
             icon: 'i-lucide-wallet-minimal',
-            to: '/music',
+            to: '/finance',
         },
         {
             label: 'Settings',

@@ -1,44 +1,79 @@
 <script setup lang="ts">
 import MusicLayout from '@/layouts/MusicLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import "plyr/dist/plyr.css";
+import { onMounted, ref } from 'vue';
+import Plyr from 'plyr';
+import 'plyr/dist/plyr.css';
 
 const props = defineProps<{
     files: Array<string>;
 }>();
 
+const player = ref(null);
 const playing = ref(null);
 const index = ref(-1);
 const src = ref(null);
+onMounted(() => {
+    navigator.mediaSession.setActionHandler('nexttrack', () => next());
+    navigator.mediaSession.setActionHandler('previoustrack', () => previous());
+    player.value = new Plyr('#player', {
+        // enabled: false,
+        autoplay: true,
+        controls: ['rewind', 'play', 'fast-forward', 'progress', 'current-time', 'mute'],
+        seekTime: Number.MAX_VALUE,
+    });
+    player.value.on('ended', next);
+});
 const play = (file: string, i: number) => {
     playing.value = file;
     index.value = i;
     src.value = `/music/stream/${file}`;
-}
+    player.value.source = {
+        type: 'audio',
+        sources: [
+            {
+                src: src.value,
+                type: 'audio/mp3',
+            },
+        ],
+    };
+};
 const next = () => {
     if (!props.files.length) return;
 
     index.value = (index.value + 1) % props.files.length;
 
     play(props.files[index.value], index.value);
-}
+};
+const previous = () => {
+    if (!props.files.length || index.value === 0) return;
+
+    index.value = (index.value - 1) % props.files.length;
+
+    play(props.files[index.value], index.value);
+};
 </script>
 
 <template>
     <Head title="Dashboard" />
 
+    <div v-show="src" class="absolute right-0 bottom-0 left-0 z-10 w-full bg-white dark:bg-gray-900">
+        <audio id="player" class="w-full" controls>
+            <!-- <source :src="src" type="audio/mp3" /> -->
+        </audio>
+    </div>
     <MusicLayout>
-        <audio v-if="src" class="w-full mb-5 rounded-xl bg-indigo-400" controls :src="src" autoplay @ended="next"></audio>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             <button v-for="(file, index) in files" :key="index" type="button" class="cursor-pointer" @click="() => play(file, index)">
-                <div class="relative transition duration-300 h-full w-full aspect-square bg-linear-to-t flex flex-col justify-end items-center rounded-lg shadow"
-                    :class="[
-                        playing === file ? 'from-green-900 to-green-300' : 'from-indigo-900 to-indigo-300',
-                    ]"
+                <div
+                    class="relative flex aspect-square h-full w-full flex-col items-center justify-end rounded-lg bg-linear-to-t shadow transition duration-300"
+                    :class="[playing === file ? 'from-green-900 to-green-300' : 'from-indigo-900 to-indigo-300']"
                 >
-                    <UiIcon name="i-lucide-music" class="size-40 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/5" />
-                    <p class="p-2 text-white font-semibold z-10">{{ file }}</p>
+                    <UiIcon
+                        name="i-lucide-music"
+                        class="absolute top-1/2 left-1/2 size-40 -translate-x-1/2 -translate-y-1/2 transform text-white/5"
+                    />
+                    <p class="z-10 p-2 font-semibold text-white">{{ file }}</p>
                     <!-- <audio class="w-full bg-indigo-600" controls src="/shared-assets/audio/t-rex-roar.mp3"></audio> -->
                 </div>
             </button>
