@@ -58,9 +58,7 @@ const previous = () => {
 
     <MusicLayout>
         <div v-show="src" class="absolute right-0 bottom-0 left-0 z-20 w-full bg-white dark:bg-gray-900">
-            <audio id="player" class="w-full" controls>
-                <!-- <source :src="src" type="audio/mp3" /> -->
-            </audio>
+            <audio id="player" class="w-full" controls></audio>
         </div>
         <div class="grid grid-cols-2 gap-4 pb-12 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             <button v-for="(file, index) in files" :key="index" type="button" class="cursor-pointer" @click="() => play(file, index)">
