@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import MusicLayout from '@/layouts/MusicLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { onMounted, ref } from 'vue';
 import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps<{
     files: Array<string>;
@@ -19,8 +19,7 @@ onMounted(() => {
     player.value = new Plyr('#player', {
         // enabled: false,
         autoplay: true,
-        controls: ['rewind', 'play', 'fast-forward', 'progress', 'current-time', 'mute'],
-        seekTime: Number.MAX_VALUE,
+        controls: ['play', 'progress', 'current-time', 'mute'],
     });
     player.value.on('ended', next);
 });
@@ -57,13 +56,13 @@ const previous = () => {
 <template>
     <Head title="Dashboard" />
 
-    <div v-show="src" class="absolute right-0 bottom-0 left-0 z-10 w-full bg-white dark:bg-gray-900">
-        <audio id="player" class="w-full" controls>
-            <!-- <source :src="src" type="audio/mp3" /> -->
-        </audio>
-    </div>
     <MusicLayout>
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div v-show="src" class="absolute right-0 bottom-0 left-0 z-20 w-full bg-white dark:bg-gray-900">
+            <audio id="player" class="w-full" controls>
+                <!-- <source :src="src" type="audio/mp3" /> -->
+            </audio>
+        </div>
+        <div class="grid grid-cols-2 gap-4 pb-12 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             <button v-for="(file, index) in files" :key="index" type="button" class="cursor-pointer" @click="() => play(file, index)">
                 <div
                     class="relative flex aspect-square h-full w-full flex-col items-center justify-end rounded-lg bg-linear-to-t shadow transition duration-300"
@@ -84,5 +83,13 @@ const previous = () => {
 <style>
 :root {
     --plyr-color-main: var(--color-purple-600);
+    --plyr-audio-controls-background: var(--color-white);
+    --plyr-audio-control-color: var(--color-black);
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --plyr-audio-controls-background: var(--color-gray-900);
+        --plyr-audio-control-color: var(--color-white);
+    }
 }
 </style>
