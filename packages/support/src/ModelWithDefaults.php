@@ -4,7 +4,6 @@ namespace Coleus\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use JetBrains\PhpStorm\NoReturn;
 
 /**
  * @mixin \Illuminate\Database\Eloquent\Model

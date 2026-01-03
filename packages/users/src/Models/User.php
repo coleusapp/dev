@@ -2,11 +2,8 @@
 
 namespace Coleus\Users\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Coleus\Support\Models\Settings;
 use Coleus\Users\Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -89,15 +86,5 @@ class User extends Authenticatable
     protected static function newFactory(): UserFactory|\Illuminate\Database\Eloquent\Factories\Factory
     {
         return UserFactory::new();
-    }
-
-    public function settings(): MorphToMany
-    {
-        return $this->morphedByMany(
-            Settings::class,
-            'model',
-            'model_has_users',
-            'model_id'
-        );
     }
 }

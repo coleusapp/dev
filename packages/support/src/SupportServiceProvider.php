@@ -9,6 +9,7 @@ class SupportServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        $package->name('support');
+        $package->name('support')
+            ->hasMigration('create_apps_table');
     }
 }
