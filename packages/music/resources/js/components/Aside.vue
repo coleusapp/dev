@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { ref } from 'vue';
 
@@ -7,9 +6,33 @@ const items = ref<NavigationMenuItem[]>([
     {
         label: 'Music',
         icon: 'i-lucide-music',
-        to: route('music.dashboard'),
-        active: route().current('music.dashboard'),
-        target: '_self',
+        to: route('music.dashboard', [], false),
+        exact: true,
+    },
+    {
+        label: 'Tracks',
+        icon: 'i-lucide-music-2',
+        to: route('music.tracks.index', [], false),
+    },
+    {
+        label: 'Albums',
+        icon: 'i-lucide-disc-3',
+        to: route('music.albums.index', [], false),
+    },
+    {
+        label: 'Artists',
+        icon: 'i-lucide-mic-vocal',
+        to: route('music.artists.index', [], false),
+    },
+    {
+        label: 'Genres',
+        icon: 'i-lucide-tag',
+        to: route('music.genres.index', [], false),
+    },
+    {
+        label: 'Playlists',
+        icon: 'i-lucide-list-music',
+        to: route('music.playlists.index', [], false),
     },
 ]);
 </script>
@@ -26,8 +49,8 @@ const items = ref<NavigationMenuItem[]>([
                 </template>
             </UiDrawer>
         </div>
-        <div class="hidden md:flex w-full flex-col gap-2 h-full min-w-60 py-2 pl-2 pr-1">
-            <UiNavigationMenu orientation="vertical" :items="items" class="w-full"  />
+        <div class="hidden md:flex w-full flex-col gap-2 h-full min-w-60">
+            <UiNavigationMenu orientation="vertical" :items="items" class="w-full" />
         </div>
     </aside>
 </template>

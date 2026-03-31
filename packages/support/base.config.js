@@ -71,6 +71,11 @@ export default defineConfig({
                         footer: 'p-2 sm:px-2',
                     },
                 },
+                dashboardPanel: {
+                    slots: {
+                        body: 'flex flex-col gap-4 sm:gap-6 flex-1 overflow-y-auto p-2 sm:p-2',
+                    },
+                },
             },
         }),
     ],
