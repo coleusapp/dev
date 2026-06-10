@@ -2,6 +2,7 @@
 
 namespace Coleus\Music;
 
+use Coleus\Music\Commands\GetMusicFilesCommand;
 use Coleus\Music\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
@@ -13,13 +14,23 @@ class MusicServiceProvider extends PackageServiceProvider
     {
         $package->name('music')
             ->hasConfigFile()
-            ->hasMigrations([
-                //
-            ])
+            ->hasMigrations(array_map(
+                fn ($migration) => config('music.name')."/$migration",
+                [
+                    'create_genres_table',
+                    'create_artists_table',
+                    'create_albums_table',
+                    'create_tracks_table',
+                    'create_playlists_table',
+                    'create_playlist_track_table',
+                ]))
             ->runsMigrations()
             ->hasRoute('web')
             ->hasAssets()
-            ->hasViews();
+            ->hasViews()
+            ->hasCommands([
+                GetMusicFilesCommand::class,
+            ]);
     }
 
     public function bootingPackage(): void
@@ -32,8 +43,8 @@ class MusicServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->bind('music', function($app) {
-            return new Music();
+        $this->app->bind('music', function ($app) {
+            return new Music;
         });
     }
 }

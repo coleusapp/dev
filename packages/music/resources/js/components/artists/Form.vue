@@ -1,0 +1,13 @@
+<template>
+    <FormKit
+        type="text"
+        name="name"
+        label="Name"
+        validation="required"
+    />
+    <FormKit
+        type="textarea"
+        name="bio"
+        label="Bio"
+    />
+</template>
