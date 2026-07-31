@@ -7,4 +7,9 @@
 3. Update `path` in `tsconfig.json`.
 4. Update `types` in `tsconfig.json`.
 
+## Dev
 
+username: admin@dev.test
+password: 12345678
+
+pnpm --filter ./packages/health dev
