@@ -76,6 +76,7 @@ export default defineConfig({
             // '@': path.resolve(__dirname, './resources/js'),
             '@coleus/support': path.resolve(__dirname, 'vendor/coleus/support/resources/js'),
             '@coleus/health': path.resolve(__dirname, 'vendor/coleus/health/resources/js'),
+            '@coleus/calendar': path.resolve(__dirname, 'vendor/coleus/calendar/resources/js'),
         },
     },
 });

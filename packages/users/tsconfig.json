@@ -1,3 +1,12 @@
 {
-  "extends": "../support/tsconfig.json",
+    "extends": "../support/tsconfig.json",
+    "include": [
+        "resources/js/**/*.ts",
+        "resources/js/**/*.d.ts",
+        "resources/js/**/*.tsx",
+        "resources/js/**/*.vue",
+        "../../auto-imports.d.ts",
+        "../../components.d.ts",
+        "../../resources/js/types/**/*.d.ts"
+    ]
 }

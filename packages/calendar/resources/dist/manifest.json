@@ -1,0 +1,64 @@
+{
+  "_dates-CPn7B2fN.js": {
+    "file": "assets/dates-CPn7B2fN.js",
+    "name": "dates",
+    "imports": [
+      "resources/js/app.ts"
+    ]
+  },
+  "resources/js/app.ts": {
+    "file": "assets/app-IDxEUAuO.js",
+    "name": "app",
+    "src": "resources/js/app.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/Day.vue",
+      "resources/js/pages/Month.vue",
+      "resources/js/pages/Week.vue",
+      "resources/js/pages/Year.vue"
+    ],
+    "css": [
+      "assets/app-D40PDaNZ.css"
+    ]
+  },
+  "resources/js/pages/Day.vue": {
+    "file": "assets/Day-D0pDQg5I.js",
+    "name": "Day",
+    "src": "resources/js/pages/Day.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_dates-CPn7B2fN.js",
+      "resources/js/app.ts"
+    ]
+  },
+  "resources/js/pages/Month.vue": {
+    "file": "assets/Month-DwtMhNj1.js",
+    "name": "Month",
+    "src": "resources/js/pages/Month.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_dates-CPn7B2fN.js",
+      "resources/js/app.ts"
+    ]
+  },
+  "resources/js/pages/Week.vue": {
+    "file": "assets/Week-Dz0fdLq4.js",
+    "name": "Week",
+    "src": "resources/js/pages/Week.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_dates-CPn7B2fN.js",
+      "resources/js/app.ts"
+    ]
+  },
+  "resources/js/pages/Year.vue": {
+    "file": "assets/Year-CxUeWa9b.js",
+    "name": "Year",
+    "src": "resources/js/pages/Year.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_dates-CPn7B2fN.js",
+      "resources/js/app.ts"
+    ]
+  }
+}

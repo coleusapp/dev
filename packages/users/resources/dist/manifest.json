@@ -1,13 +1,13 @@
 {
-  "_loader-circle-DCZcAwfo.js": {
-    "file": "assets/loader-circle-DCZcAwfo.js",
+  "_loader-circle-C1JhosyW.js": {
+    "file": "assets/loader-circle-C1JhosyW.js",
     "name": "loader-circle",
     "imports": [
       "resources/js/app.ts"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-Byvdr7xg.js",
+    "file": "assets/app-CDB7rZCV.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -24,27 +24,27 @@
     ]
   },
   "resources/js/pages/ConfirmPassword.vue": {
-    "file": "assets/ConfirmPassword-Ds-z5Xfn.js",
+    "file": "assets/ConfirmPassword-DuN3-_ZW.js",
     "name": "ConfirmPassword",
     "src": "resources/js/pages/ConfirmPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DCZcAwfo.js"
+      "_loader-circle-C1JhosyW.js"
     ]
   },
   "resources/js/pages/ForgotPassword.vue": {
-    "file": "assets/ForgotPassword-WGExm29o.js",
+    "file": "assets/ForgotPassword-Yqfd0LVR.js",
     "name": "ForgotPassword",
     "src": "resources/js/pages/ForgotPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DCZcAwfo.js"
+      "_loader-circle-C1JhosyW.js"
     ]
   },
   "resources/js/pages/Login.vue": {
-    "file": "assets/Login-a9KVgK5b.js",
+    "file": "assets/Login-Bm9Lf4YJ.js",
     "name": "Login",
     "src": "resources/js/pages/Login.vue",
     "isDynamicEntry": true,
@@ -53,33 +53,33 @@
     ]
   },
   "resources/js/pages/Register.vue": {
-    "file": "assets/Register-b-Ghs2M5.js",
+    "file": "assets/Register-CoStafTu.js",
     "name": "Register",
     "src": "resources/js/pages/Register.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DCZcAwfo.js"
+      "_loader-circle-C1JhosyW.js"
     ]
   },
   "resources/js/pages/ResetPassword.vue": {
-    "file": "assets/ResetPassword-t1WSvAO2.js",
+    "file": "assets/ResetPassword-DAYScRJm.js",
     "name": "ResetPassword",
     "src": "resources/js/pages/ResetPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DCZcAwfo.js"
+      "_loader-circle-C1JhosyW.js"
     ]
   },
   "resources/js/pages/VerifyEmail.vue": {
-    "file": "assets/VerifyEmail-BlH1eyuS.js",
+    "file": "assets/VerifyEmail-cdYh1bmm.js",
     "name": "VerifyEmail",
     "src": "resources/js/pages/VerifyEmail.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DCZcAwfo.js"
+      "_loader-circle-C1JhosyW.js"
     ]
   }
 }

@@ -127,8 +127,9 @@
         "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx",
         "resources/js/**/*.vue",
-        "./auto-imports.d.ts",
-        "./components.d.ts",
+        "../../auto-imports.d.ts",
+        "../../components.d.ts",
+        "../../resources/js/types/**/*.d.ts",
         "node_modules/lucide-vue-next/dist/lucide-vue-next.d.ts",
         "node_modules/unplugin-auto-import/auto-imports.d.ts",
     ]
