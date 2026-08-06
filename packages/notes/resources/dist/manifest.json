@@ -1,0 +1,23 @@
+{
+  "resources/js/app.ts": {
+    "file": "assets/app-BiMbQ_jz.js",
+    "name": "app",
+    "src": "resources/js/app.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/Index.vue"
+    ],
+    "css": [
+      "assets/app-DK83iCtW.css"
+    ]
+  },
+  "resources/js/pages/Index.vue": {
+    "file": "assets/Index-C8_IGcKa.js",
+    "name": "Index",
+    "src": "resources/js/pages/Index.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ]
+  }
+}

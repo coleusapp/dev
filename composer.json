@@ -23,6 +23,7 @@
         "coleus/users": "self.version",
         "coleus/widgets": "self.version",
         "coleus/music": "self.version",
+        "coleus/notes": "self.version",
         "coleus/settings": "self.version",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",

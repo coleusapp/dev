@@ -99,6 +99,11 @@ const links = [
             to: '/music',
         },
         {
+            label: 'Notes',
+            icon: 'i-lucide-notebook-text',
+            to: '/notes',
+        },
+        {
             label: 'Finance',
             icon: 'i-lucide-wallet-minimal',
             to: '/finance',
@@ -168,7 +173,7 @@ const groups = computed(() => [
 <template>
     <UiApp :toaster="{ position: 'top-center', duration: 2500 }" :tooltip="{ delayDuration: 0 }">
         <UiDashboardGroup>
-            <UiDashboardSidebar v-model:collapsed="collapsed" mode="drawer" id="default">
+            <UiDashboardSidebar v-model:collapsed="collapsed" collapsible mode="drawer" id="default">
                 <template #header="{ collapsed }">
                     <TeamMenu :collapsed="collapsed" />
                 </template>
@@ -186,18 +191,20 @@ const groups = computed(() => [
                 </template>
             </UiDashboardSidebar>
 
-            <UiDashboardPanel>
-                <template #header>
-                    <UiDashboardNavbar :title="title">
-                        <template #leading>
-                            <UiDashboardSidebarCollapse variant="ghost" />
-                        </template>
-                    </UiDashboardNavbar>
-                </template>
-                <template #body>
-                    <slot />
-                </template>
-            </UiDashboardPanel>
+            <slot name="panels">
+                <UiDashboardPanel>
+                    <template #header>
+                        <UiDashboardNavbar :title="title">
+                            <template #leading>
+                                <UiDashboardSidebarCollapse variant="ghost" />
+                            </template>
+                        </UiDashboardNavbar>
+                    </template>
+                    <template #body>
+                        <slot />
+                    </template>
+                </UiDashboardPanel>
+            </slot>
             <UiDashboardSearch :groups="groups" />
         </UiDashboardGroup>
     </UiApp>
