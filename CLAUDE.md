@@ -410,6 +410,11 @@ it('has emails', function (string $email) {
 - Treat data backfills/migrations as a separate, explicit step to confirm before running, even against a local dev database.
 - If a fix is clearly growing beyond one commit's worth of diff, stop and check in before continuing.
 
+## Concurrent Edits
+- The user may be editing the same file at the same time as you, in their own editor, adding or removing things.
+- Before editing a file you already read earlier in the conversation, re-read it first if there's any chance it changed. Never blindly Write/overwrite a file based on stale content held in context.
+- If a file changed on disk since you last read it, treat that as the user's real, deliberate work — not something to revert or ignore in favor of what you remember.
+
 ## Scope of Replies
 - Do the one task in the prompt. Nothing else.
 - Do not give opinions, suggestions, analysis, or "next steps" unless explicitly asked for them.
