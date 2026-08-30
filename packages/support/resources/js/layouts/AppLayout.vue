@@ -172,7 +172,7 @@ const groups = computed(() => [
 </script>
 <template>
     <UiApp :toaster="{ position: 'top-center', duration: 2500 }" :tooltip="{ delayDuration: 0 }">
-        <UiDashboardGroup>
+        <UiDashboardGroup storage="local">
             <UiDashboardSidebar v-model:collapsed="collapsed" collapsible mode="drawer" id="default">
                 <template #header="{ collapsed }">
                     <TeamMenu :collapsed="collapsed" />

@@ -14,8 +14,7 @@ const teams = ref([
 ]);
 const selectedTeam = ref(teams.value[0]);
 
-const items = computed<DropdownMenuItem[][]>(() => {
-    return [
+const items = computed<DropdownMenuItem[][]>(() => [
         teams.value.map((team) => ({
             ...team,
             onSelect() {
@@ -32,8 +31,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
                 icon: 'i-lucide-cog',
             },
         ],
-    ];
-});
+    ]);
 </script>
 
 <template>

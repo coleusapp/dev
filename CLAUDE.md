@@ -403,3 +403,15 @@ it('has emails', function (string $email) {
 | decoration-slice | box-decoration-slice |
 | decoration-clone | box-decoration-clone |
 </laravel-boost-guidelines>
+
+## Change Size
+- Keep every change commit-bit-sized. Never let a fix sprawl into a large multi-file/multi-concern sweep.
+- Prefer the narrowest fix that solves the stated problem; don't also "complete" adjacent unfinished/unrelated scaffolding in the same pass unless asked.
+- Treat data backfills/migrations as a separate, explicit step to confirm before running, even against a local dev database.
+- If a fix is clearly growing beyond one commit's worth of diff, stop and check in before continuing.
+
+## Scope of Replies
+- Do the one task in the prompt. Nothing else.
+- Do not give opinions, suggestions, analysis, or "next steps" unless explicitly asked for them.
+- Do not mention things that weren't asked about, even if noticed while working (e.g. unrelated bugs, inconsistencies). Stay silent on them unless asked.
+- After making a change, don't restate/explain what was changed if it adds no value (the user can read the diff). Keep end-of-turn text minimal or omit it.

@@ -2,7 +2,7 @@ import { onMounted, ref } from 'vue';
 
 type Appearance = 'light' | 'dark' | 'system';
 
-export function updateTheme(value: Appearance) {
+export const updateTheme = (value: Appearance) => {
     if (typeof window === 'undefined') {
         return;
     }
@@ -15,7 +15,7 @@ export function updateTheme(value: Appearance) {
     } else {
         document.documentElement.classList.toggle('dark', value === 'dark');
     }
-}
+};
 
 const setCookie = (name: string, value: string, days = 365) => {
     if (typeof document === 'undefined') {
@@ -49,7 +49,7 @@ const handleSystemThemeChange = () => {
     updateTheme(currentAppearance || 'system');
 };
 
-export function initializeTheme() {
+export const initializeTheme = () => {
     if (typeof window === 'undefined') {
         return;
     }
@@ -60,9 +60,9 @@ export function initializeTheme() {
 
     // Set up system theme change listener...
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
-}
+};
 
-export function useAppearance() {
+export const useAppearance = () => {
     const appearance = ref<Appearance>('system');
 
     onMounted(() => {
@@ -75,7 +75,7 @@ export function useAppearance() {
         }
     });
 
-    function updateAppearance(value: Appearance) {
+    const updateAppearance = (value: Appearance) => {
         appearance.value = value;
 
         // Store in localStorage for client-side persistence...
@@ -85,10 +85,10 @@ export function useAppearance() {
         setCookie('appearance', value);
 
         updateTheme(value);
-    }
+    };
 
     return {
         appearance,
         updateAppearance,
     };
-}
+};

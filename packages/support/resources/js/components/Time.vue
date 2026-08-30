@@ -3,14 +3,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const time = ref('');
 
-function updateTime() {
+const updateTime = () => {
     const now = new Date();
     time.value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-}
+};
 
 let interval: NodeJS.Timeout;
 

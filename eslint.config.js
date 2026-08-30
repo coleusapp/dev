@@ -13,6 +13,9 @@ export default defineConfigWithVueTs(
         rules: {
             'vue/multi-word-component-names': 'off',
             '@typescript-eslint/no-explicit-any': 'off',
+            'func-style': ['error', 'expression', { allowArrowFunctions: true }],
+            'prefer-arrow-callback': 'error',
+            'arrow-body-style': ['error', 'as-needed'],
         },
     },
     prettier,
