@@ -8,6 +8,8 @@ set -e
 
 VERSION="${1:-patch}"
 
+git pull origin main
+
 LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
 
 if [[ "$VERSION" = 'patch' ]]; then
