@@ -1,59 +1,59 @@
 {
-  "_EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js": {
-    "file": "assets/EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js",
+  "_EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js": {
+    "file": "assets/EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js",
     "name": "EditAction.vue_vue_type_script_setup_true_lang",
     "imports": [
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
       "resources/js/app.ts"
     ]
   },
-  "_Form-DbXh0gD1.js": {
-    "file": "assets/Form-DbXh0gD1.js",
+  "_Form-ChhkUjTL.js": {
+    "file": "assets/Form-ChhkUjTL.js",
     "name": "Form",
     "imports": [
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "resources/js/app.ts"
     ]
   },
-  "_Form-Ie7Hzf_O.js": {
-    "file": "assets/Form-Ie7Hzf_O.js",
+  "_Form-CnVvL8DJ.js": {
+    "file": "assets/Form-CnVvL8DJ.js",
     "name": "Form",
     "imports": [
       "__plugin-vue_export-helper-DlAUqK2U.js",
       "resources/js/app.ts"
     ]
   },
-  "_Form.vue_vue_type_script_setup_true_lang-BM1iH9O0.js": {
-    "file": "assets/Form.vue_vue_type_script_setup_true_lang-BM1iH9O0.js",
+  "_Form.vue_vue_type_script_setup_true_lang-C9YD6RNr.js": {
+    "file": "assets/Form.vue_vue_type_script_setup_true_lang-C9YD6RNr.js",
     "name": "Form.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
-  "_Form.vue_vue_type_script_setup_true_lang-Ck70vdaH.js": {
-    "file": "assets/Form.vue_vue_type_script_setup_true_lang-Ck70vdaH.js",
+  "_Form.vue_vue_type_script_setup_true_lang-DtVeA_Z3.js": {
+    "file": "assets/Form.vue_vue_type_script_setup_true_lang-DtVeA_Z3.js",
     "name": "Form.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
-  "_Form.vue_vue_type_script_setup_true_lang-j9peRDMH.js": {
-    "file": "assets/Form.vue_vue_type_script_setup_true_lang-j9peRDMH.js",
+  "_Form.vue_vue_type_script_setup_true_lang-yB47b1UT.js": {
+    "file": "assets/Form.vue_vue_type_script_setup_true_lang-yB47b1UT.js",
     "name": "Form.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
-  "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js": {
-    "file": "assets/Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
+  "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js": {
+    "file": "assets/Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
     "name": "Header.vue_vue_type_script_setup_true_lang",
     "imports": [
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
       "resources/js/app.ts"
     ]
   },
-  "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js": {
-    "file": "assets/MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
+  "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js": {
+    "file": "assets/MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
     "name": "MusicLayout.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
@@ -63,16 +63,16 @@
     "file": "assets/_plugin-vue_export-helper-DlAUqK2U.js",
     "name": "_plugin-vue_export-helper"
   },
-  "_index-BTsPPfjo.js": {
-    "file": "assets/index-BTsPPfjo.js",
+  "_index-CEHLOZNZ.js": {
+    "file": "assets/index-CEHLOZNZ.js",
     "name": "index",
     "imports": [
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-DGqF2IJC.js",
+    "file": "assets/app-BsTuGoUx.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -99,12 +99,12 @@
     ]
   },
   "resources/js/pages/Dashboard.vue": {
-    "file": "assets/Dashboard-B-KylY75.js",
+    "file": "assets/Dashboard-Bs_DIBMX.js",
     "name": "Dashboard",
     "src": "resources/js/pages/Dashboard.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
       "resources/js/app.ts"
     ],
     "css": [
@@ -112,196 +112,196 @@
     ]
   },
   "resources/js/pages/albums/Create.vue": {
-    "file": "assets/Create-BW-0uSF7.js",
+    "file": "assets/Create-D2LJEFEK.js",
     "name": "Create",
     "src": "resources/js/pages/albums/Create.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form.vue_vue_type_script_setup_true_lang-j9peRDMH.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form.vue_vue_type_script_setup_true_lang-DtVeA_Z3.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/albums/Edit.vue": {
-    "file": "assets/Edit-fupefZU8.js",
+    "file": "assets/Edit-BnCb3Bpx.js",
     "name": "Edit",
     "src": "resources/js/pages/albums/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form.vue_vue_type_script_setup_true_lang-j9peRDMH.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form.vue_vue_type_script_setup_true_lang-DtVeA_Z3.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/albums/Index.vue": {
-    "file": "assets/Index-BnVvBoEO.js",
+    "file": "assets/Index-C9qQUHGf.js",
     "name": "Index",
     "src": "resources/js/pages/albums/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/artists/Create.vue": {
-    "file": "assets/Create-DDIod36n.js",
+    "file": "assets/Create-B7uW1Uw7.js",
     "name": "Create",
     "src": "resources/js/pages/artists/Create.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form-DbXh0gD1.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form-ChhkUjTL.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/js/pages/artists/Edit.vue": {
-    "file": "assets/Edit-CHxx6Cle.js",
+    "file": "assets/Edit-BHUhWKbj.js",
     "name": "Edit",
     "src": "resources/js/pages/artists/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form-DbXh0gD1.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form-ChhkUjTL.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/js/pages/artists/Index.vue": {
-    "file": "assets/Index-bf1ehk7d.js",
+    "file": "assets/Index-CxUtNc3N.js",
     "name": "Index",
     "src": "resources/js/pages/artists/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/genres/Create.vue": {
-    "file": "assets/Create-o0H0YG-_.js",
+    "file": "assets/Create-iFZXQU0T.js",
     "name": "Create",
     "src": "resources/js/pages/genres/Create.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form-Ie7Hzf_O.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form-CnVvL8DJ.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/js/pages/genres/Edit.vue": {
-    "file": "assets/Edit-V6UxIVqL.js",
+    "file": "assets/Edit-TH6PGCDk.js",
     "name": "Edit",
     "src": "resources/js/pages/genres/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form-Ie7Hzf_O.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form-CnVvL8DJ.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts",
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ]
   },
   "resources/js/pages/genres/Index.vue": {
-    "file": "assets/Index-fd-TLuPE.js",
+    "file": "assets/Index-DuOLqwFc.js",
     "name": "Index",
     "src": "resources/js/pages/genres/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/playlists/Create.vue": {
-    "file": "assets/Create-DMXVUzkQ.js",
+    "file": "assets/Create-DXKlmIrR.js",
     "name": "Create",
     "src": "resources/js/pages/playlists/Create.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form.vue_vue_type_script_setup_true_lang-BM1iH9O0.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form.vue_vue_type_script_setup_true_lang-C9YD6RNr.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/playlists/Edit.vue": {
-    "file": "assets/Edit-D6m5ROSh.js",
+    "file": "assets/Edit-CApsKm90.js",
     "name": "Edit",
     "src": "resources/js/pages/playlists/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form.vue_vue_type_script_setup_true_lang-BM1iH9O0.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form.vue_vue_type_script_setup_true_lang-C9YD6RNr.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/playlists/Index.vue": {
-    "file": "assets/Index-BdAleOA0.js",
+    "file": "assets/Index-Pmr88HO1.js",
     "name": "Index",
     "src": "resources/js/pages/playlists/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/tracks/Create.vue": {
-    "file": "assets/Create-D3vHXjeh.js",
+    "file": "assets/Create-Cpbo7bzt.js",
     "name": "Create",
     "src": "resources/js/pages/tracks/Create.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form.vue_vue_type_script_setup_true_lang-Ck70vdaH.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form.vue_vue_type_script_setup_true_lang-yB47b1UT.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/tracks/Edit.vue": {
-    "file": "assets/Edit-BxFjmW0m.js",
+    "file": "assets/Edit-I3TWg0-6.js",
     "name": "Edit",
     "src": "resources/js/pages/tracks/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_Form.vue_vue_type_script_setup_true_lang-Ck70vdaH.js",
-      "_index-BTsPPfjo.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_Form.vue_vue_type_script_setup_true_lang-yB47b1UT.js",
+      "_index-CEHLOZNZ.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/tracks/Index.vue": {
-    "file": "assets/Index-C1Flj9mk.js",
+    "file": "assets/Index-DHk3Zcxa.js",
     "name": "Index",
     "src": "resources/js/pages/tracks/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_Header.vue_vue_type_script_setup_true_lang-BHZLdWzF.js",
-      "_MusicLayout.vue_vue_type_script_setup_true_lang-DkE_S4hR.js",
-      "_EditAction.vue_vue_type_script_setup_true_lang-D3zwdnaa.js",
+      "_Header.vue_vue_type_script_setup_true_lang-geNJW0jO.js",
+      "_MusicLayout.vue_vue_type_script_setup_true_lang-D2gkNadb.js",
+      "_EditAction.vue_vue_type_script_setup_true_lang-DArxBWB1.js",
       "resources/js/app.ts"
     ]
   }
