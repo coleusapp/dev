@@ -8,7 +8,7 @@ set -e
 
 VERSION="${1:-patch}"
 
-git pull origin main
+git pull origin 1.x
 
 LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
 
