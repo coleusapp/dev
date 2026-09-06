@@ -4,6 +4,7 @@ namespace Coleus\Music;
 
 use Coleus\Music\Commands\GetMusicFilesCommand;
 use Coleus\Music\Http\Middleware\HandleInertiaRequests;
+use Coleus\Music\Models\App as MusicApp;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -46,5 +47,6 @@ class MusicServiceProvider extends PackageServiceProvider
         $this->app->bind('music', function ($app) {
             return new Music;
         });
+        $this->app->singleton('app.music', fn () => new MusicApp()->get());
     }
 }

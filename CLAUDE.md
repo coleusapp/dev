@@ -411,6 +411,10 @@ it('has emails', function (string $email) {
 | decoration-clone | box-decoration-clone |
 </laravel-boost-guidelines>
 
+## Solution Quality
+- I'm not looking for a cheap solution. Do not implement quick/shortcut fixes that will need to be revisited later because the first pass was too minimal — build it properly the first time, even if it takes more work now.
+- The goal is to not have to ask me questions, and to make the code understandable to you and you only — the end goal is to throw you away at the end. Code, structure, and naming should stand on their own without requiring back-and-forth to explain them.
+
 ## Change Size
 - Keep every change commit-bit-sized. Never let a fix sprawl into a large multi-file/multi-concern sweep.
 - Prefer the narrowest fix that solves the stated problem; don't also "complete" adjacent unfinished/unrelated scaffolding in the same pass unless asked.

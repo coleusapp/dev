@@ -1,6 +1,6 @@
 <?php
 
-namespace Coleus\Support\Exceptions;
+namespace Coleus\Apps\Exceptions;
 
 use Exception;
 

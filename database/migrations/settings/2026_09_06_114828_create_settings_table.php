@@ -6,18 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('apps', function (Blueprint $table): void {
+        Schema::create('settings', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
+            $table->json('value')->nullable();
             $table->timestamps();
+
             $table->index('name');
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('apps');
+        Schema::dropIfExists('settings');
     }
 };

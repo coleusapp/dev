@@ -16,6 +16,7 @@
     ],
     "require": {
         "php": "^8.4",
+        "coleus/apps": "self.version",
         "coleus/calendar": "self.version",
         "coleus/health": "self.version",
         "coleus/support": "self.version",

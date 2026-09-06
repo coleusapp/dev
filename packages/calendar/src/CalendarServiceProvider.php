@@ -3,6 +3,7 @@
 namespace Coleus\Calendar;
 
 use Coleus\Calendar\Http\Middleware\HandleInertiaRequests;
+use Coleus\Calendar\Models\App as CalendarApp;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -31,5 +32,6 @@ class CalendarServiceProvider extends PackageServiceProvider
         $this->app->bind('calendar', function ($app) {
             return new Calendar;
         });
+        $this->app->singleton('app.calendar', fn () => new CalendarApp()->get());
     }
 }
