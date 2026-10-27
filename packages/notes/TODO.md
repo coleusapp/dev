@@ -151,7 +151,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A3.3 Check All / Uncheck All / Delete Checked Items actions for a list
 - [ ] A3.4 Drag to reorder checklist items in the preview
 - [ ] A3.5 Indent checklist items into sub-tasks
-- [ ] A3.6 Checking items directly in the editor (not only in preview), with a strike-through look for done items
+- [x] A3.6 Checking items directly in the editor (not only in preview), with a strike-through look for done items
 
 ## A4. Attachments and media (Apple Notes)
 - [ ] A4.1 Rich link previews: pasting a URL shows a card (title, description, image) fetched server-side safely (no SSRF, timeouts, cached) 📦

@@ -86,3 +86,34 @@ describe('prepareFirstLine', () => {
         expect(loadMarkdown(editor, '#').faithful).toBe(true);
     });
 });
+
+describe('checklists in the visual editor', () => {
+    it('ticks and unticks an item in place and writes it back as Markdown', () => {
+        loadMarkdown(editor, '- [ ] milk\n- [ ] eggs');
+
+        let itemPosition = -1;
+        editor.state.doc.descendants((node, position) => {
+            if (itemPosition < 0 && node.type.name === 'taskItem' && node.textContent === 'eggs') {
+                itemPosition = position;
+            }
+        });
+
+        editor.commands.command(({ tr }) => {
+            tr.setNodeAttribute(itemPosition, 'checked', true);
+            return true;
+        });
+        expect(editorMarkdown(editor, '')).toBe('- [ ] milk\n- [x] eggs');
+
+        editor.commands.command(({ tr }) => {
+            tr.setNodeAttribute(itemPosition, 'checked', false);
+            return true;
+        });
+        expect(editorMarkdown(editor, '')).toBe('- [ ] milk\n- [ ] eggs');
+    });
+
+    it('renders done items with data-checked for the strike-through style', () => {
+        loadMarkdown(editor, '- [x] done');
+
+        expect(editor.view.dom.querySelector('li[data-checked="true"]')?.textContent).toContain('done');
+    });
+});
