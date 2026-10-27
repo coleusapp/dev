@@ -81,3 +81,18 @@ describe('toggleHighlight', () => {
         expect(highlight('a ==hot== b', 4, 7, 'mint')).toBe('a hot b');
     });
 });
+
+describe('checklist on several lines', () => {
+    const apply = (text: string, start: number, end: number): string => {
+        const edit = formatMarkdown('checklist', { text, start, end });
+
+        return text.slice(0, edit.from) + edit.insert + text.slice(edit.to);
+    };
+
+    it('converts each selected line, skipping blank ones, and toggles back', () => {
+        const checklist = apply('milk\n\neggs\n- bread', 0, 17);
+
+        expect(checklist).toBe('- [ ] milk\n\n- [ ] eggs\n- [ ] bread');
+        expect(apply(checklist, 0, checklist.length)).toBe('milk\n\neggs\nbread');
+    });
+});

@@ -85,7 +85,7 @@ const replaceLines = ({ start, end }: Selection, from: number, to: number, lines
 const toggleLinePrefix = (selection: Selection, prefix: string): TextEdit => {
     const { from, to, lines } = lineRange(selection);
     const prefixOf = (line: string): string => line.match(ANY_PREFIX)?.[0] ?? '';
-    const removeAll = lines.every((line) => prefixOf(line) === prefix);
+    const removeAll = lines.every((line) => prefixOf(line) === prefix || (line.trim() === '' && lines.length > 1));
 
     const changed = lines.map((line) => {
         if (removeAll) {

@@ -117,3 +117,39 @@ describe('checklists in the visual editor', () => {
         expect(editor.view.dom.querySelector('li[data-checked="true"]')?.textContent).toContain('done');
     });
 });
+
+describe('checklist button', () => {
+    /**
+     * Selects from the start of the first text to the end of the last, like a user dragging over the lines.
+     */
+    const selectAll = (): void => {
+        const textPositions: number[] = [];
+        editor.state.doc.descendants((node, position) => {
+            if (node.isText) {
+                textPositions.push(position, position + node.nodeSize);
+            }
+        });
+        editor.commands.setTextSelection({ from: Math.min(...textPositions), to: Math.max(...textPositions) });
+    };
+
+    it('turns every selected line into a checklist item and back', () => {
+        loadMarkdown(editor, 'milk\n\neggs\n\nbread');
+        selectAll();
+
+        editor.chain().toggleTaskList().run();
+        expect(editorMarkdown(editor, '')).toBe('- [ ] milk\n- [ ] eggs\n- [ ] bread');
+
+        selectAll();
+        editor.chain().toggleTaskList().run();
+        expect(editorMarkdown(editor, '')).toBe('milk\n\neggs\n\nbread');
+    });
+
+    it('converts a bulleted list into a checklist', () => {
+        loadMarkdown(editor, '- milk\n- eggs');
+        selectAll();
+
+        editor.chain().toggleTaskList().run();
+
+        expect(editorMarkdown(editor, '')).toBe('- [ ] milk\n- [ ] eggs');
+    });
+});
