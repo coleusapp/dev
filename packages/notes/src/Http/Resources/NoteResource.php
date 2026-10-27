@@ -45,6 +45,7 @@ class NoteResource extends JsonResource
                 'snippet' => Highlighter::parts($snippet, $this->highlightWords),
             ],
             'pinned' => $this->pinned_at !== null,
+            'archived' => $this->archived_at !== null,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'updated_at_for_humans' => $this->updated_at?->diffForHumans(),

@@ -21,6 +21,10 @@ const emptyMessage = computed(() => {
         return `No notes match “${props.filters.q}”${props.filters.tag ? ` in #${props.filters.tag}` : ''}.`;
     }
 
+    if (props.filters.view === 'archive') {
+        return props.filters.tag ? `No archived notes tagged #${props.filters.tag}.` : 'The archive is empty.';
+    }
+
     return props.filters.tag ? `No notes tagged #${props.filters.tag}.` : 'No notes yet.';
 });
 </script>
@@ -29,7 +33,7 @@ const emptyMessage = computed(() => {
     <div v-if="notes.length === 0" class="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
         <UiIcon name="i-lucide-notebook-pen" class="text-dimmed size-8" />
         <p class="text-dimmed text-sm">{{ emptyMessage }}</p>
-        <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" size="sm" @click="$emit('create')">{{
+        <UiButton v-if="filters.view === 'notes'" icon="i-lucide-file-plus" color="neutral" variant="subtle" size="sm" @click="$emit('create')">{{
             filters.tag ? 'New note with this tag' : 'Create your first note'
         }}</UiButton>
     </div>

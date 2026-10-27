@@ -127,10 +127,17 @@ const deleteNote = (): void => {
     }
 };
 
+const listTitle = computed(() => {
+    const base = props.filters.view === 'archive' ? 'Archive' : 'Notes';
+
+    return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}#${props.filters.tag}` : base;
+});
+
 const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);
 
 const tagFilterItems = computed<DropdownMenuItem[]>(() => [
-    { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ tag: null, q: props.filters.q })) },
+    { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ q: props.filters.q })) },
+    { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     ...flattenTags(props.tags).map((tag) => ({
         label: `${tag.path} (${tag.count})`,
         icon: 'i-lucide-hash',
@@ -152,8 +159,25 @@ const togglePin = (): void => {
     });
 };
 
+const archiveNote = (): void => {
+    if (props.note) {
+        router.post(route('notes.archive', { note: props.note.data.id }));
+    }
+};
+
+const unarchiveNote = (): void => {
+    if (props.note) {
+        router.delete(route('notes.unarchive', { note: props.note.data.id }));
+    }
+};
+
 const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
-    [{ label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin }],
+    [
+        { label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin },
+        props.note?.data.archived
+            ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
+            : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
+    ],
     [{ label: 'Delete note', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
 ]);
 </script>
@@ -177,13 +201,28 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                         <Link
                             :href="route('notes.index', filters.q ? { q: filters.q } : {})"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
-                            :class="{ 'bg-elevated font-medium': !filters.tag }"
+                            :class="{ 'bg-elevated font-medium': !filters.tag && filters.view === 'notes' }"
                         >
                             <UiIcon name="i-lucide-notebook" class="text-dimmed size-4" />
                             All notes
                         </Link>
-                        <TagTree v-if="tags.length" :key="filters.tag ?? ''" :tags="tags" :selected="filters.tag" :search="filters.q" />
+                        <TagTree
+                            v-if="tags.length"
+                            :key="filters.tag ?? ''"
+                            :tags="tags"
+                            :selected="filters.view === 'notes' ? filters.tag : null"
+                            :search="filters.q"
+                        />
                         <p v-else class="text-dimmed px-2 py-1.5 text-xs">Add #tags to a note to organize it.</p>
+                        <UiSeparator class="my-2" />
+                        <Link
+                            :href="route('notes.index', filterQuery({ view: 'archive', q: filters.q }))"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+                            :class="{ 'bg-elevated font-medium': filters.view === 'archive' }"
+                        >
+                            <UiIcon name="i-lucide-archive" class="text-dimmed size-4" />
+                            Archive
+                        </Link>
                     </nav>
                 </template>
             </UiDashboardPanel>
@@ -196,7 +235,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                         </template>
                         <template #title>
                             <div class="flex flex-col">
-                                <span>{{ filters.tag ? `#${filters.tag}` : 'Notes' }}</span>
+                                <span>{{ listTitle }}</span>
                                 <small class="text-dimmed text-xs font-normal">{{ listedNotes.length }} notes</small>
                             </div>
                         </template>

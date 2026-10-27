@@ -19,7 +19,7 @@ trait RendersNotesPage
     protected function notesPage(NoteListRequest $request, ?Note $note): Response
     {
         $search = $request->search();
-        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search));
+        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view()));
 
         if ($search !== null) {
             $words = NoteSearch::words($search);

@@ -3,6 +3,7 @@
 namespace Coleus\Notes\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Facades\Notes;
 use Coleus\Notes\Http\Controllers\Concerns\RendersNotesPage;
 use Coleus\Notes\Http\Requests\NoteListRequest;
@@ -68,9 +69,9 @@ class NoteController extends Controller
      */
     private function listQuery(Request $request): array
     {
-        return collect(['tag', 'q'])
+        return collect(['tag', 'q', 'view'])
             ->mapWithKeys(fn (string $key) => [$key => $request->query($key)])
-            ->filter(fn (mixed $value) => is_string($value) && $value !== '')
+            ->filter(fn (mixed $value, string $key) => is_string($value) && $value !== '' && ! ($key === 'view' && $value === NoteView::Notes->value))
             ->all();
     }
 }

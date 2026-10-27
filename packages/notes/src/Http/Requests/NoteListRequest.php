@@ -2,8 +2,10 @@
 
 namespace Coleus\Notes\Http\Requests;
 
+use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Markdown\Hashtags;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * The list filters carried in the query string of the notes pages.
@@ -25,6 +27,7 @@ class NoteListRequest extends FormRequest
         return [
             'tag' => ['nullable', 'string', 'max:'.Hashtags::MAX_LENGTH],
             'q' => ['nullable', 'string', 'max:'.self::MAX_SEARCH_LENGTH],
+            'view' => ['nullable', Rule::enum(NoteView::class)],
         ];
     }
 
@@ -36,6 +39,7 @@ class NoteListRequest extends FormRequest
         return [
             'tag.max' => 'That tag is too long.',
             'q.max' => 'That search is too long.',
+            'view.enum' => 'That list does not exist.',
         ];
     }
 
@@ -53,11 +57,16 @@ class NoteListRequest extends FormRequest
         return $search === '' ? null : $search;
     }
 
+    public function view(): NoteView
+    {
+        return NoteView::tryFrom((string) $this->validated('view')) ?? NoteView::Notes;
+    }
+
     /**
-     * @return array{tag: string|null, q: string|null}
+     * @return array{tag: string|null, q: string|null, view: string}
      */
     public function filters(): array
     {
-        return ['tag' => $this->tag(), 'q' => $this->search()];
+        return ['tag' => $this->tag(), 'q' => $this->search(), 'view' => $this->view()->value];
     }
 }

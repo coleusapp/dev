@@ -11,6 +11,7 @@ export type NoteData = {
     body: string;
     snippet: string;
     pinned: boolean;
+    archived: boolean;
     highlights: { title: HighlightPart[]; snippet: HighlightPart[] } | null;
     created_at: string;
     updated_at: string;
@@ -41,13 +42,20 @@ export type TagNode = {
     children: TagNode[];
 };
 
+export type NoteView = 'notes' | 'archive';
+
 export type NoteFilters = {
     tag: string | null;
     q: string | null;
+    view: NoteView;
 };
 
 /**
  * The query string that carries the list filters on links and redirects.
  */
-export const filterQuery = (filters: NoteFilters): Record<string, string> =>
-    Object.fromEntries(Object.entries(filters).filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== ''));
+export const filterQuery = (filters: Partial<NoteFilters>): Record<string, string> =>
+    Object.fromEntries(
+        Object.entries(filters).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== '' && !(entry[0] === 'view' && entry[1] === 'notes'),
+        ),
+    );

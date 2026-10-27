@@ -3,6 +3,7 @@
 namespace Coleus\Notes\Services;
 
 use Coleus\Notes\Data\NoteData;
+use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Models\Note;
 use Coleus\Support\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,11 +59,26 @@ class NoteService extends Service
     }
 
     /**
+     * Like pinning, archiving files a note away without counting as an edit.
+     */
+    public function archive(Note $note): void
+    {
+        if ($note->archived_at === null) {
+            Note::withoutTimestamps(fn () => $note->forceFill(['archived_at' => now()])->save());
+        }
+    }
+
+    public function unarchive(Note $note): void
+    {
+        Note::withoutTimestamps(fn () => $note->forceFill(['archived_at' => null])->save());
+    }
+
+    /**
      * @return Collection<int, Note>
      */
-    public function list(?string $tag = null, ?string $search = null): Collection
+    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes): Collection
     {
-        return $this->defaultQuery()
+        return $view->scope($this->defaultQuery())
             ->when($tag !== null, fn (Builder $query) => $this->whereTagged($query, (string) $tag))
             ->when($search !== null, fn (Builder $query) => $query->search((string) $search))
             ->get();
@@ -95,6 +111,6 @@ class NoteService extends Service
      */
     public function tagTree(): array
     {
-        return TagTree::build(Note::query());
+        return TagTree::build(NoteView::Notes->scope(Note::query()));
     }
 }
