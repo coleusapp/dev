@@ -22,13 +22,29 @@ class NotePolicy
         return true;
     }
 
+    /**
+     * Notes in the trash are read-only until restored.
+     */
     public function update(Authenticatable $user, Note $note): bool
     {
-        return $note->isOwnedBy((int) $user->getAuthIdentifier());
+        return ! $note->trashed() && $note->isOwnedBy((int) $user->getAuthIdentifier());
     }
 
+    /**
+     * Deleting moves a note to the trash.
+     */
     public function delete(Authenticatable $user, Note $note): bool
     {
-        return $note->isOwnedBy((int) $user->getAuthIdentifier());
+        return ! $note->trashed() && $note->isOwnedBy((int) $user->getAuthIdentifier());
+    }
+
+    public function restore(Authenticatable $user, Note $note): bool
+    {
+        return $note->trashed() && $note->isOwnedBy((int) $user->getAuthIdentifier());
+    }
+
+    public function forceDelete(Authenticatable $user, Note $note): bool
+    {
+        return $note->trashed() && $note->isOwnedBy((int) $user->getAuthIdentifier());
     }
 }

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -33,6 +34,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note user($users)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note search(string $terms)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Note withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Note onlyTrashed()
  *
  * @mixin \Eloquent
  */
@@ -43,6 +46,7 @@ class Note extends NotesModelDefaults
     use HasFactory;
 
     use HasUser;
+    use SoftDeletes;
 
     protected $fillable = [
         'body',

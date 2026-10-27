@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ConfirmModal from '@/components/notes/ConfirmModal.vue';
 import {
     compareNotes,
     filterQuery,
@@ -127,8 +128,10 @@ const deleteNote = (): void => {
     }
 };
 
+const viewTitles = { notes: 'Notes', archive: 'Archive', trash: 'Trash' } as const;
+
 const listTitle = computed(() => {
-    const base = props.filters.view === 'archive' ? 'Archive' : 'Notes';
+    const base = viewTitles[props.filters.view];
 
     return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}#${props.filters.tag}` : base;
 });
@@ -138,6 +141,7 @@ const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [no
 const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ q: props.filters.q })) },
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
+    { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
     ...flattenTags(props.tags).map((tag) => ({
         label: `${tag.path} (${tag.count})`,
         icon: 'i-lucide-hash',
@@ -171,15 +175,43 @@ const unarchiveNote = (): void => {
     }
 };
 
-const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
-    [
-        { label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin },
-        props.note?.data.archived
-            ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
-            : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
-    ],
-    [{ label: 'Delete note', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
-]);
+const restoreNote = (): void => {
+    if (props.note) {
+        router.post(route('notes.restore', { note: props.note.data.id }));
+    }
+};
+
+const confirmingForceDelete = ref(false);
+const confirmingEmptyTrash = ref(false);
+
+const forceDeleteNote = (): void => {
+    if (props.note) {
+        router.delete(route('notes.force-delete', { note: props.note.data.id }));
+    }
+};
+
+const emptyTrash = (): void => {
+    router.delete(route('notes.trash.empty'));
+};
+
+const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
+    if (props.note?.data.trashed) {
+        return [
+            [{ label: 'Restore', icon: 'i-lucide-undo-2', onSelect: restoreNote }],
+            [{ label: 'Delete forever', icon: 'i-lucide-trash', color: 'error', onSelect: () => (confirmingForceDelete.value = true) }],
+        ];
+    }
+
+    return [
+        [
+            { label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin },
+            props.note?.data.archived
+                ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
+                : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
+        ],
+        [{ label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
+    ];
+});
 </script>
 
 <template>
@@ -223,6 +255,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                             <UiIcon name="i-lucide-archive" class="text-dimmed size-4" />
                             Archive
                         </Link>
+                        <Link
+                            :href="route('notes.index', filterQuery({ view: 'trash', q: filters.q }))"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+                            :class="{ 'bg-elevated font-medium': filters.view === 'trash' }"
+                        >
+                            <UiIcon name="i-lucide-trash-2" class="text-dimmed size-4" />
+                            Trash
+                        </Link>
                     </nav>
                 </template>
             </UiDashboardPanel>
@@ -243,7 +283,16 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                             <UiDropdownMenu :items="tagFilterItems" class="lg:hidden">
                                 <UiButton icon="i-lucide-hash" color="neutral" variant="ghost" aria-label="Filter by tag" class="lg:hidden" />
                             </UiDropdownMenu>
-                            <UiButton icon="i-lucide-file-plus" color="neutral" variant="ghost" aria-label="New note" @click="createNote" />
+                            <UiButton
+                                v-if="filters.view === 'trash'"
+                                color="error"
+                                variant="ghost"
+                                size="sm"
+                                :disabled="listedNotes.length === 0 && !filters.q && !filters.tag"
+                                @click="confirmingEmptyTrash = true"
+                                >Empty trash</UiButton
+                            >
+                            <UiButton v-else icon="i-lucide-file-plus" color="neutral" variant="ghost" aria-label="New note" @click="createNote" />
                         </template>
                     </UiDashboardNavbar>
                 </template>
@@ -292,12 +341,27 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                 </template>
 
                 <template #body>
-                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" @saved="onNoteSaved" />
+                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" :readonly="note.data.trashed" @saved="onNoteSaved" />
                     <div v-else class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.
                     </div>
                 </template>
             </UiDashboardPanel>
         </template>
+
+        <ConfirmModal
+            v-model:open="confirmingForceDelete"
+            title="Delete this note forever?"
+            description="It will be gone for good. This can't be undone."
+            confirm-label="Delete forever"
+            @confirm="forceDeleteNote"
+        />
+        <ConfirmModal
+            v-model:open="confirmingEmptyTrash"
+            title="Empty the trash?"
+            description="Every note in the trash will be deleted for good, including any hidden by the current search. This can't be undone."
+            confirm-label="Empty trash"
+            @confirm="emptyTrash"
+        />
     </NotesLayout>
 </template>

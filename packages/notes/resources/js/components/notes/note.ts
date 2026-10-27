@@ -12,6 +12,7 @@ export type NoteData = {
     snippet: string;
     pinned: boolean;
     archived: boolean;
+    trashed: boolean;
     highlights: { title: HighlightPart[]; snippet: HighlightPart[] } | null;
     created_at: string;
     updated_at: string;
@@ -42,7 +43,7 @@ export type TagNode = {
     children: TagNode[];
 };
 
-export type NoteView = 'notes' | 'archive';
+export type NoteView = 'notes' | 'archive' | 'trash';
 
 export type NoteFilters = {
     tag: string | null;

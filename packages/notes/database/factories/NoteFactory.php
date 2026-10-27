@@ -28,4 +28,9 @@ class NoteFactory extends Factory
             'body' => '# '.$this->faker->randomElement($titles)."\n\n".$this->faker->paragraph(),
         ];
     }
+
+    public function trashed(): static
+    {
+        return $this->state(fn () => ['deleted_at' => now()]);
+    }
 }

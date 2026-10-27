@@ -12,6 +12,7 @@ type EditorMode = 'edit' | 'split' | 'preview';
 
 const props = defineProps<{
     note: NoteDetailData;
+    readonly?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -76,7 +77,7 @@ const onPreviewClick = (event: MouseEvent): void => {
     const target = event.target;
 
     if (target instanceof HTMLInputElement && target.type === 'checkbox' && target.dataset.taskLine) {
-        if (togglingTask.value) {
+        if (togglingTask.value || props.readonly) {
             event.preventDefault();
             return;
         }
@@ -90,7 +91,13 @@ const isWide = useMediaQuery('(min-width: 1280px)');
 /**
  * Split view needs the room; on narrow screens it falls back to the editor.
  */
-const mode = computed<EditorMode>(() => (preferredMode.value === 'split' && !isWide.value ? 'edit' : preferredMode.value));
+const mode = computed<EditorMode>(() => {
+    if (props.readonly) {
+        return 'preview';
+    }
+
+    return preferredMode.value === 'split' && !isWide.value ? 'edit' : preferredMode.value;
+});
 
 const modeItems = computed(() => [
     { value: 'edit', icon: 'i-lucide-pencil', label: 'Edit' },
@@ -171,7 +178,11 @@ const onKeydown = (event: KeyboardEvent): void => {
             </li>
         </ul>
         <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-1" role="group" aria-label="Editor mode">
+            <p v-if="readonly" class="text-dimmed flex items-center gap-1 text-xs">
+                <UiIcon name="i-lucide-trash-2" class="size-3" />
+                In the trash. Restore it to edit.
+            </p>
+            <div v-else class="flex items-center gap-1" role="group" aria-label="Editor mode">
                 <UiButton
                     v-for="item in modeItems"
                     :key="item.value"
@@ -185,7 +196,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 />
             </div>
             <span v-if="taskError" class="text-error text-xs" role="alert">{{ taskError }}</span>
-            <SaveStatus :status="status" :error="error" @retry="flush" />
+            <SaveStatus v-if="!readonly" :status="status" :error="error" @retry="flush" />
         </div>
     </div>
 </template>

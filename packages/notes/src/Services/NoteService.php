@@ -30,6 +30,9 @@ class NoteService extends Service
     }
 
     /**
+     * Moves a note to the trash. Its tags stay linked so a restore brings
+     * them back, but tags only trashed notes use drop out of the sidebar.
+     *
      * @param  Note  $model
      */
     public function destroy(mixed $model): ?bool
@@ -41,6 +44,36 @@ class NoteService extends Service
         NoteTags::deleteUnused($tagIds);
 
         return $deleted;
+    }
+
+    public function restore(Note $note): void
+    {
+        $note->restore();
+
+        NoteTags::sync($note);
+    }
+
+    public function forceDelete(Note $note): void
+    {
+        $tagIds = $note->tags()->allRelatedIds()->all();
+
+        $note->forceDelete();
+
+        NoteTags::deleteUnused($tagIds);
+    }
+
+    /**
+     * Permanently deletes every note in the current user's trash.
+     *
+     * @return int how many notes were deleted
+     */
+    public function emptyTrash(): int
+    {
+        $trashed = Note::query()->onlyTrashed()->get();
+
+        $trashed->each(fn (Note $note) => $this->forceDelete($note));
+
+        return $trashed->count();
     }
 
     /**

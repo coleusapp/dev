@@ -21,6 +21,10 @@ const emptyMessage = computed(() => {
         return `No notes match “${props.filters.q}”${props.filters.tag ? ` in #${props.filters.tag}` : ''}.`;
     }
 
+    if (props.filters.view === 'trash') {
+        return 'The trash is empty.';
+    }
+
     if (props.filters.view === 'archive') {
         return props.filters.tag ? `No archived notes tagged #${props.filters.tag}.` : 'The archive is empty.';
     }

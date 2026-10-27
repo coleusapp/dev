@@ -12,6 +12,7 @@ enum NoteView: string
 {
     case Notes = 'notes';
     case Archive = 'archive';
+    case Trash = 'trash';
 
     /**
      * @param  Builder<Note>  $query
@@ -22,6 +23,7 @@ enum NoteView: string
         return match ($this) {
             self::Notes => $query->whereNull('archived_at'),
             self::Archive => $query->whereNotNull('archived_at'),
+            self::Trash => $query->onlyTrashed(),
         };
     }
 }
