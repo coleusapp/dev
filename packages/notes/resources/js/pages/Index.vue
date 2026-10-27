@@ -51,7 +51,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                 </template>
 
                 <template #body>
-                    <NoteList :notes="notes.data" :selected-id="note?.data.id ?? null" />
+                    <NoteList :notes="notes.data" :selected-id="note?.data.id ?? null" @create="createNote" />
                 </template>
             </UiDashboardPanel>
 
