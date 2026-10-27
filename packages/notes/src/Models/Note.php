@@ -4,12 +4,14 @@ namespace Coleus\Notes\Models;
 
 use Coleus\Notes\Database\Factories\NoteFactory;
 use Coleus\Notes\NotesModelDefaults;
+use Coleus\Notes\Services\NoteTags;
 use Coleus\Notes\Support\NoteText;
 use Coleus\Users\Concerns\HasUser;
 use Coleus\Users\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property int $id
@@ -21,6 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Coleus\Users\Models\User> $users
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note newQuery()
@@ -60,6 +63,20 @@ class Note extends NotesModelDefaults
         static::saving(function (Note $note) {
             $note->title = NoteText::title($note->body);
         });
+
+        static::saved(function (Note $note) {
+            if ($note->wasRecentlyCreated || $note->wasChanged('body')) {
+                NoteTags::sync($note);
+            }
+        });
+    }
+
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, config('notes.table_prefix').'note_tag');
     }
 
     public function isOwnedBy(int $userId): bool

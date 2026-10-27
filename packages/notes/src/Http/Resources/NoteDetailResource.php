@@ -18,6 +18,7 @@ class NoteDetailResource extends NoteResource
         return [
             ...parent::toArray($request),
             'html' => NoteMarkdown::toHtml($this->body),
+            'tags' => $this->tags()->orderBy('name')->pluck('name')->all(),
         ];
     }
 }

@@ -20,9 +20,11 @@ const emit = defineEmits<{
 
 const body = ref(props.note.body);
 const html = ref(props.note.html);
+const tags = ref(props.note.tags);
 
 const onServerSave = (note: NoteDetailData): void => {
     html.value = note.html;
+    tags.value = note.tags;
     emit('saved', note);
 };
 
@@ -163,6 +165,11 @@ const onKeydown = (event: KeyboardEvent): void => {
                 v-html="html"
             />
         </div>
+        <ul v-if="tags.length" class="flex flex-wrap gap-1" aria-label="Tags">
+            <li v-for="tag in tags" :key="tag">
+                <UiBadge color="neutral" variant="soft" size="sm" icon="i-lucide-hash">{{ tag }}</UiBadge>
+            </li>
+        </ul>
         <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-1" role="group" aria-label="Editor mode">
                 <UiButton

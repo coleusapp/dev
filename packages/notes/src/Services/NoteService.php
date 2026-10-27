@@ -29,6 +29,20 @@ class NoteService extends Service
     }
 
     /**
+     * @param  Note  $model
+     */
+    public function destroy(mixed $model): ?bool
+    {
+        $tagIds = $model->tags()->allRelatedIds()->all();
+
+        $deleted = $model->delete();
+
+        NoteTags::deleteUnused($tagIds);
+
+        return $deleted;
+    }
+
+    /**
      * Pinning is not an edit, so it leaves updated_at (and the list order within pinned notes) alone.
      */
     public function pin(Note $note): void

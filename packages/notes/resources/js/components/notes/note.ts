@@ -16,6 +16,7 @@ export type NoteData = {
  */
 export type NoteDetailData = NoteData & {
     html: string;
+    tags: string[];
 };
 
 export type NoteResource = Resource<NoteDetailData>;
