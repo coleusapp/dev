@@ -12,9 +12,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property int $id
+ * @property string $title
  * @property string $body
+ * @property \Illuminate\Support\Carbon|null $pinned_at
+ * @property \Illuminate\Support\Carbon|null $archived_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Coleus\Users\Models\User> $users
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note newModelQuery()
@@ -37,8 +41,18 @@ class Note extends NotesModelDefaults
     ];
 
     protected $attributes = [
+        'title' => '',
         'body' => '',
     ];
+
+    public function casts(): array
+    {
+        return [
+            'pinned_at' => 'datetime',
+            'archived_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
+    }
 
     public function isOwnedBy(int $userId): bool
     {
