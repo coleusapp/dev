@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
-import type { NoteDetailData } from '@/components/notes/note';
+import type { EditorMode, NoteDetailData } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
 import { applyEdit, formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
 import { Link, router } from '@inertiajs/vue3';
-import { useLocalStorage, useMediaQuery } from '@vueuse/core';
+import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
-
-type EditorMode = 'edit' | 'split' | 'preview';
 
 const props = defineProps<{
     note: NoteDetailData;
     readonly?: boolean;
+    defaultMode?: EditorMode;
+    autosaveDelay?: number;
 }>();
 
 const emit = defineEmits<{
@@ -33,7 +33,7 @@ const onServerSave = (note: NoteDetailData): void => {
     emit('saved', note);
 };
 
-const { status, error, flush, adopt, isDirty } = useAutosave(props.note, body, onServerSave);
+const { status, error, flush, adopt, isDirty } = useAutosave(props.note, body, onServerSave, props.autosaveDelay);
 
 const togglingTask = ref(false);
 const taskError = ref<string | null>(null);
@@ -102,7 +102,7 @@ const onPreviewClick = (event: MouseEvent): void => {
     }
 };
 
-const preferredMode = useLocalStorage<EditorMode>('notes.editor-mode', 'edit');
+const preferredMode = ref<EditorMode>(props.defaultMode ?? 'edit');
 const isWide = useMediaQuery('(min-width: 1280px)');
 
 /**

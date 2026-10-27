@@ -7,6 +7,7 @@ import {
     type NoteData,
     type NoteDetailData,
     type NoteFilters,
+    type NotePreferences,
     type NoteResource,
     type TagNode,
 } from '@/components/notes/note';
@@ -25,6 +26,7 @@ const props = defineProps<{
     note: NoteResource | null;
     tags: TagNode[];
     filters: NoteFilters;
+    preferences: NotePreferences;
 }>();
 
 /**
@@ -143,6 +145,7 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ q: props.filters.q })) },
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
+    { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
     ...flattenTags(props.tags).map((tag) => ({
         label: `${tag.path} (${tag.count})`,
         icon: 'i-lucide-hash',
@@ -291,6 +294,10 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             <UiIcon name="i-lucide-trash-2" class="text-dimmed size-4" />
                             Trash
                         </Link>
+                        <Link :href="route('notes.settings.edit')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
+                            <UiIcon name="i-lucide-settings" class="text-dimmed size-4" />
+                            Settings
+                        </Link>
                     </nav>
                 </template>
             </UiDashboardPanel>
@@ -340,7 +347,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             <UiButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Clear search" @click="search = ''" />
                         </template>
                     </UiInput>
-                    <NoteList :notes="listedNotes" :selected-id="note?.data.id ?? null" :filters="filters" @create="createNote" />
+                    <NoteList
+                        :notes="listedNotes"
+                        :selected-id="note?.data.id ?? null"
+                        :filters="filters"
+                        :relative-dates="preferences['list.relative_dates']"
+                        :show-snippets="preferences['list.show_snippets']"
+                        @create="createNote"
+                    />
                 </template>
             </UiDashboardPanel>
 
@@ -374,6 +388,8 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         :key="note.data.id"
                         :note="note.data"
                         :readonly="note.data.trashed"
+                        :default-mode="preferences['editor.default_mode']"
+                        :autosave-delay="preferences['editor.autosave_delay']"
                         @saved="onNoteSaved"
                         @create-linked="(title) => (linkedTitle = title)"
                     />

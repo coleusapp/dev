@@ -119,7 +119,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O13.6 Importers: Bear, Evernote (.enex), Notion, Apple Notes, HTML 🧩 (Apple Notes import keeps folders, checklists, attachments) 🍎
 
 ## O14. Appearance and settings
-- [ ] O14.1 Settings page (via coleus/settings, like health): editor defaults, fonts, line width, attachment folder, daily note format, etc.
+- [x] O14.1 Settings page (via coleus/settings, like health): editor defaults, fonts, line width, attachment folder, daily note format, etc.
 - [ ] O14.2 Font family / size (including the default font size for notes) and accent colour settings; zoom
 
 ## O15. Deep links and clipping

@@ -4,15 +4,24 @@ import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-const props = defineProps<{
-    notes: NoteData[];
-    selectedId: number | null;
-    filters: NoteFilters;
-}>();
+const props = withDefaults(
+    defineProps<{
+        notes: NoteData[];
+        selectedId: number | null;
+        filters: NoteFilters;
+        relativeDates?: boolean;
+        showSnippets?: boolean;
+    }>(),
+    { relativeDates: true, showSnippets: true },
+);
 
 defineEmits<{
     create: [];
 }>();
+
+const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+const absoluteDate = (iso: string): string => dateFormat.format(new Date(iso));
 
 const query = computed(() => filterQuery(props.filters));
 
@@ -57,11 +66,13 @@ const emptyMessage = computed(() => {
                 </span>
                 <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
             </span>
-            <span v-if="note.snippet" class="text-muted line-clamp-2 text-xs">
+            <span v-if="showSnippets && note.snippet" class="text-muted line-clamp-2 text-xs">
                 <HighlightedText v-if="note.highlights" :parts="note.highlights.snippet" />
                 <template v-else>{{ note.snippet }}</template>
             </span>
-            <time class="text-dimmed text-xs" :datetime="note.updated_at">{{ note.updated_at_for_humans }}</time>
+            <time class="text-dimmed text-xs" :datetime="note.updated_at">{{
+                relativeDates ? note.updated_at_for_humans : absoluteDate(note.updated_at)
+            }}</time>
         </Link>
     </nav>
 </template>

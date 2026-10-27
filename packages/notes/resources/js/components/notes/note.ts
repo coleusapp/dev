@@ -67,3 +67,15 @@ export const filterQuery = (filters: Partial<NoteFilters>): Record<string, strin
             (entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== '' && !(entry[0] === 'view' && entry[1] === 'notes'),
         ),
     );
+
+export type EditorMode = 'edit' | 'split' | 'preview';
+
+/**
+ * The user's Notes preferences (see NotePreferences::DEFINITIONS on the server).
+ */
+export type NotePreferences = {
+    'editor.default_mode': EditorMode;
+    'editor.autosave_delay': number;
+    'list.relative_dates': boolean;
+    'list.show_snippets': boolean;
+};

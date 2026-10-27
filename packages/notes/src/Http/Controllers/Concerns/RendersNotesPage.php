@@ -7,6 +7,7 @@ use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
 use Coleus\Notes\Http\Resources\NoteResource;
 use Coleus\Notes\Models\Note;
+use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Notes\Search\NoteSearch;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,6 +32,7 @@ trait RendersNotesPage
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),
             'filters' => $request->filters(),
+            'preferences' => NotePreferences::all(),
         ]);
     }
 }

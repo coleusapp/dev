@@ -6,7 +6,7 @@ import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue';
 
 export type AutosaveStatus = 'saved' | 'unsaved' | 'saving' | 'error';
 
-export const AUTOSAVE_DELAY_MS = 750;
+export const DEFAULT_AUTOSAVE_DELAY_MS = 750;
 
 /**
  * Debounced, serialized saving of a note body.
@@ -17,7 +17,12 @@ export const AUTOSAVE_DELAY_MS = 750;
  * are on the server, and closing or hiding the tab flushes with a keepalive
  * request that outlives the page.
  */
-export const useAutosave = (note: NoteDetailData, body: Ref<string>, onSaved: (note: NoteDetailData) => void) => {
+export const useAutosave = (
+    note: NoteDetailData,
+    body: Ref<string>,
+    onSaved: (note: NoteDetailData) => void,
+    delay: number = DEFAULT_AUTOSAVE_DELAY_MS,
+) => {
     const savedBody = ref(note.body);
     const inFlight = ref(false);
     const failed = ref(false);
@@ -90,7 +95,7 @@ export const useAutosave = (note: NoteDetailData, body: Ref<string>, onSaved: (n
         return current;
     };
 
-    const debouncedFlush = useDebounceFn(flush, AUTOSAVE_DELAY_MS);
+    const debouncedFlush = useDebounceFn(flush, delay);
 
     watch(body, () => {
         failed.value = false;
