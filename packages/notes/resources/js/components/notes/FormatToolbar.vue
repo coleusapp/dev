@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmojiPicker from '@/components/notes/EmojiPicker.vue';
 import type { ChecklistAction, TableAction } from '@/components/notes/note';
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/editor/Highlight';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
@@ -17,6 +18,7 @@ const emit = defineEmits<{
     highlight: [color: HighlightColor | null];
     checklistAction: [action: ChecklistAction];
     tableAction: [action: TableAction];
+    insert: [text: string];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -183,6 +185,7 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                 />
             </UiTooltip>
         </UiDropdownMenu>
+        <EmojiPicker @pick="(emoji) => emit('insert', emoji)" />
         <UiTooltip text="Highlight">
             <UiButton
                 icon="i-lucide-highlighter"

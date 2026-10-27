@@ -327,7 +327,11 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
     }
 };
 
-defineExpose({ run, setStyle, highlight, checklistAction, tableAction, runSlash, setLink, unsetLink, isLinkActive, focus });
+const insertText = (text: string): void => {
+    editor.value?.chain().focus().insertContent(text).run();
+};
+
+defineExpose({ run, setStyle, highlight, checklistAction, tableAction, runSlash, insertText, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

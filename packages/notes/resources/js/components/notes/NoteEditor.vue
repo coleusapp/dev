@@ -366,6 +366,27 @@ const chooseSlash = (command: SlashCommand): void => {
     }
 };
 
+/**
+ * Inserts plain text (an emoji from the picker) at the cursor of whichever editor is showing.
+ */
+const insertAtCursor = (text: string): void => {
+    if (togglingTask.value) {
+        return;
+    }
+
+    if (mode.value === 'edit') {
+        visual.value?.insertText(text);
+    } else {
+        editSource(({ start, end }) => ({
+            from: start,
+            to: end,
+            insert: text,
+            selectionStart: start + text.length,
+            selectionEnd: start + text.length,
+        }));
+    }
+};
+
 const visualStyle = ref<ParagraphStyle | null>(null);
 const visualInTable = ref(false);
 
@@ -674,6 +695,7 @@ const onKeydown = (event: KeyboardEvent): void => {
             @highlight="highlight"
             @checklist-action="checklistAction"
             @table-action="tableAction"
+            @insert="insertAtCursor"
         />
         <div
             v-if="!faithful && mode === 'source' && preferredMode === 'edit'"

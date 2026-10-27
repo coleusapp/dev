@@ -143,7 +143,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] A2.3 Underline and strikethrough in toolbar and shortcuts (Cmd/Ctrl+U, Cmd/Ctrl+Shift+X) 📦
 - [x] A2.4 Text highlight colours (pink, purple, orange, mint, blue), stored as a safe Markdown extension (e.g. `==text=={color}`) 📦
 - [x] A2.5 Dashed list and numbered list buttons; block quote button
-- [ ] A2.6 Emoji picker in the toolbar 📦
+- [x] A2.6 Emoji picker in the toolbar 📦
 
 ## A3. Checklists (Apple Notes)
 - [x] A3.1 Checklist button converts the selected lines to checklist items (have the toolbar button; add: works on multi-line selection) and toggles back
