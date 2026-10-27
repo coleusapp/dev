@@ -46,6 +46,7 @@ const props = defineProps<{
     checkedToBottom?: boolean;
     spellcheck?: boolean;
     textDirection?: 'auto' | 'ltr' | 'rtl';
+    readableWidth?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -196,7 +197,7 @@ const modeItems = computed(() => [
     { value: 'edit', icon: 'i-lucide-pencil', label: 'Visual editor' },
     { value: 'source', icon: 'i-lucide-code-xml', label: 'Markdown source' },
     ...(isWide.value ? [{ value: 'split', icon: 'i-lucide-columns-2', label: 'Source and preview' }] : []),
-    { value: 'preview', icon: 'i-lucide-eye', label: 'Preview' },
+    { value: 'preview', icon: 'i-lucide-book-open', label: 'Reading view' },
 ]);
 
 const setMode = async (next: EditorMode): Promise<void> => {
@@ -758,7 +759,7 @@ const onKeydown = (event: KeyboardEvent): void => {
             <span class="text-muted flex-1">This note uses Markdown the visual editor can't keep exactly, so it opened as source.</span>
             <UiButton size="xs" color="neutral" variant="link" @click="visualAnyway = true">Edit visually anyway</UiButton>
         </div>
-        <div class="flex min-h-0 flex-1 gap-4" @keydown="onKeydown">
+        <div class="flex min-h-0 flex-1 gap-4" :class="{ 'readable-width': readableWidth !== false && mode !== 'split' }" @keydown="onKeydown">
             <VisualEditor
                 v-if="!readonly"
                 v-show="mode === 'edit'"
@@ -803,7 +804,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 :class="{ 'border-default border-l pl-4': mode === 'split' }"
                 ref="preview"
                 :dir="textDirection ?? 'auto'"
-                aria-label="Preview"
+                :aria-label="mode === 'preview' ? 'Reading view' : 'Preview'"
                 @click="onPreviewClick"
                 v-html="html"
             />

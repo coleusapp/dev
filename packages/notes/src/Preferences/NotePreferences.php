@@ -21,6 +21,7 @@ class NotePreferences
     public const array DEFINITIONS = [
         'editor.default_mode' => ['default' => 'edit', 'options' => ['edit', 'source', 'split', 'preview']],
         'editor.autosave_delay' => ['default' => 750, 'options' => [500, 750, 1500, 3000]],
+        'editor.readable_width' => ['default' => true, 'type' => 'boolean'],
         'editor.spellcheck' => ['default' => true, 'type' => 'boolean'],
         'editor.text_direction' => ['default' => 'auto', 'options' => ['auto', 'ltr', 'rtl']],
         'editor.first_line_style' => ['default' => 'body', 'options' => ['title', 'heading', 'subheading', 'body']],

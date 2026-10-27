@@ -219,3 +219,15 @@ li.is-folded::after {
     content: ' …';
     @apply text-dimmed font-normal;
 }
+
+/* Readable line length (setting): text stays about 46rem wide, centred. */
+.readable-width .tiptap,
+.readable-width > textarea,
+.readable-width > .note-preview > * {
+    @apply mx-auto w-full max-w-[46rem];
+}
+
+/* Reading view: a little more air than the editor. */
+.readable-width > .note-preview {
+    @apply text-base leading-7;
+}

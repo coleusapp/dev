@@ -37,6 +37,7 @@ it('saves preferences for the current user only', function () use ($defaults) {
     expect(NotePreferences::all())->toBe([
         'editor.default_mode' => 'split',
         'editor.autosave_delay' => 1500,
+        'editor.readable_width' => true,
         'editor.spellcheck' => true,
         'editor.text_direction' => 'auto',
         'editor.first_line_style' => 'body',

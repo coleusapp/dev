@@ -23,13 +23,19 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         label: 'Open notes in',
         help: 'How a note opens. Source and preview side by side needs a wide screen.',
         optionLabel: (value) =>
-            ({ edit: 'Visual editor', source: 'Markdown source', split: 'Source and preview', preview: 'Preview' })[value as string] ?? String(value),
+            ({ edit: 'Visual editor', source: 'Markdown source', split: 'Source and preview', preview: 'Reading view' })[value as string] ??
+            String(value),
     },
     {
         key: 'editor.autosave_delay',
         label: 'Autosave after',
         help: 'How long to wait after you stop typing before saving.',
         optionLabel: (value) => `${Number(value) / 1000} s`,
+    },
+    {
+        key: 'editor.readable_width',
+        label: 'Readable line length',
+        help: 'Keep lines to a comfortable width on wide screens instead of running edge to edge.',
     },
     { key: 'editor.spellcheck', label: 'Check spelling', help: "Underline misspelled words while you type (uses your browser's spellchecker)." },
     {

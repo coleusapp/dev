@@ -50,7 +50,10 @@ const countWords = (text: string): number => {
  */
 export const noteStats = (markdown: string): NoteStats => {
     const text = readableText(markdown);
-    const collapsed = text.replace(/[ \t]+/g, ' ').replace(/ ?\n ?/g, '\n').trim();
+    const collapsed = text
+        .replace(/[ \t]+/g, ' ')
+        .replace(/ ?\n ?/g, '\n')
+        .trim();
     const words = countWords(text);
 
     return {

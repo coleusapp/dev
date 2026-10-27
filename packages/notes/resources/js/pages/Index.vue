@@ -396,6 +396,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             :checked-to-bottom="preferences['checklists.checked_to_bottom']"
                             :spellcheck="preferences['editor.spellcheck']"
                             :text-direction="preferences['editor.text_direction']"
+                            :readable-width="preferences['editor.readable_width']"
                             @saved="onNoteSaved"
                             @create-linked="(title) => (linkedTitle = title)"
                         />
