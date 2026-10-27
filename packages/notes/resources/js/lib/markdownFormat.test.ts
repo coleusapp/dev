@@ -1,0 +1,31 @@
+import { formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
+import { describe, expect, it } from 'vitest';
+
+const apply = (command: FormatCommand, text: string, start: number, end: number): [string, string] => {
+    const edit = formatMarkdown(command, { text, start, end });
+    const result = text.slice(0, edit.from) + edit.insert + text.slice(edit.to);
+
+    return [result, result.slice(edit.selectionStart, edit.selectionEnd)];
+};
+
+describe('formatMarkdown', () => {
+    it.each<[FormatCommand, string, number, number, string, string]>([
+        ['bold', 'hello world', 0, 5, '**hello** world', 'hello'],
+        ['bold', '**hello** world', 2, 7, 'hello world', 'hello'],
+        ['bold', '**hello** world', 0, 9, 'hello world', 'hello'],
+        ['italic', 'ab', 1, 1, 'a__b', ''],
+        ['code', 'x a\nb y', 2, 5, 'x \n```\na\nb\n```\n y', 'a\nb'],
+        ['code', 'run cmd', 4, 7, 'run `cmd`', 'cmd'],
+        ['heading', 'Title\nbody', 2, 2, '## Title\nbody', ''],
+        ['heading', '## Title\nbody', 4, 4, 'Title\nbody', ''],
+        ['list', 'a\nb\nc', 0, 3, '- a\n- b\nc', '- a\n- b'],
+        ['list', '- a\n- b', 0, 7, 'a\nb', 'a\nb'],
+        ['checklist', '- a', 2, 2, '- [ ] a', ''],
+        ['list', '- [ ] a', 6, 6, '- a', ''],
+        ['link', 'see docs', 4, 8, 'see [docs](url)', 'url'],
+        ['link', 'https://x.test', 0, 14, '[](https://x.test)', ''],
+        ['link', '', 0, 0, '[link](url)', 'url'],
+    ])('%s on %j (%i-%i)', (command, text, start, end, expected, selected) => {
+        expect(apply(command, text, start, end)).toEqual([expected, selected]);
+    });
+});
