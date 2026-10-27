@@ -2,6 +2,7 @@ import type { Resource } from '@coleus/support/types/resource';
 
 export type NoteData = {
     id: number;
+    title: string;
     body: string;
     snippet: string;
     created_at: string;

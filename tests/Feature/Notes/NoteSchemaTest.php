@@ -25,8 +25,7 @@ it('casts lifecycle timestamps to dates', function () {
     $note = Note::factory()->create(['pinned_at' => now(), 'archived_at' => now()]);
 
     expect($note->refresh()->pinned_at)->toBeInstanceOf(DateTimeInterface::class)
-        ->and($note->archived_at)->toBeInstanceOf(DateTimeInterface::class)
-        ->and($note->title)->toBe('');
+        ->and($note->archived_at)->toBeInstanceOf(DateTimeInterface::class);
 });
 
 it('rolls the lifecycle migration back and forward cleanly', function () {

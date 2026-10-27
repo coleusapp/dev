@@ -11,6 +11,19 @@ class NoteText
 {
     public const int SNIPPET_LENGTH = 140;
 
+    public const int TITLE_LENGTH = 255;
+
+    /**
+     * The first non-empty line of the body as plain text, like Bear's title.
+     */
+    public static function title(string $body): string
+    {
+        $firstLine = collect(preg_split('/\R/', $body) ?: [])
+            ->first(fn (string $line) => self::isTextLine($line), '');
+
+        return Str::limit(self::plainLine($firstLine), self::TITLE_LENGTH - 3);
+    }
+
     /**
      * The lines of the body after the first non-empty one (the title line),
      * stripped of Markdown syntax and flattened into one line.
@@ -18,13 +31,21 @@ class NoteText
     public static function snippet(string $body, int $length = self::SNIPPET_LENGTH): string
     {
         $lines = collect(preg_split('/\R/', $body) ?: [])
-            ->skipUntil(fn (string $line) => trim($line) !== '')
+            ->skipUntil(fn (string $line) => self::isTextLine($line))
             ->skip(1)
-            ->reject(fn (string $line) => preg_match('/^\s*(```|~~~)/', $line) === 1)
+            ->filter(fn (string $line) => self::isTextLine($line))
             ->map(fn (string $line) => self::plainLine($line))
             ->filter(fn (string $line) => $line !== '');
 
         return Str::limit($lines->implode(' '), $length);
+    }
+
+    /**
+     * Whether a line carries readable text, as opposed to blank lines and code fence markers.
+     */
+    private static function isTextLine(string $line): bool
+    {
+        return trim($line) !== '' && preg_match('/^\s*(```|~~~)/', $line) !== 1;
     }
 
     /**

@@ -10,8 +10,6 @@ defineProps<{
 defineEmits<{
     create: [];
 }>();
-
-const firstLine = (body: string): string => body.split('\n').find((line) => line.trim() !== '') ?? '';
 </script>
 
 <template>
@@ -29,9 +27,7 @@ const firstLine = (body: string): string => body.split('\n').find((line) => line
             class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
             :class="{ 'bg-elevated': note.id === selectedId }"
         >
-            <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !firstLine(note.body) }">{{
-                firstLine(note.body) || 'Empty note'
-            }}</span>
+            <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">{{ note.title || 'Empty note' }}</span>
             <span v-if="note.snippet" class="text-muted line-clamp-2 text-xs">{{ note.snippet }}</span>
             <time class="text-dimmed text-xs" :datetime="note.updated_at">{{ note.updated_at_for_humans }}</time>
         </Link>

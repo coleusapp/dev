@@ -28,7 +28,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
 </script>
 
 <template>
-    <Head title="Notes" />
+    <Head :title="note?.data.title || 'Notes'" />
 
     <NotesLayout>
         <template #panels>

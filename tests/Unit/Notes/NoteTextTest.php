@@ -24,3 +24,28 @@ it('limits the snippet length', function () {
     expect(mb_strlen($snippet))->toBeLessThanOrEqual(NoteText::SNIPPET_LENGTH + 3)
         ->and($snippet)->toEndWith('...');
 });
+
+it('derives the title from the first line with text', function (string $body, string $title) {
+    expect(NoteText::title($body))->toBe($title);
+})->with([
+    'heading' => ["# Groceries\nmilk", 'Groceries'],
+    'plain line' => ['Just text', 'Just text'],
+    'leading blank lines' => ["\n  \n## Plan\nbody", 'Plan'],
+    'formatting stripped' => ['**Bold** and [link](https://x.test)', 'Bold and link'],
+    'checklist item' => ['- [ ] buy milk', 'buy milk'],
+    'hashtag kept' => ['#work/meetings', '#work/meetings'],
+    'code fence skipped' => ["```\ncode\n```", 'code'],
+    'empty' => ['', ''],
+    'whitespace only' => ["  \n\t", ''],
+]);
+
+it('keeps the snippet in step with a title that follows a code fence', function () {
+    expect(NoteText::snippet("```\nfirst\nsecond\n```"))->toBe('second');
+});
+
+it('limits the title to the column length', function () {
+    $title = NoteText::title(str_repeat('a', 1000));
+
+    expect(mb_strlen($title))->toBe(NoteText::TITLE_LENGTH)
+        ->and($title)->toEndWith('...');
+});

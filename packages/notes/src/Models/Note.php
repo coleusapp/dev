@@ -4,6 +4,7 @@ namespace Coleus\Notes\Models;
 
 use Coleus\Notes\Database\Factories\NoteFactory;
 use Coleus\Notes\NotesModelDefaults;
+use Coleus\Notes\Support\NoteText;
 use Coleus\Users\Concerns\HasUser;
 use Coleus\Users\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -52,6 +53,13 @@ class Note extends NotesModelDefaults
             'archived_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Note $note) {
+            $note->title = NoteText::title($note->body);
+        });
     }
 
     public function isOwnedBy(int $userId): bool
