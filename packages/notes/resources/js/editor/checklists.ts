@@ -34,6 +34,96 @@ export const checkedToBottomTransaction = (state: EditorState): Transaction | nu
 };
 
 /**
+ * The checklist the cursor is in (the outermost one, so sub-items count),
+ * as [position, node], or null when the cursor isn't in a checklist.
+ */
+const checklistAtCursor = (state: EditorState): [number, ProseMirrorNode] | null => {
+    const { $from } = state.selection;
+
+    for (let depth = 1; depth <= $from.depth; depth++) {
+        const node = $from.node(depth);
+
+        if (node.type.name === 'taskList') {
+            return [$from.before(depth), node];
+        }
+    }
+
+    return null;
+};
+
+/**
+ * Every task item in scope: the checklist at the cursor, or the whole note.
+ */
+const taskItemsInScope = (state: EditorState): { position: number; node: ProseMirrorNode }[] => {
+    const scope = checklistAtCursor(state);
+    const items: { position: number; node: ProseMirrorNode }[] = [];
+    const collect = (node: ProseMirrorNode, offset: number): void => {
+        node.descendants((child, position) => {
+            if (child.type.name === 'taskItem') {
+                items.push({ position: offset + position, node: child });
+            }
+        });
+    };
+
+    if (scope) {
+        collect(scope[1], scope[0] + 1);
+    } else {
+        collect(state.doc, 0);
+    }
+
+    return items;
+};
+
+/**
+ * Ticks or unticks every item of the checklist at the cursor (or of every
+ * checklist when the cursor isn't in one). Null when nothing changes.
+ */
+export const setAllCheckedTransaction = (state: EditorState, checked: boolean): Transaction | null => {
+    const tr = state.tr;
+    let changed = false;
+
+    for (const { position, node } of taskItemsInScope(state)) {
+        if (node.attrs.checked !== checked) {
+            tr.setNodeAttribute(position, 'checked', checked);
+            changed = true;
+        }
+    }
+
+    return changed ? tr : null;
+};
+
+/**
+ * Deletes the ticked items (with their sub-items) of the checklist at the
+ * cursor, or of every checklist. A checklist left empty is removed too.
+ */
+export const deleteCheckedTransaction = (state: EditorState): Transaction | null => {
+    const tr = state.tr;
+    const ticked = taskItemsInScope(state).filter(({ node }) => node.attrs.checked);
+
+    if (ticked.length === 0) {
+        return null;
+    }
+
+    // Outermost ticked items only: deleting a parent already deletes its sub-items.
+    const outermost = ticked.filter(
+        ({ position }) => !ticked.some((other) => other.position < position && position < other.position + other.node.nodeSize),
+    );
+
+    for (const { position, node } of [...outermost].reverse()) {
+        const $item = tr.doc.resolve(position);
+        const list = $item.parent;
+
+        if (list.childCount === 1) {
+            tr.delete($item.before(), $item.after());
+        } else {
+            tr.delete(position, position + node.nodeSize);
+        }
+    }
+
+    return tr;
+};
+
+/**
  * Whether a transaction ticked at least one checklist item.
  */
 const tickedSomething = (transactions: readonly Transaction[], before: ProseMirrorNode, after: ProseMirrorNode): boolean => {

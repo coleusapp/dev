@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { checkedToBottomTransaction } from '@/editor/checklists';
+import type { ChecklistAction } from '@/components/notes/note';
+import { checkedToBottomTransaction, deleteCheckedTransaction, setAllCheckedTransaction } from '@/editor/checklists';
 import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
 import { splitFrontMatter } from '@/editor/frontMatter';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
+import type { EditorState, Transaction } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { watch } from 'vue';
 
@@ -205,11 +207,18 @@ const setStyle = (style: ParagraphStyle): void => {
     }
 };
 
+const checklistTransactions: Record<ChecklistAction, (state: EditorState) => Transaction | null> = {
+    'checked-to-bottom': checkedToBottomTransaction,
+    'check-all': (state) => setAllCheckedTransaction(state, true),
+    'uncheck-all': (state) => setAllCheckedTransaction(state, false),
+    'delete-checked': deleteCheckedTransaction,
+};
+
 /**
- * Moves ticked checklist items below unticked ones in every list. Pending
- * changes from source mode are loaded first so they aren't lost.
+ * Runs a whole-checklist action (editor/checklists.ts). Pending changes
+ * from source mode are loaded first so they aren't lost.
  */
-const moveCheckedToBottom = (): void => {
+const checklistAction = (action: ChecklistAction): void => {
     if (!editor.value) {
         return;
     }
@@ -219,7 +228,7 @@ const moveCheckedToBottom = (): void => {
         pendingMarkdown = null;
     }
 
-    const tr = checkedToBottomTransaction(editor.value.state);
+    const tr = checklistTransactions[action](editor.value.state);
 
     if (tr) {
         editor.value.view.dispatch(tr);
@@ -243,7 +252,7 @@ const highlight = (color: string | null): void => {
     }
 };
 
-defineExpose({ run, setStyle, highlight, moveCheckedToBottom, setLink, unsetLink, isLinkActive, focus });
+defineExpose({ run, setStyle, highlight, checklistAction, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

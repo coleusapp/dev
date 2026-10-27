@@ -68,7 +68,7 @@ export const filterQuery = (filters: Partial<NoteFilters>): Record<string, strin
         ),
     );
 
-export type ChecklistAction = 'checked-to-bottom';
+export type ChecklistAction = 'checked-to-bottom' | 'check-all' | 'uncheck-all' | 'delete-checked';
 
 export type EditorMode = 'edit' | 'source' | 'split' | 'preview';
 

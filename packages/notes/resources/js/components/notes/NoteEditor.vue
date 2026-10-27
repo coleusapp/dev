@@ -258,9 +258,7 @@ const checklistAction = (action: ChecklistAction): void => {
         return;
     }
 
-    if (action === 'checked-to-bottom') {
-        visual.value?.moveCheckedToBottom();
-    }
+    visual.value?.checklistAction(action);
 };
 
 const format = (command: FormatCommand): void => {

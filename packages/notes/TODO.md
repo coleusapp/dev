@@ -148,7 +148,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 ## A3. Checklists (Apple Notes)
 - [x] A3.1 Checklist button converts the selected lines to checklist items (have the toolbar button; add: works on multi-line selection) and toggles back
 - [x] A3.2 Automatically move checked items to the bottom of their list (setting + per-note action)
-- [ ] A3.3 Check All / Uncheck All / Delete Checked Items actions for a list
+- [x] A3.3 Check All / Uncheck All / Delete Checked Items actions for a list
 - [ ] A3.4 Drag to reorder checklist items in the preview
 - [x] A3.5 Indent checklist items into sub-tasks
 - [x] A3.6 Checking items directly in the editor (not only in preview), with a strike-through look for done items

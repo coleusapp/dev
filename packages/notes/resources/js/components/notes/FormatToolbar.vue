@@ -49,8 +49,20 @@ const highlightColor = ref<HighlightColor | null>(null);
 
 const swatchClass = (color: HighlightColor | null): string => (color ? `mark-${color}` : 'mark-default');
 
-const checklistItems: DropdownMenuItem[] = [
-    { label: 'Move checked items to bottom', icon: 'i-lucide-arrow-down-wide-narrow', onSelect: () => emit('checklistAction', 'checked-to-bottom') },
+/**
+ * Act on the checklist the cursor is in, or on every checklist in the note.
+ */
+const checklistItems: DropdownMenuItem[][] = [
+    [
+        { label: 'Check all', icon: 'i-lucide-list-checks', onSelect: () => emit('checklistAction', 'check-all') },
+        { label: 'Uncheck all', icon: 'i-lucide-list', onSelect: () => emit('checklistAction', 'uncheck-all') },
+        {
+            label: 'Move checked items to bottom',
+            icon: 'i-lucide-arrow-down-wide-narrow',
+            onSelect: () => emit('checklistAction', 'checked-to-bottom'),
+        },
+    ],
+    [{ label: 'Delete checked items', icon: 'i-lucide-trash-2', color: 'error', onSelect: () => emit('checklistAction', 'delete-checked') }],
 ];
 
 const highlightItems = computed<DropdownMenuItem[]>(() =>
