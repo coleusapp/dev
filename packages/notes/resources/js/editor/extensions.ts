@@ -2,6 +2,7 @@ import { AutoPair } from '@/editor/AutoPair';
 import { CheckedToBottom } from '@/editor/checklists';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
+import { LineCommands } from '@/editor/LineCommands';
 import { WikiLink } from '@/editor/WikiLink';
 import Link from '@tiptap/extension-link';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
@@ -47,5 +48,6 @@ export const editorExtensions = ({
     Placeholder.configure({ placeholder }),
     CheckedToBottom.configure({ enabled: checkedToBottom }),
     AutoPair,
+    LineCommands,
     Markdown,
 ];

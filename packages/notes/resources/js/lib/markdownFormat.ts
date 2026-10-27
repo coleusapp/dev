@@ -218,6 +218,79 @@ export const continueList = ({ text, start, end }: Selection): TextEdit | null =
     return { from: start, to: start, insert, selectionStart: start + insert.length, selectionEnd: start + insert.length };
 };
 
+/**
+ * Alt+Up / Alt+Down: moves the selected lines past the line above or
+ * below, keeping them selected. Null at the top or bottom.
+ */
+export const moveLines = (selection: Selection, direction: 'up' | 'down'): TextEdit | null => {
+    const { text } = selection;
+    const { from, to } = lineRange(selection);
+
+    if (direction === 'up') {
+        if (from === 0) {
+            return null;
+        }
+
+        const aboveStart = text.lastIndexOf('\n', from - 2) + 1;
+        const above = text.slice(aboveStart, from - 1);
+        const moving = text.slice(from, to);
+        const shift = above.length + 1;
+
+        return {
+            from: aboveStart,
+            to,
+            insert: `${moving}\n${above}`,
+            selectionStart: selection.start - shift,
+            selectionEnd: selection.end - shift,
+        };
+    }
+
+    if (to >= text.length) {
+        return null;
+    }
+
+    const belowEnd = text.indexOf('\n', to + 1) === -1 ? text.length : text.indexOf('\n', to + 1);
+    const below = text.slice(to + 1, belowEnd);
+    const moving = text.slice(from, to);
+    const shift = below.length + 1;
+
+    return { from, to: belowEnd, insert: `${below}\n${moving}`, selectionStart: selection.start + shift, selectionEnd: selection.end + shift };
+};
+
+/**
+ * Shift+Alt+Down: duplicates the selected lines below themselves and
+ * selects the copy.
+ */
+export const duplicateLines = (selection: Selection): TextEdit => {
+    const { from, to } = lineRange(selection);
+    const lines = selection.text.slice(from, to);
+    const shift = lines.length + 1;
+
+    return { from: to, to, insert: `\n${lines}`, selectionStart: selection.start + shift, selectionEnd: selection.end + shift };
+};
+
+/**
+ * Cmd/Ctrl+/: wraps the selection (or the current line) in a %%comment%%,
+ * hidden from the rendered note, or removes the comment marks when it is one.
+ */
+export const toggleComment = (selection: Selection): TextEdit => {
+    const { text } = selection;
+    const { from: lineFrom, to: lineTo } = lineRange(selection);
+    const [from, to] = selection.start === selection.end ? [lineFrom, lineTo] : [selection.start, selection.end];
+    const target = text.slice(from, to);
+    const commented = /^%%([\s\S]*)%%$/.exec(target);
+
+    if (commented) {
+        return { from, to, insert: commented[1], selectionStart: from, selectionEnd: to - 4 };
+    }
+
+    if (text.slice(from - 2, from) === '%%' && text.slice(to, to + 2) === '%%') {
+        return { from: from - 2, to: to + 2, insert: target, selectionStart: from - 2, selectionEnd: to - 2 };
+    }
+
+    return { from, to, insert: `%%${target}%%`, selectionStart: from, selectionEnd: to + 4 };
+};
+
 export type ParagraphStyle = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled';
 
 const STYLE_PREFIXES = { title: '# ', heading: '## ', subheading: '### ', body: '' } as const;

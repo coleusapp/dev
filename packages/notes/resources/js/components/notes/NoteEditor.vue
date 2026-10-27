@@ -11,11 +11,16 @@ import {
     applyEdit,
     applyParagraphStyle,
     continueList,
+    duplicateLines,
     formatMarkdown,
     indentListLines,
+    moveLines,
+    toggleComment,
     toggleHighlight,
     type FormatCommand,
     type ParagraphStyle,
+    type Selection,
+    type TextEdit,
 } from '@/lib/markdownFormat';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
@@ -337,6 +342,42 @@ const continueSourceList = (event: KeyboardEvent): void => {
 };
 
 /**
+ * Applies a Markdown source edit computed from the textarea's selection.
+ */
+const editSource = (build: (selection: Selection) => TextEdit | null): boolean => {
+    if (!textarea.value || togglingTask.value) {
+        return false;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea.value;
+    const edit = build({ text: value, start: selectionStart, end: selectionEnd });
+
+    if (edit) {
+        applyEdit(textarea.value, edit);
+    }
+
+    return edit !== null;
+};
+
+/**
+ * Alt+Up / Alt+Down move the current lines, Shift+Alt+Down duplicates
+ * them (the visual editor has the same shortcuts, editor/LineCommands.ts).
+ */
+const moveSourceLines = (event: KeyboardEvent): void => {
+    event.preventDefault();
+
+    if (event.shiftKey) {
+        if (event.key === 'ArrowDown') {
+            editSource(duplicateLines);
+        }
+
+        return;
+    }
+
+    editSource((selection) => moveLines(selection, event.key === 'ArrowUp' ? 'up' : 'down'));
+};
+
+/**
  * Brackets, quotes and backticks type in pairs in Markdown source, a
  * selection gets wrapped (also with * _ ~ =), and Backspace removes an
  * empty pair (lib/autoPair.ts).
@@ -373,6 +414,12 @@ const onKeydown = (event: KeyboardEvent): void => {
         return;
     }
 
+    if (event.altKey && !event.metaKey && !event.ctrlKey && event.target === textarea.value && ['ArrowUp', 'ArrowDown'].includes(event.key)) {
+        moveSourceLines(event);
+
+        return;
+    }
+
     if (
         !event.metaKey &&
         !event.ctrlKey &&
@@ -402,6 +449,9 @@ const onKeydown = (event: KeyboardEvent): void => {
 
     if (key === 's') {
         saveNow(event);
+    } else if (key === '/' && event.target === textarea.value) {
+        event.preventDefault();
+        editSource(toggleComment);
     } else if (mode.value === 'edit' && key !== 'k') {
         return;
     } else if (shortcuts[key]) {
