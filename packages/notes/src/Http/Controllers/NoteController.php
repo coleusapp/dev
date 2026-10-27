@@ -61,15 +61,16 @@ class NoteController extends Controller
     }
 
     /**
-     * Keeps the list filter from the query string across a redirect; the
-     * page it lands on validates it.
+     * Keeps the list filters from the query string across a redirect; the
+     * page it lands on validates them.
      *
      * @return array<string, string>
      */
     private function listQuery(Request $request): array
     {
-        $tag = $request->query('tag');
-
-        return is_string($tag) && $tag !== '' ? ['tag' => $tag] : [];
+        return collect(['tag', 'q'])
+            ->mapWithKeys(fn (string $key) => [$key => $request->query($key)])
+            ->filter(fn (mixed $value) => is_string($value) && $value !== '')
+            ->all();
     }
 }

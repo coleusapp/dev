@@ -60,10 +60,11 @@ class NoteService extends Service
     /**
      * @return Collection<int, Note>
      */
-    public function list(?string $tag = null): Collection
+    public function list(?string $tag = null, ?string $search = null): Collection
     {
         return $this->defaultQuery()
             ->when($tag !== null, fn (Builder $query) => $this->whereTagged($query, (string) $tag))
+            ->when($search !== null, fn (Builder $query) => $query->search((string) $search))
             ->get();
     }
 

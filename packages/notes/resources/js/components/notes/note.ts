@@ -37,4 +37,11 @@ export type TagNode = {
 
 export type NoteFilters = {
     tag: string | null;
+    q: string | null;
 };
+
+/**
+ * The query string that carries the list filters on links and redirects.
+ */
+export const filterQuery = (filters: NoteFilters): Record<string, string> =>
+    Object.fromEntries(Object.entries(filters).filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== ''));

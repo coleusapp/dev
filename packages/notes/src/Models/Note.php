@@ -4,11 +4,14 @@ namespace Coleus\Notes\Models;
 
 use Coleus\Notes\Database\Factories\NoteFactory;
 use Coleus\Notes\NotesModelDefaults;
+use Coleus\Notes\Search\NoteSearch;
 use Coleus\Notes\Services\NoteTags;
 use Coleus\Notes\Support\NoteText;
 use Coleus\Users\Concerns\HasUser;
 use Coleus\Users\Models\Scopes\UserScope;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -29,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note user($users)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Note search(string $terms)
  *
  * @mixin \Eloquent
  */
@@ -77,6 +81,17 @@ class Note extends NotesModelDefaults
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, config('notes.table_prefix').'note_tag');
+    }
+
+    /**
+     * Notes whose title or body contain every word of $terms (see NoteSearch).
+     *
+     * @param  Builder<Note>  $query
+     */
+    #[Scope]
+    protected function search(Builder $query, string $terms): void
+    {
+        NoteSearch::apply($query, $terms);
     }
 
     public function isOwnedBy(int $userId): bool

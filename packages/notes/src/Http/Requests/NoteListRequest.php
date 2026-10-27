@@ -10,6 +10,8 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class NoteListRequest extends FormRequest
 {
+    public const int MAX_SEARCH_LENGTH = 200;
+
     public function authorize(): bool
     {
         return true;
@@ -22,6 +24,7 @@ class NoteListRequest extends FormRequest
     {
         return [
             'tag' => ['nullable', 'string', 'max:'.Hashtags::MAX_LENGTH],
+            'q' => ['nullable', 'string', 'max:'.self::MAX_SEARCH_LENGTH],
         ];
     }
 
@@ -32,6 +35,7 @@ class NoteListRequest extends FormRequest
     {
         return [
             'tag.max' => 'That tag is too long.',
+            'q.max' => 'That search is too long.',
         ];
     }
 
@@ -42,11 +46,18 @@ class NoteListRequest extends FormRequest
         return $tag === '' ? null : $tag;
     }
 
+    public function search(): ?string
+    {
+        $search = trim((string) $this->validated('q'));
+
+        return $search === '' ? null : $search;
+    }
+
     /**
-     * @return array{tag: string|null}
+     * @return array{tag: string|null, q: string|null}
      */
     public function filters(): array
     {
-        return ['tag' => $this->tag()];
+        return ['tag' => $this->tag(), 'q' => $this->search()];
     }
 }

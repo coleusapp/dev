@@ -1,31 +1,42 @@
 <script setup lang="ts">
-import type { NoteData } from '@/components/notes/note';
+import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     notes: NoteData[];
     selectedId: number | null;
-    tag: string | null;
+    filters: NoteFilters;
 }>();
 
 defineEmits<{
     create: [];
 }>();
+
+const query = computed(() => filterQuery(props.filters));
+
+const emptyMessage = computed(() => {
+    if (props.filters.q) {
+        return `No notes match “${props.filters.q}”${props.filters.tag ? ` in #${props.filters.tag}` : ''}.`;
+    }
+
+    return props.filters.tag ? `No notes tagged #${props.filters.tag}.` : 'No notes yet.';
+});
 </script>
 
 <template>
     <div v-if="notes.length === 0" class="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
         <UiIcon name="i-lucide-notebook-pen" class="text-dimmed size-8" />
-        <p class="text-dimmed text-sm">{{ tag ? `No notes tagged #${tag}.` : 'No notes yet.' }}</p>
+        <p class="text-dimmed text-sm">{{ emptyMessage }}</p>
         <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" size="sm" @click="$emit('create')">{{
-            tag ? 'New note with this tag' : 'Create your first note'
+            filters.tag ? 'New note with this tag' : 'Create your first note'
         }}</UiButton>
     </div>
     <nav v-else class="divide-default flex flex-col divide-y">
         <Link
             v-for="note in notes"
             :key="note.id"
-            :href="route('notes.show', { note: note.id, ...(tag ? { tag } : {}) })"
+            :href="route('notes.show', { note: note.id, ...query })"
             preserve-scroll
             class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
             :class="{ 'bg-elevated': note.id === selectedId }"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     compareNotes,
+    filterQuery,
     type NoteCollection,
     type NoteData,
     type NoteDetailData,
@@ -14,6 +15,7 @@ import TagTree from '@/components/notes/TagTree.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
+import { watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -26,7 +28,42 @@ const props = defineProps<{
 /**
  * Query parameters that keep the current list filter on every link and redirect.
  */
-const listQuery = computed(() => (props.filters.tag ? { tag: props.filters.tag } : {}));
+const listQuery = computed(() => filterQuery(props.filters));
+
+const search = ref(props.filters.q ?? '');
+
+watch(
+    () => props.filters.q,
+    (q) => {
+        if ((q ?? '') !== search.value.trim()) {
+            search.value = q ?? '';
+        }
+    },
+);
+
+/**
+ * Typing in the search box filters the list in place; the open note stays open.
+ */
+watchDebounced(
+    search,
+    (value) => {
+        const q = value.trim();
+
+        if (q === (props.filters.q ?? '')) {
+            return;
+        }
+
+        const url = props.note ? route('notes.show', { note: props.note.data.id }) : route('notes.index');
+
+        router.get(url, filterQuery({ ...props.filters, q }), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            only: ['notes', 'filters'],
+        });
+    },
+    { debounce: 300 },
+);
 
 const listedNotes = ref<NoteData[]>(props.notes.data);
 const title = ref(props.note?.data.title ?? '');
@@ -75,10 +112,13 @@ const onNoteSaved = (saved: NoteDetailData): void => {
 };
 
 /**
- * A note made while a tag is selected starts with that tag, like Bear.
+ * A note made while a tag is selected starts with that tag, like Bear. The
+ * search is dropped: a new, empty note would never match it.
  */
 const createNote = (): void => {
-    router.post(route('notes.store', listQuery.value), { body: props.filters.tag ? `\n\n#${props.filters.tag}` : '' });
+    const tag = props.filters.tag;
+
+    router.post(route('notes.store', tag ? { tag } : {}), { body: tag ? `\n\n#${tag}` : '' });
 };
 
 const deleteNote = (): void => {
@@ -170,7 +210,21 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                 </template>
 
                 <template #body>
-                    <NoteList :notes="listedNotes" :selected-id="note?.data.id ?? null" :tag="filters.tag" @create="createNote" />
+                    <UiInput
+                        v-model="search"
+                        icon="i-lucide-search"
+                        type="search"
+                        placeholder="Search notes"
+                        aria-label="Search notes"
+                        class="mb-2 w-full"
+                        size="sm"
+                        :ui="{ trailing: 'pe-1' }"
+                    >
+                        <template v-if="search" #trailing>
+                            <UiButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Clear search" @click="search = ''" />
+                        </template>
+                    </UiInput>
+                    <NoteList :notes="listedNotes" :selected-id="note?.data.id ?? null" :filters="filters" @create="createNote" />
                 </template>
             </UiDashboardPanel>
 

@@ -115,3 +115,10 @@ it('keeps the filter when creating and deleting from a filtered list', function 
     $this->delete(route('notes.destroy', ['note' => Note::query()->sole(), 'tag' => 'work']))
         ->assertRedirect(route('notes.index', ['tag' => 'work']));
 });
+
+it('keeps the search across a delete redirect', function () {
+    $note = Note::factory()->create();
+
+    $this->delete(route('notes.destroy', ['note' => $note, 'q' => 'plans', 'tag' => 'work']))
+        ->assertRedirect(route('notes.index', ['tag' => 'work', 'q' => 'plans']));
+});

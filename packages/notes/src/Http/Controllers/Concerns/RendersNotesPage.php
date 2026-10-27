@@ -18,7 +18,7 @@ trait RendersNotesPage
     protected function notesPage(NoteListRequest $request, ?Note $note): Response
     {
         return Inertia::render('Index', [
-            'notes' => NoteResource::collection(Notes::note()->list($request->tag())),
+            'notes' => NoteResource::collection(Notes::note()->list($request->tag(), $request->search())),
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),
             'filters' => $request->filters(),
