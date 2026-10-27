@@ -6,13 +6,14 @@ import type { Editor } from '@tiptap/vue-3';
  * differences the visual editor introduces without changing meaning:
  * bullet characters, "1)" vs "1.", _emphasis_ vs *emphasis*, setext vs
  * "#" headings, harmless backslash escapes, blank-line runs, and table
- * cell padding. "\#" is deliberately NOT unescaped: it decides whether
+ * cell padding, empty headings (which render as nothing). "\#" is deliberately NOT unescaped: it decides whether
  * something is a tag.
  */
 export const normalizeMarkdown = (markdown: string): string =>
     markdown
         .replace(/\r\n?/g, '\n')
         .replace(/^(.+)\n=+[ \t]*$/gm, '# $1')
+        .replace(/^#{1,6}[ \t]*$/gm, '')
         .replace(/\\([[\]*_`~|!\-+.()<>{}\\])/g, '$1')
         .replace(/^(\s*)[*+](\s)/gm, '$1-$2')
         .replace(/^(\s*\d+)\)(\s)/gm, '$1.$2')

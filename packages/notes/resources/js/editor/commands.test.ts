@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { applyParagraphStyle, currentParagraphStyle } from '@/editor/commands';
+import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
 import type { ParagraphStyle } from '@/lib/markdownFormat';
@@ -48,5 +48,41 @@ describe('toolbar commands', () => {
 
         editor.chain().toggleOrderedList().toggleBlockquote().run();
         expect(editorMarkdown(editor, '')).toBe('> one');
+    });
+});
+
+describe('prepareFirstLine', () => {
+    it('starts an empty note with a title line without saving anything', () => {
+        let updates = 0;
+        editor.on('update', () => updates++);
+        loadMarkdown(editor, '');
+
+        prepareFirstLine(editor, '', 'title');
+
+        expect(updates).toBe(0);
+        expect(currentParagraphStyle(editor)).toBe('title');
+        editor.commands.insertContent('Trip');
+        expect(editorMarkdown(editor, '')).toBe('# Trip');
+    });
+
+    it('adds the styled line above the tag of a note started from a tag', () => {
+        loadMarkdown(editor, '\n\n#work');
+
+        prepareFirstLine(editor, '\n\n#work', 'heading');
+        editor.commands.insertContent('Plan');
+
+        expect(editorMarkdown(editor, '')).toBe('## Plan\n\n#work');
+    });
+
+    it('leaves notes that already have a first line alone', () => {
+        loadMarkdown(editor, 'Existing');
+
+        prepareFirstLine(editor, 'Existing', 'title');
+
+        expect(editorMarkdown(editor, '')).toBe('Existing');
+    });
+
+    it('treats a leftover empty heading as faithful', () => {
+        expect(loadMarkdown(editor, '#').faithful).toBe(true);
     });
 });

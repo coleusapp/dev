@@ -390,6 +390,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         :readonly="note.data.trashed"
                         :default-mode="preferences['editor.default_mode']"
                         :autosave-delay="preferences['editor.autosave_delay']"
+                        :first-line-style="preferences['editor.first_line_style']"
                         @saved="onNoteSaved"
                         @create-linked="(title) => (linkedTitle = title)"
                     />

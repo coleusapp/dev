@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { applyParagraphStyle, currentParagraphStyle } from '@/editor/commands';
+import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
+import { splitFrontMatter } from '@/editor/frontMatter';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
@@ -14,6 +15,7 @@ const props = defineProps<{
     modelValue: string;
     readonly?: boolean;
     active?: boolean;
+    firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
 }>();
 
 const emit = defineEmits<{
@@ -72,6 +74,7 @@ const editor = useEditor({
         const result = loadMarkdown(created, props.modelValue);
         frontMatter = result.frontMatter;
         emit('faithful', result.faithful);
+        prepareFirstLine(created, splitFrontMatter(props.modelValue).body, props.firstLineStyle ?? 'body');
     },
     onUpdate: ({ editor: updated }) => {
         lastMarkdown = editorMarkdown(updated, frontMatter);

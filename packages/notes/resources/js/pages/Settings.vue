@@ -31,6 +31,12 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         help: 'How long to wait after you stop typing before saving.',
         optionLabel: (value) => `${Number(value) / 1000} s`,
     },
+    {
+        key: 'editor.first_line_style',
+        label: 'New notes start with',
+        help: 'The style of the first line of an empty note in the visual editor, where you type its title.',
+        optionLabel: (value) => ({ title: 'Title', heading: 'Heading', subheading: 'Subheading', body: 'Body' })[value as string] ?? String(value),
+    },
     { key: 'list.relative_dates', label: 'Relative dates in the list', help: 'Show "5 minutes ago" instead of the full date and time.' },
     { key: 'list.show_snippets', label: 'Show snippets in the list', help: 'Show a couple of lines of each note under its title.' },
 ];

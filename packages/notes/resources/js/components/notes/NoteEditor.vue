@@ -15,6 +15,7 @@ const props = defineProps<{
     readonly?: boolean;
     defaultMode?: EditorMode;
     autosaveDelay?: number;
+    firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
 }>();
 
 const emit = defineEmits<{
@@ -319,6 +320,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 v-show="mode === 'edit'"
                 ref="visual"
                 :active="mode === 'edit'"
+                :first-line-style="firstLineStyle"
                 v-model="body"
                 @faithful="(value) => (faithful = value)"
                 @style="(value) => (visualStyle = value)"
