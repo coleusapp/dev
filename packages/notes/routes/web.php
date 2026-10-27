@@ -1,5 +1,6 @@
 <?php
 
+use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
@@ -16,4 +17,5 @@ Route::middleware(['web', 'auth'])
         Route::delete('/{note}', [NoteController::class, 'destroy'])->name('destroy')->whereNumber('note');
         Route::post('/{note}/pin', [PinController::class, 'store'])->name('pin')->whereNumber('note');
         Route::delete('/{note}/pin', [PinController::class, 'destroy'])->name('unpin')->whereNumber('note');
+        Route::put('/{note}/checklist/{line}', [ChecklistController::class, 'update'])->name('checklist.update')->whereNumber(['note', 'line']);
     });

@@ -150,5 +150,16 @@ export const useAutosave = (note: NoteDetailData, body: Ref<string>, onSaved: (n
         flushWithKeepalive();
     });
 
-    return { status, error, flush, isDirty };
+    /**
+     * Take a body the server saved through another endpoint (e.g. a checklist
+     * toggle) as both the current and the saved text.
+     */
+    const adopt = (saved: NoteDetailData): void => {
+        savedBody.value = saved.body;
+        body.value = saved.body;
+        failed.value = false;
+        error.value = null;
+    };
+
+    return { status, error, flush, adopt, isDirty };
 };
