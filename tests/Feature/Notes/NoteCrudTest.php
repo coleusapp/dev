@@ -128,3 +128,50 @@ it('ignores attributes that are not fillable', function () {
         ->and($note->created_at->year)->not->toBe(2000)
         ->and($note->isOwnedBy($other->id))->toBeFalse();
 });
+
+it('returns the saved note as JSON for autosave requests', function () {
+    $note = Note::factory()->create(['body' => 'old']);
+
+    $this->putJson(route('notes.update', ['note' => $note]), ['body' => "# Autosaved\nbody"])
+        ->assertOk()
+        ->assertJsonPath('data.id', $note->id)
+        ->assertJsonPath('data.title', 'Autosaved')
+        ->assertJsonPath('data.body', "# Autosaved\nbody")
+        ->assertJsonPath('data.snippet', 'body');
+
+    expect($note->refresh()->body)->toBe("# Autosaved\nbody");
+});
+
+it('still redirects Inertia visits that accept JSON', function () {
+    $note = Note::factory()->create();
+
+    $this->put(route('notes.update', ['note' => $note]), ['body' => 'x'], ['X-Inertia' => 'true', 'Accept' => 'application/json'])
+        ->assertRedirect(route('notes.show', ['note' => $note]));
+});
+
+it('returns validation errors as JSON for autosave requests', function () {
+    $note = Note::factory()->create(['body' => 'keep']);
+
+    $this->putJson(route('notes.update', ['note' => $note]), ['body' => str_repeat('a', 1_000_001)])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('body');
+
+    expect($note->refresh()->body)->toBe('keep');
+});
+
+it('rejects autosave of another user note', function () {
+    $this->actingAs(User::factory()->create());
+    $foreign = Note::factory()->create(['body' => 'secret']);
+    $this->actingAs($this->user);
+
+    $this->putJson(route('notes.update', ['note' => $foreign]), ['body' => 'hijack'])->assertNotFound();
+});
+
+it('accepts autosave with the XSRF cookie header instead of a form token', function () {
+    $note = Note::factory()->create();
+    $this->get(route('notes.index'));
+
+    $this->withHeader('X-XSRF-TOKEN', encrypt(csrf_token(), false))
+        ->putJson(route('notes.update', ['note' => $note]), ['body' => 'via xsrf'])
+        ->assertOk();
+});

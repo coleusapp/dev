@@ -33,11 +33,19 @@ class NoteController extends Controller
         return to_route('notes.show', ['note' => $note]);
     }
 
-    public function update(NoteRequest $request, Note $note): RedirectResponse
+    /**
+     * Inertia visits get a redirect; the editor's autosave sends plain JSON
+     * requests and gets the saved note back so it can refresh the list row.
+     */
+    public function update(NoteRequest $request, Note $note): RedirectResponse|NoteResource
     {
         Gate::authorize('update', $note);
 
         Notes::note()->update($note, $request->noteData());
+
+        if ($request->wantsJson() && ! $request->inertia()) {
+            return new NoteResource($note->refresh());
+        }
 
         return to_route('notes.show', ['note' => $note]);
     }

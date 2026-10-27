@@ -1,16 +1,42 @@
 <script setup lang="ts">
-import type { NoteCollection, NoteResource } from '@/components/notes/note';
+import type { NoteCollection, NoteData, NoteResource } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     notes: NoteCollection;
     note: NoteResource | null;
 }>();
+
+const listedNotes = ref<NoteData[]>(props.notes.data);
+const title = ref(props.note?.data.title ?? '');
+
+watch(
+    () => props.notes,
+    (notes) => {
+        listedNotes.value = notes.data;
+    },
+);
+
+watch(
+    () => props.note,
+    (note) => {
+        title.value = note?.data.title ?? '';
+    },
+);
+
+/**
+ * Autosave doesn't reload the page, so the saved note's row is refreshed in
+ * place and moved to the top, matching the server's last-updated order.
+ */
+const onNoteSaved = (saved: NoteData): void => {
+    listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)];
+    title.value = saved.title;
+};
 
 const createNote = (): void => {
     router.post(route('notes.store'), { body: '' });
@@ -28,7 +54,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
 </script>
 
 <template>
-    <Head :title="note?.data.title || 'Notes'" />
+    <Head :title="title || 'Notes'" />
 
     <NotesLayout>
         <template #panels>
@@ -41,7 +67,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                         <template #title>
                             <div class="flex flex-col">
                                 <span>Notes</span>
-                                <small class="text-dimmed text-xs font-normal">{{ notes.data.length }} notes</small>
+                                <small class="text-dimmed text-xs font-normal">{{ listedNotes.length }} notes</small>
                             </div>
                         </template>
                         <template #right>
@@ -51,7 +77,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                 </template>
 
                 <template #body>
-                    <NoteList :notes="notes.data" :selected-id="note?.data.id ?? null" @create="createNote" />
+                    <NoteList :notes="listedNotes" :selected-id="note?.data.id ?? null" @create="createNote" />
                 </template>
             </UiDashboardPanel>
 
@@ -80,7 +106,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                 </template>
 
                 <template #body>
-                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" />
+                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" @saved="onNoteSaved" />
                     <div v-else class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.
                     </div>

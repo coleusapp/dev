@@ -1,29 +1,40 @@
 <script setup lang="ts">
 import type { NoteData } from '@/components/notes/note';
-import { useForm } from '@inertiajs/vue3';
+import SaveStatus from '@/components/notes/SaveStatus.vue';
+import { useAutosave } from '@/composables/useAutosave';
+import { ref } from 'vue';
 
 const props = defineProps<{
     note: NoteData;
 }>();
 
-const form = useForm({ body: props.note.body });
+const emit = defineEmits<{
+    saved: [note: NoteData];
+}>();
 
-const save = (): void => {
-    form.put(route('notes.update', { note: props.note.id }), { preserveScroll: true, preserveState: true });
+const body = ref(props.note.body);
+
+const { status, error, flush } = useAutosave(props.note, body, (note) => emit('saved', note));
+
+const saveNow = (event: KeyboardEvent): void => {
+    event.preventDefault();
+    flush();
 };
 </script>
 
 <template>
-    <form class="flex h-full flex-col gap-2" @submit.prevent="save">
+    <div class="flex h-full flex-col gap-2">
         <textarea
-            v-model="form.body"
+            v-model="body"
             class="h-full w-full flex-1 resize-none bg-transparent font-mono text-sm leading-relaxed focus:outline-none"
             placeholder="Start writing..."
+            aria-label="Note"
             autofocus
+            @keydown.meta.s="saveNow"
+            @keydown.ctrl.s="saveNow"
         />
-        <div class="flex items-center justify-end gap-2">
-            <span v-if="form.errors.body" class="text-error text-sm">{{ form.errors.body }}</span>
-            <UiButton type="submit" color="neutral" variant="subtle" :loading="form.processing" :disabled="!form.isDirty">Save</UiButton>
+        <div class="flex items-center justify-end">
+            <SaveStatus :status="status" :error="error" @retry="flush" />
         </div>
-    </form>
+    </div>
 </template>
