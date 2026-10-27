@@ -4,55 +4,82 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-.tiptap {
-    @apply h-full text-sm;
+.note-preview {
+    @apply text-sm leading-relaxed break-words;
 }
 
-.tiptap h1 {
+.note-preview h1 {
     @apply mt-4 mb-2 text-lg font-bold first:mt-0;
 }
 
-.tiptap h2 {
+.note-preview h2 {
     @apply mt-4 mb-2 font-bold first:mt-0;
 }
 
-.tiptap h3 {
+.note-preview h3,
+.note-preview h4,
+.note-preview h5,
+.note-preview h6 {
     @apply mt-4 mb-2 font-semibold first:mt-0;
 }
 
-.tiptap p {
+.note-preview p {
     @apply mb-2;
 }
 
-.tiptap ul {
+.note-preview a {
+    @apply text-primary underline underline-offset-2;
+}
+
+.note-preview ul {
     @apply mb-2 list-disc pl-6;
 }
 
-.tiptap ol {
+.note-preview ol {
     @apply mb-2 list-decimal pl-6;
 }
 
-.tiptap blockquote {
+.note-preview li:has(> input[type='checkbox']) {
+    @apply -ml-6 list-none;
+}
+
+.note-preview li > input[type='checkbox'] {
+    @apply mr-2 align-middle;
+}
+
+.note-preview blockquote {
     @apply border-default text-dimmed mb-2 border-l-2 pl-4;
 }
 
-.tiptap code {
+.note-preview code {
     @apply bg-elevated rounded px-1 py-0.5 font-mono text-xs;
 }
 
-.tiptap pre {
-    @apply bg-elevated mb-2 rounded-md p-3 font-mono text-xs;
+.note-preview pre {
+    @apply bg-elevated mb-2 overflow-x-auto rounded-md p-3 font-mono text-xs;
 }
 
-.tiptap pre code {
+.note-preview pre code {
     @apply bg-transparent p-0;
 }
 
-.tiptap mark {
-    @apply rounded-sm px-0.5;
+.note-preview mark {
+    @apply rounded-sm bg-yellow-200 px-0.5 dark:bg-yellow-700;
 }
 
-.tiptap p.is-editor-empty:first-child::before {
-    @apply text-dimmed pointer-events-none float-left h-0;
-    content: attr(data-placeholder);
+.note-preview hr {
+    @apply border-default my-4;
+}
+
+.note-preview img {
+    @apply max-w-full rounded-md;
+}
+
+.note-preview table {
+    @apply mb-2 border-collapse text-left;
+}
+
+.note-preview th,
+.note-preview td {
+    @apply border-default border px-2 py-1;
 }

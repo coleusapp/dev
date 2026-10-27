@@ -11,7 +11,14 @@ export type NoteData = {
     updated_at_for_humans: string;
 };
 
-export type NoteResource = Resource<NoteData>;
+/**
+ * The open note, which also carries its server-rendered preview.
+ */
+export type NoteDetailData = NoteData & {
+    html: string;
+};
+
+export type NoteResource = Resource<NoteDetailData>;
 export type NoteCollection = { data: NoteData[] };
 
 /**

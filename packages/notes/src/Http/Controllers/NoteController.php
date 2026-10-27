@@ -5,6 +5,7 @@ namespace Coleus\Notes\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Coleus\Notes\Facades\Notes;
 use Coleus\Notes\Http\Requests\NoteRequest;
+use Coleus\Notes\Http\Resources\NoteDetailResource;
 use Coleus\Notes\Http\Resources\NoteResource;
 use Coleus\Notes\Models\Note;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +21,7 @@ class NoteController extends Controller
 
         return Inertia::render('Index', [
             'notes' => NoteResource::collection(Notes::note()->list()),
-            'note' => new NoteResource($note),
+            'note' => new NoteDetailResource($note),
         ]);
     }
 
@@ -37,14 +38,14 @@ class NoteController extends Controller
      * Inertia visits get a redirect; the editor's autosave sends plain JSON
      * requests and gets the saved note back so it can refresh the list row.
      */
-    public function update(NoteRequest $request, Note $note): RedirectResponse|NoteResource
+    public function update(NoteRequest $request, Note $note): RedirectResponse|NoteDetailResource
     {
         Gate::authorize('update', $note);
 
         Notes::note()->update($note, $request->noteData());
 
         if ($request->wantsJson() && ! $request->inertia()) {
-            return new NoteResource($note->refresh());
+            return new NoteDetailResource($note->refresh());
         }
 
         return to_route('notes.show', ['note' => $note]);

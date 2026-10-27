@@ -1,4 +1,4 @@
-import type { NoteData } from '@/components/notes/note';
+import type { NoteDetailData } from '@/components/notes/note';
 import { jsonHeaders } from '@/lib/http';
 import { router } from '@inertiajs/vue3';
 import { useDebounceFn, useEventListener } from '@vueuse/core';
@@ -17,7 +17,7 @@ export const AUTOSAVE_DELAY_MS = 750;
  * are on the server, and closing or hiding the tab flushes with a keepalive
  * request that outlives the page.
  */
-export const useAutosave = (note: NoteData, body: Ref<string>, onSaved: (note: NoteData) => void) => {
+export const useAutosave = (note: NoteDetailData, body: Ref<string>, onSaved: (note: NoteDetailData) => void) => {
     const savedBody = ref(note.body);
     const inFlight = ref(false);
     const failed = ref(false);
@@ -55,7 +55,7 @@ export const useAutosave = (note: NoteData, body: Ref<string>, onSaved: (note: N
                 throw new Error(payload?.errors?.body?.[0] ?? payload?.message ?? `Save failed (${response.status}).`);
             }
 
-            const { data } = (await response.json()) as { data: NoteData };
+            const { data } = (await response.json()) as { data: NoteDetailData };
             savedBody.value = sending;
             failed.value = false;
             error.value = null;
