@@ -5,6 +5,7 @@ import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
+import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
 import { autoPair, deletePair } from '@/lib/autoPair';
 import { jsonHeaders } from '@/lib/http';
 import {
@@ -22,6 +23,7 @@ import {
     type Selection,
     type TextEdit,
 } from '@/lib/markdownFormat';
+import { pasteUrlOverSelection } from '@/lib/paste';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
@@ -360,6 +362,41 @@ const editSource = (build: (selection: Selection) => TextEdit | null): boolean =
 };
 
 /**
+ * Pasting in Markdown source: a URL over selected text makes a link, and
+ * rich text (web pages, Word, Google Docs) arrives as Markdown instead of
+ * losing its formatting. Plain-text pastes are untouched.
+ */
+const onSourcePaste = (event: ClipboardEvent): void => {
+    const plain = event.clipboardData?.getData('text/plain') ?? '';
+    const html = event.clipboardData?.getData('text/html') ?? '';
+
+    if (editSource((selection) => pasteUrlOverSelection(selection, plain))) {
+        event.preventDefault();
+
+        return;
+    }
+
+    if (html.trim() === '') {
+        return;
+    }
+
+    const markdown = htmlToMarkdown(html);
+
+    if (markdown === '' || markdown === plain.trim()) {
+        return;
+    }
+
+    event.preventDefault();
+    editSource(({ start, end }) => ({
+        from: start,
+        to: end,
+        insert: markdown,
+        selectionStart: start + markdown.length,
+        selectionEnd: start + markdown.length,
+    }));
+};
+
+/**
  * Alt+Up / Alt+Down move the current lines, Shift+Alt+Down duplicates
  * them (the visual editor has the same shortcuts, editor/LineCommands.ts).
  */
@@ -502,6 +539,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 aria-label="Note"
                 :readonly="togglingTask"
                 autofocus
+                @paste="onSourcePaste"
             />
             <!-- The HTML is rendered on the server with raw HTML escaped and unsafe links removed (NoteMarkdown). -->
             <!-- eslint-disable-next-line vue/no-v-html -->
