@@ -136,6 +136,12 @@ const run = (command: Exclude<FormatCommand, 'link'>): void => {
         case 'italic':
             chain.toggleItalic().run();
             break;
+        case 'underline':
+            chain.toggleUnderline().run();
+            break;
+        case 'strike':
+            chain.toggleStrike().run();
+            break;
         case 'heading':
             chain.toggleHeading({ level: 2 }).run();
             break;

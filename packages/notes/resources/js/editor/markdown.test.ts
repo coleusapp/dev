@@ -28,6 +28,7 @@ describe('round trip', () => {
         ['wiki link spacing kept', 'See [[  Trip  ]] here'],
         ['hashtags', '#inbox\n\nPlan #work/meetings today'],
         ['highlight', '==marked== text'],
+        ['underline and strike', '++under++ and ~~gone~~'],
         ['table', '| a | b |\n| --- | --- |\n| 1 | 2 |'],
         ['quote and code', '> quote\n\n```php\necho 1;\n```'],
         ['link', '[link](https://x.test)'],

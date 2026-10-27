@@ -18,6 +18,8 @@ const mod = isMac ? '⌘' : 'Ctrl+';
 const buttons: { command: FormatCommand; icon: string; label: string }[] = [
     { command: 'bold', icon: 'i-lucide-bold', label: `Bold (${mod}B)` },
     { command: 'italic', icon: 'i-lucide-italic', label: `Italic (${mod}I)` },
+    { command: 'underline', icon: 'i-lucide-underline', label: `Underline (${mod}U)` },
+    { command: 'strike', icon: 'i-lucide-strikethrough', label: `Strikethrough (${mod}${isMac ? '⇧' : 'Shift+'}X)` },
     { command: 'heading', icon: 'i-lucide-heading', label: 'Heading' },
     { command: 'list', icon: 'i-lucide-list', label: 'Bulleted list' },
     { command: 'checklist', icon: 'i-lucide-list-checks', label: 'Checklist' },

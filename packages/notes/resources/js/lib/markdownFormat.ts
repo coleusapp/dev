@@ -19,9 +19,9 @@ export type TextEdit = {
     selectionEnd: number;
 };
 
-export type FormatCommand = 'bold' | 'italic' | 'code' | 'heading' | 'list' | 'checklist' | 'link';
+export type FormatCommand = 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'heading' | 'list' | 'checklist' | 'link';
 
-const INLINE_MARKERS = { bold: '**', italic: '_', code: '`' } as const;
+const INLINE_MARKERS = { bold: '**', italic: '_', underline: '++', strike: '~~', code: '`' } as const;
 
 const LINE_PREFIXES = { heading: '## ', list: '- ', checklist: '- [ ] ' } as const;
 
@@ -138,6 +138,8 @@ export const formatMarkdown = (command: FormatCommand, selection: Selection): Te
     switch (command) {
         case 'bold':
         case 'italic':
+        case 'underline':
+        case 'strike':
             return toggleInline(selection, INLINE_MARKERS[command]);
         case 'code':
             return selection.text.slice(selection.start, selection.end).includes('\n')

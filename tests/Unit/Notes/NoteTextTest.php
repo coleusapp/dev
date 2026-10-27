@@ -54,3 +54,7 @@ it('shows backslash-escaped characters plainly', function () {
     expect(NoteText::title('\\[draft\\] plan for snake\\_case'))->toBe('[draft] plan for snake_case')
         ->and(NoteText::snippet("T\nprice \\*not\\* bold"))->toBe('price *not* bold');
 });
+
+it('strips underline markers from titles', function () {
+    expect(NoteText::title('++Important++ plan'))->toBe('Important plan');
+});

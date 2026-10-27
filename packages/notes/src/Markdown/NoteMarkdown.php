@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown;
 
+use Coleus\Notes\Markdown\Underline\UnderlineExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
 use League\CommonMark\Extension\Highlight\HighlightExtension;
@@ -51,6 +52,7 @@ class NoteMarkdown
 
         $converter->getEnvironment()->addExtension(new HighlightExtension);
         $converter->getEnvironment()->addExtension(new ChecklistExtension);
+        $converter->getEnvironment()->addExtension(new UnderlineExtension);
         $converter->getEnvironment()->addExtension(new WikiLinkExtension($wikiLinks));
 
         return $converter;

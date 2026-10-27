@@ -250,14 +250,27 @@ const format = (command: FormatCommand): void => {
     applyEdit(textarea.value, formatMarkdown(command, { text: value, start: selectionStart, end: selectionEnd }));
 };
 
-const shortcuts: Record<string, FormatCommand> = { b: 'bold', i: 'italic', k: 'link' };
+const shortcuts: Record<string, FormatCommand> = { b: 'bold', i: 'italic', u: 'underline', k: 'link' };
 
+/**
+ * Shortcuts the visual editor doesn't already handle itself (Tiptap has
+ * Mod-B/I/U built in); in source mode all of them go through the toolbar.
+ */
 const onKeydown = (event: KeyboardEvent): void => {
-    if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey) {
         return;
     }
 
     const key = event.key.toLowerCase();
+
+    if (event.shiftKey) {
+        if (key === 'x') {
+            event.preventDefault();
+            format('strike');
+        }
+
+        return;
+    }
 
     if (key === 's') {
         saveNow(event);

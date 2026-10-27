@@ -14,6 +14,8 @@ describe('formatMarkdown', () => {
         ['bold', '**hello** world', 2, 7, 'hello world', 'hello'],
         ['bold', '**hello** world', 0, 9, 'hello world', 'hello'],
         ['italic', 'ab', 1, 1, 'a__b', ''],
+        ['underline', 'a b', 2, 3, 'a ++b++', 'b'],
+        ['strike', 'a b', 0, 1, '~~a~~ b', 'a'],
         ['code', 'x a\nb y', 2, 5, 'x \n```\na\nb\n```\n y', 'a\nb'],
         ['code', 'run cmd', 4, 7, 'run `cmd`', 'cmd'],
         ['heading', 'Title\nbody', 2, 2, '## Title\nbody', ''],

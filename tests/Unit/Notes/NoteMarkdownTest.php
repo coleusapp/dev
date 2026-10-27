@@ -50,3 +50,14 @@ it('drops unsafe link targets', function (string $markdown) {
     'javascript image' => ['![x](javascript:alert(1))'],
     'reference link' => ["[click][x]\n\n[x]: javascript:alert(1)"],
 ]);
+
+it('renders ++underline++', function (string $markdown, string $html) {
+    expect(NoteMarkdown::toHtml($markdown))->toContain($html);
+})->with([
+    'underline' => ['++under++ line', '<u>under</u> line'],
+    'with emphasis inside' => ['++**both**++', '<u><strong>both</strong></u>'],
+]);
+
+it('leaves other plus signs alone', function (string $markdown) {
+    expect(NoteMarkdown::toHtml($markdown))->not->toContain('<u>');
+})->with(['1+1=2', 'C++ and C++', '+++ triple +++', '++ spaced ++']);
