@@ -5,6 +5,7 @@ import SaveStatus from '@/components/notes/SaveStatus.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
 import { applyEdit, formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
+import { router } from '@inertiajs/vue3';
 import { useLocalStorage, useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
 
@@ -17,6 +18,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     saved: [note: NoteDetailData];
+    createLinked: [title: string];
 }>();
 
 const body = ref(props.note.body);
@@ -75,6 +77,19 @@ const toggleTask = async (checkbox: HTMLInputElement): Promise<void> => {
 
 const onPreviewClick = (event: MouseEvent): void => {
     const target = event.target;
+    const wikiLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a.wiki-link') : null;
+
+    if (wikiLink && !event.metaKey && !event.ctrlKey) {
+        event.preventDefault();
+
+        if (wikiLink.dataset.noteId) {
+            router.visit(wikiLink.href);
+        } else if (wikiLink.dataset.wikiTitle) {
+            emit('createLinked', wikiLink.dataset.wikiTitle);
+        }
+
+        return;
+    }
 
     if (target instanceof HTMLInputElement && target.type === 'checkbox' && target.dataset.taskLine) {
         if (togglingTask.value || props.readonly) {

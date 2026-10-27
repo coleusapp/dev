@@ -3,6 +3,7 @@
 namespace Coleus\Notes\Http\Resources;
 
 use Coleus\Notes\Markdown\NoteMarkdown;
+use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
 use Illuminate\Http\Request;
 
 /**
@@ -17,7 +18,7 @@ class NoteDetailResource extends NoteResource
     {
         return [
             ...parent::toArray($request),
-            'html' => NoteMarkdown::toHtml($this->body),
+            'html' => NoteMarkdown::toHtml($this->body, WikiLinkResolver::forBody($this->body, $this->id)),
             'tags' => $this->tags()->orderBy('name')->pluck('name')->all(),
         ];
     }

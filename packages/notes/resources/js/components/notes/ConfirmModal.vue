@@ -1,9 +1,13 @@
 <script setup lang="ts">
-defineProps<{
-    title: string;
-    description: string;
-    confirmLabel: string;
-}>();
+withDefaults(
+    defineProps<{
+        title: string;
+        description: string;
+        confirmLabel: string;
+        destructive?: boolean;
+    }>(),
+    { destructive: true },
+);
 
 const emit = defineEmits<{
     confirm: [];
@@ -11,9 +15,12 @@ const emit = defineEmits<{
 
 const open = defineModel<boolean>('open', { required: true });
 
+/**
+ * Emits before closing so a parent that clears its state on close still has it.
+ */
 const confirm = (): void => {
-    open.value = false;
     emit('confirm');
+    open.value = false;
 };
 </script>
 
@@ -22,7 +29,7 @@ const confirm = (): void => {
         <template #footer>
             <div class="flex w-full justify-end gap-2">
                 <UiButton color="neutral" variant="ghost" @click="open = false">Cancel</UiButton>
-                <UiButton color="error" @click="confirm">{{ confirmLabel }}</UiButton>
+                <UiButton :color="destructive ? 'error' : 'primary'" @click="confirm">{{ confirmLabel }}</UiButton>
             </div>
         </template>
     </UiModal>

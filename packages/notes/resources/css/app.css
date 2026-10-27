@@ -83,3 +83,7 @@
 .note-preview td {
     @apply border-default border px-2 py-1;
 }
+
+.note-preview a.wiki-link-missing {
+    @apply text-muted decoration-dashed;
+}

@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown;
 
+use Coleus\Notes\Markdown\WikiLinks\WikiLink;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
 use League\CommonMark\Extension\CommonMark\Node\Inline\HtmlInline;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Image;
@@ -17,7 +18,7 @@ use League\CommonMark\Node\Node;
  *
  * Only prose counts: the Markdown is parsed and text is collected from
  * paragraphs, headings and table cells, skipping code spans, code blocks,
- * links (including autolinked URLs) and images. Inside that text a tag must
+ * links (including autolinked URLs), [[wiki links]] and images. Inside that text a tag must
  * start a word, so "#" in "a#b", "/#anchor", "&#38;" or "##" doesn't count,
  * and it needs at least one letter, so "#1" (issue numbers) isn't a tag.
  */
@@ -115,7 +116,7 @@ class Hashtags
             $text .= match (true) {
                 $child instanceof Text => $child->getLiteral(),
                 $child instanceof Newline => "\n",
-                $child instanceof Code, $child instanceof Link, $child instanceof Image, $child instanceof HtmlInline => ' ',
+                $child instanceof Code, $child instanceof Link, $child instanceof Image, $child instanceof HtmlInline, $child instanceof WikiLink => ' ',
                 default => self::prose($child),
             };
         }

@@ -181,6 +181,28 @@ const restoreNote = (): void => {
     }
 };
 
+/**
+ * Clicking a [[wiki link]] to a note that doesn't exist offers to create it.
+ */
+const linkedTitle = ref<string | null>(null);
+
+const creatingLinked = computed({
+    get: () => linkedTitle.value !== null,
+    set: (open: boolean) => {
+        if (!open) {
+            linkedTitle.value = null;
+        }
+    },
+});
+
+const createLinkedNote = (): void => {
+    const title = linkedTitle.value;
+
+    if (title) {
+        router.post(route('notes.store'), { body: `# ${title}\n` });
+    }
+};
+
 const confirmingForceDelete = ref(false);
 const confirmingEmptyTrash = ref(false);
 
@@ -341,7 +363,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                 </template>
 
                 <template #body>
-                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" :readonly="note.data.trashed" @saved="onNoteSaved" />
+                    <NoteEditor
+                        v-if="note"
+                        :key="note.data.id"
+                        :note="note.data"
+                        :readonly="note.data.trashed"
+                        @saved="onNoteSaved"
+                        @create-linked="(title) => (linkedTitle = title)"
+                    />
                     <div v-else class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.
                     </div>
@@ -349,6 +378,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
+        <ConfirmModal
+            v-model:open="creatingLinked"
+            :title="`Create “${linkedTitle ?? ''}”?`"
+            description="There's no note with this title yet."
+            confirm-label="Create note"
+            :destructive="false"
+            @confirm="createLinkedNote"
+        />
         <ConfirmModal
             v-model:open="confirmingForceDelete"
             title="Delete this note forever?"

@@ -2,6 +2,8 @@
 
 namespace Coleus\Notes\Markdown;
 
+use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
+use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
 use League\CommonMark\Extension\Highlight\HighlightExtension;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 use League\CommonMark\Node\Block\Document;
@@ -29,9 +31,13 @@ class NoteMarkdown
         'max_nesting_level' => 50,
     ];
 
-    public static function toHtml(string $body): string
+    /**
+     * Without a resolver every [[wiki link]] renders as a link to a note that
+     * doesn't exist yet; pass WikiLinkResolver::forBody() to link real notes.
+     */
+    public static function toHtml(string $body, ?WikiLinkResolver $wikiLinks = null): string
     {
-        return (string) self::converter()->convert($body);
+        return (string) self::converter($wikiLinks)->convert($body);
     }
 
     public static function parse(string $body): Document
@@ -39,12 +45,13 @@ class NoteMarkdown
         return new MarkdownParser(self::converter()->getEnvironment())->parse($body);
     }
 
-    private static function converter(): GithubFlavoredMarkdownConverter
+    private static function converter(?WikiLinkResolver $wikiLinks = null): GithubFlavoredMarkdownConverter
     {
         $converter = new GithubFlavoredMarkdownConverter(self::OPTIONS);
 
         $converter->getEnvironment()->addExtension(new HighlightExtension);
         $converter->getEnvironment()->addExtension(new ChecklistExtension);
+        $converter->getEnvironment()->addExtension(new WikiLinkExtension($wikiLinks));
 
         return $converter;
     }
