@@ -137,9 +137,10 @@ class NoteService extends Service
     /**
      * @return Collection<int, Note>
      */
-    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes): Collection
+    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes, ?int $folderId = null): Collection
     {
         return $view->scope($this->defaultQuery())
+            ->when($folderId !== null, fn (Builder $query) => $query->where('folder_id', $folderId))
             ->when($tag !== null, fn (Builder $query) => $this->whereTagged($query, (string) $tag))
             ->when($search !== null, fn (Builder $query) => $query->search((string) $search))
             ->get();

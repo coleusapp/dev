@@ -9,6 +9,7 @@ use Coleus\Notes\Http\Resources\NoteResource;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Notes\Search\NoteSearch;
+use Coleus\Notes\Services\FolderService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,7 +21,7 @@ trait RendersNotesPage
     protected function notesPage(NoteListRequest $request, ?Note $note): Response
     {
         $search = $request->search();
-        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view()));
+        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view(), $request->folderId()));
 
         if ($search !== null) {
             $words = NoteSearch::words($search);
@@ -31,6 +32,7 @@ trait RendersNotesPage
             'notes' => $notes,
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),
+            'folders' => app(FolderService::class)->tree(),
             'filters' => $request->filters(),
             'preferences' => NotePreferences::all(),
         ]);

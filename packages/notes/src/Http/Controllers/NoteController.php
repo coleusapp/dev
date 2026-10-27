@@ -10,6 +10,7 @@ use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Requests\NoteRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
 use Coleus\Notes\Models\Note;
+use Coleus\Notes\Services\FolderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +32,10 @@ class NoteController extends Controller
         Gate::authorize('create', Note::class);
 
         $note = Notes::note()->store($request->noteData());
+
+        if ($folder = $request->folder()) {
+            app(FolderService::class)->moveNote($note, $folder);
+        }
 
         return to_route('notes.show', ['note' => $note, ...$this->listQuery($request)]);
     }
@@ -69,7 +74,7 @@ class NoteController extends Controller
      */
     private function listQuery(Request $request): array
     {
-        return collect(['tag', 'q', 'view'])
+        return collect(['tag', 'q', 'view', 'folder'])
             ->mapWithKeys(fn (string $key) => [$key => $request->query($key)])
             ->filter(fn (mixed $value, string $key) => is_string($value) && $value !== '' && ! ($key === 'view' && $value === NoteView::Notes->value))
             ->all();

@@ -2,6 +2,7 @@
 
 use Coleus\Notes\Http\Controllers\ArchiveController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
+use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
@@ -17,6 +18,7 @@ Route::middleware(['web', 'auth'])
     ->group(function () {
         Route::get('/', IndexController::class)->name('index');
         Route::post('/', [NoteController::class, 'store'])->name('store');
+        Route::post('/folders', [FolderController::class, 'store'])->name('folders.store');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

@@ -37,6 +37,7 @@ class NoteResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'folder_id' => $this->folder_id,
             'title' => $this->title,
             'body' => $this->body,
             'snippet' => $snippet,

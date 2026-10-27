@@ -12,6 +12,7 @@ export type NoteData = {
     snippet: string;
     pinned: boolean;
     archived: boolean;
+    folder_id: number | null;
     trashed: boolean;
     highlights: { title: HighlightPart[]; snippet: HighlightPart[] } | null;
     created_at: string;
@@ -56,6 +57,14 @@ export type NoteFilters = {
     tag: string | null;
     q: string | null;
     view: NoteView;
+    folder: number | null;
+};
+
+export type FolderNode = {
+    id: number;
+    name: string;
+    count: number;
+    children: FolderNode[];
 };
 
 /**
@@ -63,9 +72,10 @@ export type NoteFilters = {
  */
 export const filterQuery = (filters: Partial<NoteFilters>): Record<string, string> =>
     Object.fromEntries(
-        Object.entries(filters).filter(
-            (entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== '' && !(entry[0] === 'view' && entry[1] === 'notes'),
-        ),
+        Object.entries(filters)
+            .filter(([key, value]) => (typeof value === 'string' && value !== '') || (key === 'folder' && typeof value === 'number'))
+            .filter(([key, value]) => !(key === 'view' && value === 'notes'))
+            .map(([key, value]) => [key, String(value)]),
     );
 
 export type TableAction =

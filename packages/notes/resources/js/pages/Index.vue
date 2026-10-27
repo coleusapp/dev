@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import ConfirmModal from '@/components/notes/ConfirmModal.vue';
+import FolderTree from '@/components/notes/FolderTree.vue';
+import NewFolderModal from '@/components/notes/NewFolderModal.vue';
 import {
     compareNotes,
     filterQuery,
+    type FolderNode,
     type NoteCollection,
     type NoteData,
     type NoteDetailData,
@@ -25,6 +28,7 @@ const props = defineProps<{
     notes: NoteCollection;
     note: NoteResource | null;
     tags: TagNode[];
+    folders: FolderNode[];
     filters: NoteFilters;
     preferences: NotePreferences;
 }>();
@@ -120,10 +124,16 @@ const onNoteSaved = (saved: NoteDetailData): void => {
  * search is dropped: a new, empty note would never match it.
  */
 const createNote = (): void => {
-    const tag = props.filters.tag;
+    const { tag, folder } = props.filters;
 
-    router.post(route('notes.store', tag ? { tag } : {}), { body: tag ? `\n\n#${tag}` : '' });
+    router.post(route('notes.store', filterQuery({ tag, folder })), { body: tag ? `\n\n#${tag}` : '', folder_id: folder });
 };
+
+const flattenFolders = (nodes: FolderNode[]): FolderNode[] => nodes.flatMap((node) => [node, ...flattenFolders(node.children)]);
+
+const currentFolder = computed(() => flattenFolders(props.folders).find((folder) => folder.id === props.filters.folder) ?? null);
+
+const creatingFolder = ref(false);
 
 const deleteNote = (): void => {
     if (props.note) {
@@ -134,7 +144,7 @@ const deleteNote = (): void => {
 const viewTitles = { notes: 'Notes', archive: 'Archive', trash: 'Trash' } as const;
 
 const listTitle = computed(() => {
-    const base = viewTitles[props.filters.view];
+    const base = currentFolder.value && props.filters.view === 'notes' ? currentFolder.value.name : viewTitles[props.filters.view];
 
     return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}#${props.filters.tag}` : base;
 });
@@ -146,6 +156,11 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
     { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
+    ...flattenFolders(props.folders).map((folder) => ({
+        label: `${folder.name} (${folder.count})`,
+        icon: 'i-lucide-folder',
+        to: route('notes.index', { folder: folder.id }),
+    })),
     ...flattenTags(props.tags).map((tag) => ({
         label: `${tag.path} (${tag.count})`,
         icon: 'i-lucide-hash',
@@ -264,11 +279,25 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         <Link
                             :href="route('notes.index', filters.q ? { q: filters.q } : {})"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
-                            :class="{ 'bg-elevated font-medium': !filters.tag && filters.view === 'notes' }"
+                            :class="{ 'bg-elevated font-medium': !filters.tag && !filters.folder && filters.view === 'notes' }"
                         >
                             <UiIcon name="i-lucide-notebook" class="text-dimmed size-4" />
                             All notes
                         </Link>
+                        <div class="text-dimmed mt-2 flex items-center justify-between px-2 text-xs font-medium">
+                            Folders
+                            <UiButton
+                                icon="i-lucide-folder-plus"
+                                color="neutral"
+                                variant="ghost"
+                                size="xs"
+                                aria-label="New folder"
+                                @click="creatingFolder = true"
+                            />
+                        </div>
+                        <FolderTree v-if="folders.length" :key="filters.folder ?? 0" :folders="folders" :selected="filters.folder" />
+                        <p v-else class="text-dimmed px-2 py-1 text-xs">No folders yet.</p>
+                        <div class="text-dimmed mt-2 px-2 text-xs font-medium">Tags</div>
                         <TagTree
                             v-if="tags.length"
                             :key="filters.tag ?? ''"
@@ -408,6 +437,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
+        <NewFolderModal v-model:open="creatingFolder" :parent-id="currentFolder?.id ?? null" :parent-name="currentFolder?.name ?? null" />
         <VersionHistory v-if="note" :key="note.data.id" v-model:open="showingHistory" :note-id="note.data.id" :readonly="note.data.trashed" />
         <ConfirmModal
             v-model:open="creatingLinked"

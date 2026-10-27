@@ -129,7 +129,7 @@ it('combines search with the tag filter', function () {
 
     $this->get(route('notes.index', ['tag' => 'travel', 'q' => 'lisbon']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('filters', ['tag' => 'travel', 'q' => 'lisbon', 'view' => 'notes'])
+            ->where('filters', ['tag' => 'travel', 'q' => 'lisbon', 'view' => 'notes', 'folder' => null])
             ->has('notes.data', 1)
             ->where('notes.data.0.id', $both->id));
 });

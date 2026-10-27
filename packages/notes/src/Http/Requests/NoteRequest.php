@@ -2,6 +2,8 @@
 
 namespace Coleus\Notes\Http\Requests;
 
+use Closure;
+use Coleus\Notes\Models\Folder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class NoteRequest extends FormRequest
@@ -20,6 +22,15 @@ class NoteRequest extends FormRequest
     {
         return [
             'body' => ['present', 'nullable', 'string', 'max:'.self::MAX_BODY_LENGTH],
+            'folder_id' => [
+                'nullable',
+                'integer',
+                function (string $attribute, mixed $value, Closure $fail) {
+                    if ($value !== null && ! Folder::query()->whereKey($value)->exists()) {
+                        $fail('That folder does not exist.');
+                    }
+                },
+            ],
         ];
     }
 
@@ -40,5 +51,15 @@ class NoteRequest extends FormRequest
     public function noteData(): array
     {
         return ['body' => (string) $this->validated('body')];
+    }
+
+    /**
+     * The folder a new note goes into (the one being viewed), if any.
+     */
+    public function folder(): ?Folder
+    {
+        $folder = $this->validated('folder_id');
+
+        return $folder === null ? null : Folder::query()->findOrFail((int) $folder);
     }
 }

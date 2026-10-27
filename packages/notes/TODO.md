@@ -17,7 +17,7 @@ Still open from the Bear ladder (also Obsidian features): export .md/.zip, impor
 duplicate note, sort options, version history, global shortcuts. They're folded into the tasks below.
 
 ## O1. Organizing notes
-- [ ] O1.1 Folders: nested folders table, note belongs to one folder, file-explorer tree in sidebar, counts 🍎 📦
+- [x] O1.1 Folders: nested folders table, note belongs to one folder, file-explorer tree in sidebar, counts 🍎 📦
 - [ ] O1.2 Create / rename / move / delete folders (delete moves notes to trash), drag-and-drop notes into folders; restoring a trashed note puts it back in its original folder 🍎
 - [ ] O1.3 Sort options for list and explorer: name, created, modified (asc/desc), remembered per user (Bear 7.4) (Apple: sort per folder) 🍎
 - [ ] O1.4 Bookmarks: bookmark notes, headings, blocks and saved searches; bookmark groups; Bookmarks panel (Box: favorites / collections) 📦
