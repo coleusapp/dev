@@ -1,11 +1,17 @@
 import type { Resource } from '@coleus/support/types/resource';
 
+export type HighlightPart = {
+    text: string;
+    match: boolean;
+};
+
 export type NoteData = {
     id: number;
     title: string;
     body: string;
     snippet: string;
     pinned: boolean;
+    highlights: { title: HighlightPart[]; snippet: HighlightPart[] } | null;
     created_at: string;
     updated_at: string;
     updated_at_for_humans: string;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import HighlightedText from '@/components/notes/HighlightedText.vue';
 import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -42,10 +43,16 @@ const emptyMessage = computed(() => {
             :class="{ 'bg-elevated': note.id === selectedId }"
         >
             <span class="flex items-center gap-1">
-                <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">{{ note.title || 'Empty note' }}</span>
+                <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">
+                    <HighlightedText v-if="note.highlights && note.title" :parts="note.highlights.title" />
+                    <template v-else>{{ note.title || 'Empty note' }}</template>
+                </span>
                 <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
             </span>
-            <span v-if="note.snippet" class="text-muted line-clamp-2 text-xs">{{ note.snippet }}</span>
+            <span v-if="note.snippet" class="text-muted line-clamp-2 text-xs">
+                <HighlightedText v-if="note.highlights" :parts="note.highlights.snippet" />
+                <template v-else>{{ note.snippet }}</template>
+            </span>
             <time class="text-dimmed text-xs" :datetime="note.updated_at">{{ note.updated_at_for_humans }}</time>
         </Link>
     </nav>

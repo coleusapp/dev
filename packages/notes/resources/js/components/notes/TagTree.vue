@@ -6,6 +6,7 @@ import { ref } from 'vue';
 const props = defineProps<{
     tags: TagNode[];
     selected: string | null;
+    search: string | null;
     depth?: number;
 }>();
 
@@ -39,13 +40,23 @@ const toggle = (tag: TagNode): void => {
                     @click="toggle(tag)"
                 />
                 <span v-else class="w-6 shrink-0" />
-                <Link :href="route('notes.index', { tag: tag.path })" preserve-scroll class="flex min-w-0 flex-1 items-center gap-1 py-1.5">
+                <Link
+                    :href="route('notes.index', { tag: tag.path, ...(search ? { q: search } : {}) })"
+                    preserve-scroll
+                    class="flex min-w-0 flex-1 items-center gap-1 py-1.5"
+                >
                     <UiIcon name="i-lucide-hash" class="text-dimmed size-3.5 shrink-0" />
                     <span class="truncate">{{ tag.name }}</span>
                     <span class="text-dimmed ml-auto text-xs">{{ tag.count }}</span>
                 </Link>
             </div>
-            <TagTree v-if="tag.children.length && expanded[tag.path]" :tags="tag.children" :selected="selected" :depth="(depth ?? 0) + 1" />
+            <TagTree
+                v-if="tag.children.length && expanded[tag.path]"
+                :tags="tag.children"
+                :selected="selected"
+                :search="search"
+                :depth="(depth ?? 0) + 1"
+            />
         </li>
     </ul>
 </template>

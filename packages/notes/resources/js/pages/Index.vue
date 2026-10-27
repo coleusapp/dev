@@ -130,11 +130,11 @@ const deleteNote = (): void => {
 const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);
 
 const tagFilterItems = computed<DropdownMenuItem[]>(() => [
-    { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index') },
+    { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ tag: null, q: props.filters.q })) },
     ...flattenTags(props.tags).map((tag) => ({
         label: `${tag.path} (${tag.count})`,
         icon: 'i-lucide-hash',
-        to: route('notes.index', { tag: tag.path }),
+        to: route('notes.index', filterQuery({ tag: tag.path, q: props.filters.q })),
     })),
 ]);
 
@@ -175,14 +175,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                 <template #body>
                     <nav class="flex flex-col gap-1" aria-label="Filter notes">
                         <Link
-                            :href="route('notes.index')"
+                            :href="route('notes.index', filters.q ? { q: filters.q } : {})"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
                             :class="{ 'bg-elevated font-medium': !filters.tag }"
                         >
                             <UiIcon name="i-lucide-notebook" class="text-dimmed size-4" />
                             All notes
                         </Link>
-                        <TagTree v-if="tags.length" :key="filters.tag ?? ''" :tags="tags" :selected="filters.tag" />
+                        <TagTree v-if="tags.length" :key="filters.tag ?? ''" :tags="tags" :selected="filters.tag" :search="filters.q" />
                         <p v-else class="text-dimmed px-2 py-1.5 text-xs">Add #tags to a note to organize it.</p>
                     </nav>
                 </template>

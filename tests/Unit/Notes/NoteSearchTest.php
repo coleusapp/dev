@@ -121,3 +121,50 @@ it('splits search words and strips operators', function () {
     expect(NoteSearch::words('  +Foo  -bar "baz" foo (qux) '))->toBe(['foo', 'bar', 'baz', 'qux'])
         ->and(NoteSearch::words(implode(' ', range('a', 'z'))))->toHaveCount(NoteSearch::MAX_WORDS);
 });
+
+it('combines search with the tag filter', function () {
+    $both = Note::factory()->create(['body' => "# Lisbon flights\n#travel"]);
+    Note::factory()->create(['body' => "# Lisbon office\n#work"]);
+    Note::factory()->create(['body' => "# Porto\n#travel"]);
+
+    $this->get(route('notes.index', ['tag' => 'travel', 'q' => 'lisbon']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters', ['tag' => 'travel', 'q' => 'lisbon'])
+            ->has('notes.data', 1)
+            ->where('notes.data.0.id', $both->id));
+});
+
+it('includes nested tags when combining search and tag', function () {
+    $nested = Note::factory()->create(['body' => "# Lisbon\n#travel/2026"]);
+
+    $this->get(route('notes.index', ['tag' => 'travel', 'q' => 'lisbon']))
+        ->assertInertia(fn (Assert $page) => $page->has('notes.data', 1)->where('notes.data.0.id', $nested->id));
+});
+
+it('highlights matches in titles and snippets', function () {
+    Note::factory()->create(['body' => "# Trip to Lisbon\n".str_repeat('filler ', 30).'book the lisbon hotel']);
+
+    $this->get(route('notes.index', ['q' => 'lisbon']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('notes.data.0.highlights.title', [
+                ['text' => 'Trip to ', 'match' => false],
+                ['text' => 'Lisbon', 'match' => true],
+            ])
+            ->where('notes.data.0.snippet', fn (string $snippet) => str_starts_with($snippet, '...') && str_contains($snippet, 'lisbon hotel'))
+            ->where('notes.data.0.highlights.snippet', fn ($parts) => collect($parts)->contains(['text' => 'lisbon', 'match' => true])));
+});
+
+it('sends no highlights without a search', function () {
+    Note::factory()->create(['body' => 'Lisbon']);
+
+    $this->get(route('notes.index'))
+        ->assertInertia(fn (Assert $page) => $page->where('notes.data.0.highlights', null));
+});
+
+it('keeps the search on the open note page', function () {
+    $note = Note::factory()->create(['body' => 'Lisbon']);
+    Note::factory()->create(['body' => 'Porto']);
+
+    $this->get(route('notes.show', ['note' => $note, 'q' => 'lisbon']))
+        ->assertInertia(fn (Assert $page) => $page->where('filters.q', 'lisbon')->has('notes.data', 1)->where('note.data.id', $note->id));
+});

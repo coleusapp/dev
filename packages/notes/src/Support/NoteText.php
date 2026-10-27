@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Support;
 
+use Coleus\Notes\Search\Highlighter;
 use Illuminate\Support\Str;
 
 /**
@@ -12,6 +13,11 @@ class NoteText
     public const int SNIPPET_LENGTH = 140;
 
     public const int TITLE_LENGTH = 255;
+
+    /**
+     * Characters of context shown before a search match in a snippet.
+     */
+    public const int SEARCH_CONTEXT = 30;
 
     /**
      * The first non-empty line of the body as plain text, like Bear's title.
@@ -38,6 +44,28 @@ class NoteText
             ->filter(fn (string $line) => $line !== '');
 
         return Str::limit($lines->implode(' '), $length);
+    }
+
+    /**
+     * Like snippet(), but when a search word appears in the body the excerpt
+     * is moved to show it, with a little context before it.
+     *
+     * @param  list<string>  $words
+     */
+    public static function searchSnippet(string $body, array $words, int $length = self::SNIPPET_LENGTH): string
+    {
+        $text = self::snippet($body, PHP_INT_MAX);
+        $offset = Highlighter::firstMatch($text, $words);
+
+        if ($offset === null || $offset < self::SEARCH_CONTEXT) {
+            return Str::limit($text, $length);
+        }
+
+        $start = $offset - self::SEARCH_CONTEXT;
+        $wordStart = mb_strrpos(mb_substr($text, 0, $start + 1), ' ');
+        $start = $wordStart === false ? $start : $wordStart + 1;
+
+        return '...'.Str::limit(mb_substr($text, $start), $length);
     }
 
     /**

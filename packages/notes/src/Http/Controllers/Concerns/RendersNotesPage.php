@@ -7,6 +7,7 @@ use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
 use Coleus\Notes\Http\Resources\NoteResource;
 use Coleus\Notes\Models\Note;
+use Coleus\Notes\Search\NoteSearch;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,8 +18,16 @@ trait RendersNotesPage
 {
     protected function notesPage(NoteListRequest $request, ?Note $note): Response
     {
+        $search = $request->search();
+        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search));
+
+        if ($search !== null) {
+            $words = NoteSearch::words($search);
+            $notes->collection->each(fn (NoteResource $resource) => $resource->highlight($words));
+        }
+
         return Inertia::render('Index', [
-            'notes' => NoteResource::collection(Notes::note()->list($request->tag(), $request->search())),
+            'notes' => $notes,
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),
             'filters' => $request->filters(),
