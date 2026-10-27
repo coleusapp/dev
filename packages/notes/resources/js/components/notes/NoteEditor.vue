@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { NoteDetailData } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
+import { applyEdit, formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
 import { useLocalStorage, useMediaQuery } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 
 type EditorMode = 'edit' | 'split' | 'preview';
 
@@ -105,21 +107,50 @@ const saveNow = (event: KeyboardEvent): void => {
     event.preventDefault();
     flush();
 };
+
+const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
+
+const format = (command: FormatCommand): void => {
+    if (!textarea.value || togglingTask.value) {
+        return;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea.value;
+    applyEdit(textarea.value, formatMarkdown(command, { text: value, start: selectionStart, end: selectionEnd }));
+};
+
+const shortcuts: Record<string, FormatCommand> = { b: 'bold', i: 'italic', k: 'link' };
+
+const onKeydown = (event: KeyboardEvent): void => {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) {
+        return;
+    }
+
+    const key = event.key.toLowerCase();
+
+    if (key === 's') {
+        saveNow(event);
+    } else if (shortcuts[key]) {
+        event.preventDefault();
+        format(shortcuts[key]);
+    }
+};
 </script>
 
 <template>
     <div class="flex h-full flex-col gap-2">
+        <FormatToolbar v-if="mode !== 'preview'" @format="format" />
         <div class="flex min-h-0 flex-1 gap-4">
             <textarea
                 v-if="mode !== 'preview'"
+                ref="textarea"
                 v-model="body"
                 class="h-full min-w-0 flex-1 resize-none bg-transparent font-mono text-sm leading-relaxed focus:outline-none"
                 placeholder="Start writing..."
                 aria-label="Note"
                 :readonly="togglingTask"
                 autofocus
-                @keydown.meta.s="saveNow"
-                @keydown.ctrl.s="saveNow"
+                @keydown="onKeydown"
             />
             <!-- The HTML is rendered on the server with raw HTML escaped and unsafe links removed (NoteMarkdown). -->
             <!-- eslint-disable-next-line vue/no-v-html -->
