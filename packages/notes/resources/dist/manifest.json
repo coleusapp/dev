@@ -1,13 +1,13 @@
 {
-  "_NotesLayout.vue_vue_type_script_setup_true_lang-bSi0M8YO.js": {
-    "file": "assets/NotesLayout.vue_vue_type_script_setup_true_lang-bSi0M8YO.js",
+  "_NotesLayout.vue_vue_type_script_setup_true_lang-DD8G8Kwf.js": {
+    "file": "assets/NotesLayout.vue_vue_type_script_setup_true_lang-DD8G8Kwf.js",
     "name": "NotesLayout.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-BZIOBFuj.js",
+    "file": "assets/app-btD8x_Q-.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -20,22 +20,22 @@
     ]
   },
   "resources/js/pages/Index.vue": {
-    "file": "assets/Index-D6-ZKH4P.js",
+    "file": "assets/Index-C72YrZAs.js",
     "name": "Index",
     "src": "resources/js/pages/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-bSi0M8YO.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-DD8G8Kwf.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/Settings.vue": {
-    "file": "assets/Settings-DRvG1DKJ.js",
+    "file": "assets/Settings-noigmY8a.js",
     "name": "Settings",
     "src": "resources/js/pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-bSi0M8YO.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-DD8G8Kwf.js",
       "resources/js/app.ts"
     ]
   }
