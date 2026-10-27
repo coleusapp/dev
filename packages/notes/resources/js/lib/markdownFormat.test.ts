@@ -1,4 +1,4 @@
-import { applyParagraphStyle, formatMarkdown, toggleHighlight, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
+import { applyParagraphStyle, formatMarkdown, indentListLines, toggleHighlight, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
 import { describe, expect, it } from 'vitest';
 
 const apply = (command: FormatCommand, text: string, start: number, end: number): [string, string] => {
@@ -94,5 +94,29 @@ describe('checklist on several lines', () => {
 
         expect(checklist).toBe('- [ ] milk\n\n- [ ] eggs\n- [ ] bread');
         expect(apply(checklist, 0, checklist.length)).toBe('milk\n\neggs\nbread');
+    });
+});
+
+describe('indentListLines', () => {
+    const indent = (text: string, start: number, end: number, outdent = false): string | null => {
+        const edit = indentListLines({ text, start, end }, outdent);
+
+        return edit ? text.slice(0, edit.from) + edit.insert + text.slice(edit.to) : null;
+    };
+
+    it('nests a checklist item under the one above', () => {
+        expect(indent('- [ ] trip\n- [ ] pack', 15, 15)).toBe('- [ ] trip\n  - [ ] pack');
+    });
+
+    it('outdents back', () => {
+        expect(indent('- [ ] trip\n  - [ ] pack', 17, 17, true)).toBe('- [ ] trip\n- [ ] pack');
+    });
+
+    it('indents every selected list line but not plain lines', () => {
+        expect(indent('- a\ntext\n1. b', 0, 13)).toBe('  - a\ntext\n  1. b');
+    });
+
+    it('does nothing outside lists', () => {
+        expect(indent('plain', 2, 2)).toBeNull();
     });
 });

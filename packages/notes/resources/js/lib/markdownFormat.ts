@@ -155,6 +155,31 @@ export const toggleHighlight = ({ text, start, end }: Selection, color: string |
     return { from: start, to: end, insert: `==${selected}==${suffix}`, selectionStart: start + 2, selectionEnd: end + 2 };
 };
 
+const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s/;
+
+/**
+ * Tab / Shift+Tab on list and checklist lines: indents the selected lines
+ * by two spaces (making sub-items) or outdents them. Returns null when the
+ * cursor isn't on a list line, so Tab keeps its normal meaning elsewhere.
+ */
+export const indentListLines = (selection: Selection, outdent: boolean): TextEdit | null => {
+    const { from, to, lines } = lineRange(selection);
+
+    if (!lines.some((line) => LIST_ITEM.test(line))) {
+        return null;
+    }
+
+    const changed = lines.map((line) => {
+        if (!LIST_ITEM.test(line)) {
+            return line;
+        }
+
+        return outdent ? line.replace(/^( {1,2}|\t)/, '') : `  ${line}`;
+    });
+
+    return replaceLines(selection, from, to, lines, changed);
+};
+
 export type ParagraphStyle = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled';
 
 const STYLE_PREFIXES = { title: '# ', heading: '## ', subheading: '### ', body: '' } as const;

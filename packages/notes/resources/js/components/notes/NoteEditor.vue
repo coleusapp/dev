@@ -5,7 +5,15 @@ import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
-import { applyEdit, applyParagraphStyle, formatMarkdown, toggleHighlight, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
+import {
+    applyEdit,
+    applyParagraphStyle,
+    formatMarkdown,
+    indentListLines,
+    toggleHighlight,
+    type FormatCommand,
+    type ParagraphStyle,
+} from '@/lib/markdownFormat';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
@@ -267,10 +275,34 @@ const format = (command: FormatCommand): void => {
 const shortcuts: Record<string, FormatCommand> = { b: 'bold', i: 'italic', u: 'underline', k: 'link' };
 
 /**
+ * Tab / Shift+Tab nest and un-nest list and checklist lines in Markdown
+ * source (the visual editor does this itself). Elsewhere Tab keeps moving focus.
+ */
+const indentSourceList = (event: KeyboardEvent): void => {
+    if (!textarea.value || togglingTask.value) {
+        return;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea.value;
+    const edit = indentListLines({ text: value, start: selectionStart, end: selectionEnd }, event.shiftKey);
+
+    if (edit) {
+        event.preventDefault();
+        applyEdit(textarea.value, edit);
+    }
+};
+
+/**
  * Shortcuts the visual editor doesn't already handle itself (Tiptap has
  * Mod-B/I/U built in); in source mode all of them go through the toolbar.
  */
 const onKeydown = (event: KeyboardEvent): void => {
+    if (event.key === 'Tab' && !event.metaKey && !event.ctrlKey && !event.altKey && event.target === textarea.value) {
+        indentSourceList(event);
+
+        return;
+    }
+
     if (!(event.metaKey || event.ctrlKey) || event.altKey) {
         return;
     }

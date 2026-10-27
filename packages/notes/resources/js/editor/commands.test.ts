@@ -153,3 +153,22 @@ describe('checklist button', () => {
         expect(editorMarkdown(editor, '')).toBe('- [ ] milk\n- [ ] eggs');
     });
 });
+
+describe('sub-tasks in the visual editor', () => {
+    it('Tab nests a checklist item and Shift+Tab lifts it back', () => {
+        loadMarkdown(editor, '- [ ] trip\n- [ ] pack');
+        let packPosition = -1;
+        editor.state.doc.descendants((node, position) => {
+            if (node.isText && node.text === 'pack') {
+                packPosition = position;
+            }
+        });
+        editor.commands.setTextSelection(packPosition + 1);
+
+        editor.commands.sinkListItem('taskItem');
+        expect(editorMarkdown(editor, '')).toBe('- [ ] trip\n  - [ ] pack');
+
+        editor.commands.liftListItem('taskItem');
+        expect(editorMarkdown(editor, '')).toBe('- [ ] trip\n- [ ] pack');
+    });
+});
