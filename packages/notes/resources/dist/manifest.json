@@ -1,6 +1,6 @@
 {
   "resources/js/app.ts": {
-    "file": "assets/app-CjROw6yp.js",
+    "file": "assets/app-BEGQsnHv.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -8,11 +8,11 @@
       "resources/js/pages/Index.vue"
     ],
     "css": [
-      "assets/app-BYF5sIJ8.css"
+      "assets/app-BXbOmPNU.css"
     ]
   },
   "resources/js/pages/Index.vue": {
-    "file": "assets/Index-DzHQF3E-.js",
+    "file": "assets/Index-D5Xa9Ylj.js",
     "name": "Index",
     "src": "resources/js/pages/Index.vue",
     "isDynamicEntry": true,
