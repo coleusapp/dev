@@ -5,6 +5,7 @@ export type NoteData = {
     title: string;
     body: string;
     snippet: string;
+    pinned: boolean;
     created_at: string;
     updated_at: string;
     updated_at_for_humans: string;
@@ -12,3 +13,9 @@ export type NoteData = {
 
 export type NoteResource = Resource<NoteData>;
 export type NoteCollection = { data: NoteData[] };
+
+/**
+ * The server's list order: pinned notes first, then most recently updated.
+ */
+export const compareNotes = (a: NoteData, b: NoteData): number =>
+    Number(b.pinned) - Number(a.pinned) || b.updated_at.localeCompare(a.updated_at) || b.id - a.id;

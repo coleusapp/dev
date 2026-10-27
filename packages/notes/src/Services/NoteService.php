@@ -22,7 +22,25 @@ class NoteService extends Service
      */
     public function defaultQuery(): Builder
     {
-        return Note::query()->orderByDesc('updated_at')->orderByDesc('id');
+        return Note::query()
+            ->orderByRaw('case when pinned_at is null then 1 else 0 end')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id');
+    }
+
+    /**
+     * Pinning is not an edit, so it leaves updated_at (and the list order within pinned notes) alone.
+     */
+    public function pin(Note $note): void
+    {
+        if ($note->pinned_at === null) {
+            Note::withoutTimestamps(fn () => $note->forceFill(['pinned_at' => now()])->save());
+        }
+    }
+
+    public function unpin(Note $note): void
+    {
+        Note::withoutTimestamps(fn () => $note->forceFill(['pinned_at' => null])->save());
     }
 
     /**

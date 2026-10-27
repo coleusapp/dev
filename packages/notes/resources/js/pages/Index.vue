@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NoteCollection, NoteData, NoteResource } from '@/components/notes/note';
+import { compareNotes, type NoteCollection, type NoteData, type NoteResource } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
@@ -31,10 +31,10 @@ watch(
 
 /**
  * Autosave doesn't reload the page, so the saved note's row is refreshed in
- * place and moved to the top, matching the server's last-updated order.
+ * place and re-sorted the way the server orders the list.
  */
 const onNoteSaved = (saved: NoteData): void => {
-    listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)];
+    listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes);
     title.value = saved.title;
 };
 
@@ -48,7 +48,22 @@ const deleteNote = (): void => {
     }
 };
 
+const isPinned = computed(() => listedNotes.value.find((listed) => listed.id === props.note?.data.id)?.pinned ?? false);
+
+const togglePin = (): void => {
+    if (!props.note) {
+        return;
+    }
+
+    router.visit(route(isPinned.value ? 'notes.unpin' : 'notes.pin', { note: props.note.data.id }), {
+        method: isPinned.value ? 'delete' : 'post',
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
 const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
+    [{ label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin }],
     [{ label: 'Delete note', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
 ]);
 </script>

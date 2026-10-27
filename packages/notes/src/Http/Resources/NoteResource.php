@@ -18,6 +18,7 @@ class NoteResource extends JsonResource
             'title' => $this->title,
             'body' => $this->body,
             'snippet' => NoteText::snippet($this->body),
+            'pinned' => $this->pinned_at !== null,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'updated_at_for_humans' => $this->updated_at?->diffForHumans(),
