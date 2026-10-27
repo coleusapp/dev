@@ -22,9 +22,16 @@ export type NoteData = {
 /**
  * The open note, which also carries its server-rendered preview.
  */
+export type Backlink = {
+    id: number;
+    title: string;
+    updated_at_for_humans: string;
+};
+
 export type NoteDetailData = NoteData & {
     html: string;
     tags: string[];
+    backlinks: Backlink[];
 };
 
 export type NoteResource = Resource<NoteDetailData>;

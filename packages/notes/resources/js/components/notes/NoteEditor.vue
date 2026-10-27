@@ -5,7 +5,7 @@ import SaveStatus from '@/components/notes/SaveStatus.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
 import { applyEdit, formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useLocalStorage, useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
 
@@ -24,10 +24,12 @@ const emit = defineEmits<{
 const body = ref(props.note.body);
 const html = ref(props.note.html);
 const tags = ref(props.note.tags);
+const backlinks = ref(props.note.backlinks);
 
 const onServerSave = (note: NoteDetailData): void => {
     html.value = note.html;
     tags.value = note.tags;
+    backlinks.value = note.backlinks;
     emit('saved', note);
 };
 
@@ -192,6 +194,22 @@ const onKeydown = (event: KeyboardEvent): void => {
                 <UiBadge color="neutral" variant="soft" size="sm" icon="i-lucide-hash">{{ tag }}</UiBadge>
             </li>
         </ul>
+        <details v-if="backlinks.length" class="border-default border-t pt-2 text-sm">
+            <summary class="text-muted cursor-pointer text-xs">
+                Linked from {{ backlinks.length }} note{{ backlinks.length === 1 ? '' : 's' }}
+            </summary>
+            <ul class="mt-1 flex flex-col gap-1">
+                <li v-for="backlink in backlinks" :key="backlink.id">
+                    <Link
+                        :href="route('notes.show', { note: backlink.id })"
+                        class="hover:bg-elevated flex items-center justify-between gap-2 rounded px-2 py-1"
+                    >
+                        <span class="truncate">{{ backlink.title || 'Untitled note' }}</span>
+                        <span class="text-dimmed shrink-0 text-xs">{{ backlink.updated_at_for_humans }}</span>
+                    </Link>
+                </li>
+            </ul>
+        </details>
         <div class="flex items-center justify-between gap-2">
             <p v-if="readonly" class="text-dimmed flex items-center gap-1 text-xs">
                 <UiIcon name="i-lucide-trash-2" class="size-3" />
