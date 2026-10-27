@@ -55,6 +55,7 @@ const emptyMessage = computed(() => {
             v-for="note in notes"
             :key="note.id"
             :href="route('notes.show', { note: note.id, ...query })"
+            preserve-state
             preserve-scroll
             class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
             :class="{ 'bg-elevated': note.id === selectedId }"

@@ -34,7 +34,7 @@ import { pasteUrlOverSelection } from '@/lib/paste';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch } from 'vue';
+import { computed, onActivated, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     note: NoteDetailData;
@@ -58,6 +58,18 @@ const tags = ref(props.note.tags);
 const backlinks = ref(props.note.backlinks);
 
 const updatedAt = ref(props.note.updated_at);
+
+/**
+ * Coming back to a note kept alive (for its undo history): if the note
+ * changed elsewhere meanwhile and nothing here is unsaved, take the newer
+ * text. Otherwise keep what's on screen.
+ */
+onActivated(() => {
+    if (!isDirty.value && props.note.body !== body.value && props.note.updated_at > updatedAt.value) {
+        adopt(props.note);
+        onServerSave(props.note);
+    }
+});
 
 const onServerSave = (note: NoteDetailData): void => {
     updatedAt.value = note.updated_at;
@@ -209,7 +221,7 @@ const openWikiLink = async (title: string): Promise<void> => {
     const id = payload?.data?.id;
 
     if (response.ok && typeof id === 'number') {
-        router.visit(route('notes.show', { note: id }));
+        router.visit(route('notes.show', { note: id }), { preserveState: true });
     } else if (response.ok) {
         emit('createLinked', title);
     }
@@ -806,6 +818,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 <li v-for="backlink in backlinks" :key="backlink.id">
                     <Link
                         :href="route('notes.show', { note: backlink.id })"
+                        preserve-state
                         class="hover:bg-elevated flex items-center justify-between gap-2 rounded px-2 py-1"
                     >
                         <span class="truncate">{{ backlink.title || 'Untitled note' }}</span>

@@ -1,8 +1,9 @@
 import type { NoteDetailData } from '@/components/notes/note';
 import { jsonHeaders } from '@/lib/http';
+import type { GlobalEvent } from '@inertiajs/core';
 import { router } from '@inertiajs/vue3';
 import { useDebounceFn, useEventListener } from '@vueuse/core';
-import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue';
+import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, watch, type Ref } from 'vue';
 
 export type AutosaveStatus = 'saved' | 'unsaved' | 'saving' | 'error';
 
@@ -123,7 +124,7 @@ export const useAutosave = (
         }
     });
 
-    const removeBeforeListener = router.on('before', (event) => {
+    const guardNavigation = (event: GlobalEvent<'before'>) => {
         if (!isDirty.value && !inFlight.value) {
             return;
         }
@@ -148,10 +149,26 @@ export const useAutosave = (
         });
 
         return false;
+    };
+
+    let removeBeforeListener: (() => void) | null = router.on('before', guardNavigation);
+
+    /**
+     * Editors kept alive for undo history (KeepAlive) stop guarding
+     * navigation while hidden, and start again when shown.
+     */
+    onDeactivated(() => {
+        removeBeforeListener?.();
+        removeBeforeListener = null;
+        flushWithKeepalive();
+    });
+
+    onActivated(() => {
+        removeBeforeListener ??= router.on('before', guardNavigation);
     });
 
     onBeforeUnmount(() => {
-        removeBeforeListener();
+        removeBeforeListener?.();
         flushWithKeepalive();
     });
 

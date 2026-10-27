@@ -383,21 +383,24 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                 </template>
 
                 <template #body>
-                    <NoteEditor
-                        v-if="note"
-                        :key="note.data.id"
-                        :note="note.data"
-                        :readonly="note.data.trashed"
-                        :default-mode="preferences['editor.default_mode']"
-                        :autosave-delay="preferences['editor.autosave_delay']"
-                        :first-line-style="preferences['editor.first_line_style']"
-                        :checked-to-bottom="preferences['checklists.checked_to_bottom']"
-                        :spellcheck="preferences['editor.spellcheck']"
-                        :text-direction="preferences['editor.text_direction']"
-                        @saved="onNoteSaved"
-                        @create-linked="(title) => (linkedTitle = title)"
-                    />
-                    <div v-else class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
+                    <!-- Recently opened notes stay alive so each keeps its undo history while you switch between them. -->
+                    <KeepAlive :max="10">
+                        <NoteEditor
+                            v-if="note"
+                            :key="note.data.id"
+                            :note="note.data"
+                            :readonly="note.data.trashed"
+                            :default-mode="preferences['editor.default_mode']"
+                            :autosave-delay="preferences['editor.autosave_delay']"
+                            :first-line-style="preferences['editor.first_line_style']"
+                            :checked-to-bottom="preferences['checklists.checked_to_bottom']"
+                            :spellcheck="preferences['editor.spellcheck']"
+                            :text-direction="preferences['editor.text_direction']"
+                            @saved="onNoteSaved"
+                            @create-linked="(title) => (linkedTitle = title)"
+                        />
+                    </KeepAlive>
+                    <div v-if="!note" class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.
                     </div>
                 </template>

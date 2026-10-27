@@ -194,7 +194,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A12.1 Print a note (print stylesheet: hides chrome, keeps checkboxes/tables/images) 📦
 
 ## A13. Undo history (Apple Notes)
-- [ ] A13.1 Undo/redo history that survives switching notes in a session
+- [x] A13.1 Undo/redo history that survives switching notes in a session
 
 ## B5. Date chips (Box Notes)
 - [ ] B5.4 Date chips: insert a date (`@today`, date picker) rendered as a chip, clickable to the Calendar app
