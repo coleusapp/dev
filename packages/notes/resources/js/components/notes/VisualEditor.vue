@@ -5,6 +5,8 @@ import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/
 import { editorExtensions } from '@/editor/extensions';
 import { splitFrontMatter } from '@/editor/frontMatter';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
+import { todayIso, type SlashCommand } from '@/editor/slashCommands';
+import { SlashMenu, type SlashState } from '@/editor/SlashMenu';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import type { EditorState, Transaction } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
@@ -20,6 +22,7 @@ const props = defineProps<{
     active?: boolean;
     firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
     checkedToBottom?: boolean;
+    onSlashKey?: (key: string) => boolean;
 }>();
 
 const emit = defineEmits<{
@@ -27,6 +30,7 @@ const emit = defineEmits<{
     faithful: [faithful: boolean];
     style: [style: ParagraphStyle | null];
     inTable: [inTable: boolean];
+    slash: [state: SlashState | null];
     openWikiLink: [title: string];
     openTag: [tag: string];
 }>();
@@ -47,7 +51,10 @@ const load = (markdown: string): void => {
 };
 
 const editor = useEditor({
-    extensions: editorExtensions({ checkedToBottom: () => props.checkedToBottom ?? false }),
+    extensions: [
+        ...editorExtensions({ checkedToBottom: () => props.checkedToBottom ?? false }),
+        SlashMenu.configure({ onState: (state) => emit('slash', state), onKey: (key) => props.onSlashKey?.(key) ?? false }),
+    ],
     editable: !props.readonly,
     editorProps: {
         attributes: { class: 'note-preview tiptap h-full focus:outline-none', 'aria-label': 'Note', spellcheck: 'true' },
@@ -280,7 +287,47 @@ const tableAction = (action: Exclude<TableAction, 'format'>): void => {
     commands[action]();
 };
 
-defineExpose({ run, setStyle, highlight, checklistAction, tableAction, setLink, unsetLink, isLinkActive, focus });
+/**
+ * Carries out a "/" menu command: removes the typed "/query", then inserts
+ * or formats like the toolbar would.
+ */
+const runSlash = (command: SlashCommand, range: { from: number; to: number }): void => {
+    const current = editor.value;
+
+    if (!current) {
+        return;
+    }
+
+    current.chain().focus().deleteRange(range).run();
+
+    const { action } = command;
+
+    switch (action.type) {
+        case 'style':
+            applyParagraphStyle(current, action.style);
+            break;
+        case 'format':
+            if (action.command !== 'link') {
+                run(action.command);
+            }
+            break;
+        case 'table':
+            tableAction('insert');
+            break;
+        case 'divider':
+            current.chain().focus().setHorizontalRule().run();
+            break;
+        case 'wikiLink':
+            current.chain().focus().insertContent('[[]]').run();
+            current.commands.setTextSelection(current.state.selection.from - 2);
+            break;
+        case 'date':
+            current.chain().focus().insertContent(todayIso()).run();
+            break;
+    }
+};
+
+defineExpose({ run, setStyle, highlight, checklistAction, tableAction, runSlash, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

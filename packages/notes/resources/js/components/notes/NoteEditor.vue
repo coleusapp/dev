@@ -2,11 +2,15 @@
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
+import SlashMenu from '@/components/notes/SlashMenu.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
+import { filterSlashCommands, slashQuery, todayIso, type SlashCommand } from '@/editor/slashCommands';
+import type { SlashState } from '@/editor/SlashMenu';
 import { autoPair, deletePair } from '@/lib/autoPair';
+import { textareaCaretPosition } from '@/lib/caret';
 import { jsonHeaders } from '@/lib/http';
 import {
     applyEdit,
@@ -27,7 +31,7 @@ import { pasteUrlOverSelection } from '@/lib/paste';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
-import { computed, ref, useTemplateRef } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     note: NoteDetailData;
@@ -232,6 +236,135 @@ const saveNow = (event: KeyboardEvent): void => {
 };
 
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
+
+/**
+ * The "/" command menu, open in either editor. `range` is the typed
+ * "/query" (ProseMirror positions in the visual editor, string offsets in
+ * source), replaced by the chosen command.
+ */
+type OpenSlash = { source: boolean; query: string; range: { from: number; to: number }; position: { left: number; top: number } };
+
+const slash = ref<OpenSlash | null>(null);
+const slashSelected = ref(0);
+const slashCommands = computed(() => (slash.value ? filterSlashCommands(slash.value.query) : []));
+let sourceSlashDismissedAt: number | null = null;
+
+watch(
+    () => slash.value?.query,
+    () => (slashSelected.value = 0),
+);
+
+const onVisualSlash = (state: SlashState | null): void => {
+    slash.value = state ? { source: false, ...state } : null;
+};
+
+const detectSourceSlash = (): void => {
+    if (!textarea.value || textarea.value.selectionStart !== textarea.value.selectionEnd) {
+        slash.value = null;
+        return;
+    }
+
+    const cursor = textarea.value.selectionStart;
+    const lineStart = textarea.value.value.lastIndexOf('\n', cursor - 1) + 1;
+    const found = slashQuery(textarea.value.value.slice(lineStart, cursor));
+    const from = found ? cursor - found.length : null;
+
+    if (from === null || from === sourceSlashDismissedAt) {
+        sourceSlashDismissedAt = from === null ? null : sourceSlashDismissedAt;
+        slash.value = null;
+        return;
+    }
+
+    slash.value = { source: true, query: found!.query, range: { from, to: cursor }, position: textareaCaretPosition(textarea.value, from) };
+};
+
+const closeSourceSlash = (): void => {
+    if (slash.value?.source) {
+        slash.value = null;
+    }
+};
+
+/**
+ * Arrow keys pick, Enter/Tab run, Escape closes (until the "/" is retyped).
+ */
+const handleSlashKey = (key: string): boolean => {
+    if (!slash.value) {
+        return false;
+    }
+
+    const count = slashCommands.value.length;
+
+    if (key === 'Escape') {
+        if (slash.value.source) {
+            sourceSlashDismissedAt = slash.value.range.from;
+        }
+        slash.value = null;
+    } else if (key === 'ArrowDown' && count) {
+        slashSelected.value = (slashSelected.value + 1) % count;
+    } else if (key === 'ArrowUp' && count) {
+        slashSelected.value = (slashSelected.value - 1 + count) % count;
+    } else if ((key === 'Enter' || key === 'Tab') && count) {
+        chooseSlash(slashCommands.value[slashSelected.value]);
+    } else {
+        return false;
+    }
+
+    return true;
+};
+
+const chooseSlash = (command: SlashCommand): void => {
+    const open = slash.value;
+    slash.value = null;
+
+    if (!open) {
+        return;
+    }
+
+    if (!open.source) {
+        visual.value?.runSlash(command, open.range);
+        return;
+    }
+
+    editSource(({ start }) => ({
+        from: open.range.from,
+        to: open.range.to,
+        insert: '',
+        selectionStart: start - (open.range.to - open.range.from),
+        selectionEnd: start - (open.range.to - open.range.from),
+    }));
+
+    const insertText =
+        (text: string, cursorBack = 0) =>
+        ({ start, end }: Selection): TextEdit => ({
+            from: start,
+            to: end,
+            insert: text,
+            selectionStart: start + text.length - cursorBack,
+            selectionEnd: start + text.length - cursorBack,
+        });
+    const { action } = command;
+
+    switch (action.type) {
+        case 'style':
+            editSource((selection) => applyParagraphStyle(action.style, selection));
+            break;
+        case 'format':
+            editSource((selection) => formatMarkdown(action.command, selection));
+            break;
+        case 'table':
+            editSource(insertTable);
+            break;
+        case 'divider':
+            editSource(insertText('---\n'));
+            break;
+        case 'wikiLink':
+            editSource(insertText('[[]]', 2));
+            break;
+        case 'date':
+            editSource(insertText(todayIso()));
+            break;
+    }
+};
 
 const visualStyle = ref<ParagraphStyle | null>(null);
 const visualInTable = ref(false);
@@ -462,6 +595,14 @@ const pairSourceCharacters = (event: KeyboardEvent): void => {
  * Mod-B/I/U built in); in source mode all of them go through the toolbar.
  */
 const onKeydown = (event: KeyboardEvent): void => {
+    if (slash.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
+        if (handleSlashKey(event.key)) {
+            event.preventDefault();
+        }
+
+        return;
+    }
+
     if (event.key === 'Tab' && !event.metaKey && !event.ctrlKey && !event.altKey && event.target === textarea.value) {
         indentSourceList(event);
 
@@ -554,9 +695,12 @@ const onKeydown = (event: KeyboardEvent): void => {
                 @faithful="(value) => (faithful = value)"
                 @style="(value) => (visualStyle = value)"
                 @in-table="(value) => (visualInTable = value)"
+                @slash="onVisualSlash"
+                :on-slash-key="handleSlashKey"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
             />
+            <SlashMenu v-if="slash" :commands="slashCommands" :selected="slashSelected" :position="slash.position" @choose="chooseSlash" />
             <textarea
                 v-if="showsSource"
                 ref="textarea"
@@ -567,6 +711,9 @@ const onKeydown = (event: KeyboardEvent): void => {
                 :readonly="togglingTask"
                 autofocus
                 @paste="onSourcePaste"
+                @input="detectSourceSlash"
+                @click="detectSourceSlash"
+                @blur="closeSourceSlash"
             />
             <!-- The HTML is rendered on the server with raw HTML escaped and unsafe links removed (NoteMarkdown). -->
             <!-- eslint-disable-next-line vue/no-v-html -->
