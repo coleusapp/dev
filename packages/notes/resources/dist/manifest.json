@@ -1,6 +1,6 @@
 {
   "resources/js/app.ts": {
-    "file": "assets/app-BEGQsnHv.js",
+    "file": "assets/app-BLODq-ks.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -12,7 +12,7 @@
     ]
   },
   "resources/js/pages/Index.vue": {
-    "file": "assets/Index-D5Xa9Ylj.js",
+    "file": "assets/Index-C_zhY5hA.js",
     "name": "Index",
     "src": "resources/js/pages/Index.vue",
     "isDynamicEntry": true,
