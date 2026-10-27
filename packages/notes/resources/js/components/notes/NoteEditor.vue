@@ -9,6 +9,7 @@ import { jsonHeaders } from '@/lib/http';
 import {
     applyEdit,
     applyParagraphStyle,
+    continueList,
     formatMarkdown,
     indentListLines,
     toggleHighlight,
@@ -316,12 +317,37 @@ const indentSourceList = (event: KeyboardEvent): void => {
 };
 
 /**
+ * Enter continues lists, checklists and quotes in Markdown source, or ends
+ * them on an empty item (the visual editor does this itself). Shift+Enter
+ * always inserts a plain new line.
+ */
+const continueSourceList = (event: KeyboardEvent): void => {
+    if (!textarea.value || togglingTask.value || event.isComposing) {
+        return;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea.value;
+    const edit = continueList({ text: value, start: selectionStart, end: selectionEnd });
+
+    if (edit) {
+        event.preventDefault();
+        applyEdit(textarea.value, edit);
+    }
+};
+
+/**
  * Shortcuts the visual editor doesn't already handle itself (Tiptap has
  * Mod-B/I/U built in); in source mode all of them go through the toolbar.
  */
 const onKeydown = (event: KeyboardEvent): void => {
     if (event.key === 'Tab' && !event.metaKey && !event.ctrlKey && !event.altKey && event.target === textarea.value) {
         indentSourceList(event);
+
+        return;
+    }
+
+    if (event.key === 'Enter' && !event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey && event.target === textarea.value) {
+        continueSourceList(event);
 
         return;
     }

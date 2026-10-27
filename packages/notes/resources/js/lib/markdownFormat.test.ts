@@ -1,4 +1,12 @@
-import { applyParagraphStyle, formatMarkdown, indentListLines, toggleHighlight, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
+import {
+    applyParagraphStyle,
+    continueList,
+    formatMarkdown,
+    indentListLines,
+    toggleHighlight,
+    type FormatCommand,
+    type ParagraphStyle,
+} from '@/lib/markdownFormat';
 import { describe, expect, it } from 'vitest';
 
 const apply = (command: FormatCommand, text: string, start: number, end: number): [string, string] => {
@@ -118,5 +126,43 @@ describe('indentListLines', () => {
 
     it('does nothing outside lists', () => {
         expect(indent('plain', 2, 2)).toBeNull();
+    });
+});
+
+describe('continueList', () => {
+    const enter = (text: string, cursor = text.length): string | null => {
+        const edit = continueList({ text, start: cursor, end: cursor });
+
+        return edit ? text.slice(0, edit.from) + edit.insert + text.slice(edit.to) + `|${edit.selectionStart}` : null;
+    };
+
+    it.each([
+        ['bullet', '- milk', '- milk\n- |9'],
+        ['star bullet', '* milk', '* milk\n* |9'],
+        ['numbered', '1. one', '1. one\n2. |10'],
+        ['numbered with paren', '9) nine', '9) nine\n10) |12'],
+        ['checklist (new item unticked)', '- [x] done', '- [x] done\n- [ ] |17'],
+        ['indented sub-item', '  - [ ] sub', '  - [ ] sub\n  - [ ] |20'],
+        ['quote', '> said', '> said\n> |9'],
+        ['quoted list', '> - item', '> - item\n> - |13'],
+    ])('continues a %s', (_, text, expected) => {
+        expect(enter(text)).toBe(expected);
+    });
+
+    it('splits an item at the cursor', () => {
+        expect(enter('- milk eggs', 7)).toBe('- milk \n- eggs|10');
+    });
+
+    it('ends the list on an empty item, keeping quote nesting', () => {
+        expect(enter('- a\n- ')).toBe('- a\n|4');
+        expect(enter('- a\n- [ ] ')).toBe('- a\n|4');
+        expect(enter('> - ')).toBe('> |2');
+        expect(enter('> ')).toBe('|0');
+    });
+
+    it('leaves Enter alone elsewhere', () => {
+        expect(enter('plain text')).toBeNull();
+        expect(enter('- item', 1)).toBeNull();
+        expect(continueList({ text: '- item', start: 2, end: 4 })).toBeNull();
     });
 });

@@ -172,3 +172,48 @@ describe('sub-tasks in the visual editor', () => {
         expect(editorMarkdown(editor, '')).toBe('- [ ] trip\n- [ ] pack');
     });
 });
+
+describe('smart lists in the visual editor', () => {
+    /**
+     * Puts the cursor at the end of the last text (the editor keeps an empty
+     * paragraph after a list, which isn't where the user types).
+     */
+    const cursorAtEnd = (): void => {
+        let end = 1;
+        editor.state.doc.descendants((node, position) => {
+            if (node.isTextblock && node.content.size > 0) {
+                end = position + 1 + node.content.size;
+            }
+        });
+        editor.commands.setTextSelection(end);
+    };
+
+    const typeAtEnd = (text: string): void => {
+        editor.commands.insertContent(text);
+    };
+
+    // Enter is bound to splitListItem by Tiptap's list keymaps; jsdom can't
+    // dispatch real key events through them, so the bound commands are called.
+    it('Enter continues a checklist with an unticked item', () => {
+        loadMarkdown(editor, '- [x] done');
+        cursorAtEnd();
+
+        editor.commands.splitListItem('taskItem');
+        typeAtEnd('next');
+
+        expect(editorMarkdown(editor, '')).toBe('- [x] done\n- [ ] next');
+    });
+
+    it('Enter continues numbered lists and ends a list on an empty item', () => {
+        loadMarkdown(editor, '1. one');
+        cursorAtEnd();
+
+        editor.commands.splitListItem('listItem');
+        typeAtEnd('two');
+        editor.commands.splitListItem('listItem');
+        editor.commands.liftListItem('listItem');
+        typeAtEnd('after');
+
+        expect(editorMarkdown(editor, '')).toBe('1. one\n2. two\n\nafter');
+    });
+});

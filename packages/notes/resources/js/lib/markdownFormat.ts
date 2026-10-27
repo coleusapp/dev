@@ -180,6 +180,44 @@ export const indentListLines = (selection: Selection, outdent: boolean): TextEdi
     return replaceLines(selection, from, to, lines, changed);
 };
 
+const CONTINUABLE = /^(\s*(?:>\s?)*)(?:([-*+])|(\d+)([.)]))(\s+)(\[[ xX]\]\s+)?/;
+const QUOTE_ONLY = /^(\s*(?:>\s?)+)/;
+
+/**
+ * Enter in Markdown source: continues a bulleted, numbered or checklist
+ * item (or a quote) on the next line, splitting the item at the cursor;
+ * on an empty item it ends the list instead (the marker is removed).
+ * Returns null when the cursor isn't in a list or quote, or text is selected.
+ */
+export const continueList = ({ text, start, end }: Selection): TextEdit | null => {
+    if (start !== end) {
+        return null;
+    }
+
+    const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+    const lineEndIndex = text.indexOf('\n', start);
+    const lineEnd = lineEndIndex === -1 ? text.length : lineEndIndex;
+    const line = text.slice(lineStart, lineEnd);
+    const item = CONTINUABLE.exec(line);
+    const quote = item ? null : QUOTE_ONLY.exec(line);
+    const marker = item?.[0] ?? quote?.[0];
+
+    if (!marker || start - lineStart < marker.length) {
+        return null;
+    }
+
+    if (line.slice(marker.length).trim() === '') {
+        const kept = item ? item[1] : '';
+
+        return { from: lineStart, to: lineEnd, insert: kept, selectionStart: lineStart + kept.length, selectionEnd: lineStart + kept.length };
+    }
+
+    const next = item ? `${item[1]}${item[2] ?? `${Number(item[3]) + 1}${item[4]}`}${item[5]}${item[6] ? '[ ] ' : ''}` : (quote?.[1] ?? '');
+    const insert = `\n${next}`;
+
+    return { from: start, to: start, insert, selectionStart: start + insert.length, selectionEnd: start + insert.length };
+};
+
 export type ParagraphStyle = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled';
 
 const STYLE_PREFIXES = { title: '# ', heading: '## ', subheading: '### ', body: '' } as const;

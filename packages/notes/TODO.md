@@ -52,7 +52,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 ## O4. Editor
 - [x] O4.0 Tiptap editor: WYSIWYG editing that loads and saves Markdown (`@tiptap/markdown`), custom nodes for [[wiki links]], #tags, checklists and ==highlights==, a Source toggle for raw Markdown, round-trip tests ⚠️ dep
 - [ ] O4.3 Reading view as its own mode (no editor chrome), plus "readable line length" toggle
-- [ ] O4.4 Smart lists: Enter continues bullets/numbers/checkboxes; Tab / Shift+Tab indent/outdent; empty item ends the list 🍎
+- [x] O4.4 Smart lists: Enter continues bullets/numbers/checkboxes; Tab / Shift+Tab indent/outdent; empty item ends the list 🍎
 - [ ] O4.5 Auto-pair brackets, quotes and Markdown markers (`**`, `` ` ``, `[[`)
 - [ ] O4.6 Paste URL over a selection creates `[selection](url)`; paste rich HTML converts to Markdown 🍎
 - [ ] O4.7 Folding: collapse headings and nested list items (editor + preview) 🍎
