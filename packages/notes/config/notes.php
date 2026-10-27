@@ -22,4 +22,12 @@ return [
      * Default: notes
      */
     'settings_prefix' => 'notes',
+
+    /*
+     * Notes stay in the trash this many days before notes:purge-trash
+     * deletes them for good.
+     *
+     * Default: 30
+     */
+    'trash_retention_days' => 30,
 ];

@@ -6,6 +6,7 @@ use Coleus\Notes\Data\NoteData;
 use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Models\Note;
 use Coleus\Support\Services\Service;
+use Coleus\Users\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -74,6 +75,33 @@ class NoteService extends Service
         $trashed->each(fn (Note $note) => $this->forceDelete($note));
 
         return $trashed->count();
+    }
+
+    /**
+     * Permanently deletes every user's notes that were trashed more than
+     * $days days ago. Runs from the scheduler, where there is no signed-in
+     * user, so the user scope is lifted deliberately here and only here.
+     *
+     * @return int how many notes were deleted
+     */
+    public function purgeTrash(int $days): int
+    {
+        $purged = 0;
+
+        Note::query()
+            ->withoutGlobalScope(UserScope::class)
+            ->onlyTrashed()
+            ->where('deleted_at', '<', now()->subDays($days))
+            ->chunkById(100, function ($notes) use (&$purged) {
+                foreach ($notes as $note) {
+                    $tagIds = $note->tags()->withoutGlobalScope(UserScope::class)->allRelatedIds()->all();
+                    $note->forceDelete();
+                    NoteTags::deleteUnusedForAllUsers($tagIds);
+                    $purged++;
+                }
+            });
+
+        return $purged;
     }
 
     /**

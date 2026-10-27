@@ -2,10 +2,12 @@
 
 namespace Coleus\Notes;
 
+use Coleus\Notes\Commands\PurgeTrashCommand;
 use Coleus\Notes\Http\Middleware\HandleInertiaRequests;
 use Coleus\Notes\Models\App as NotesApp;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Policies\NotePolicy;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
@@ -19,6 +21,9 @@ class NotesServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->discoversMigrations()
             ->runsMigrations()
+            ->hasCommands([
+                PurgeTrashCommand::class,
+            ])
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews();
@@ -27,6 +32,10 @@ class NotesServiceProvider extends PackageServiceProvider
     public function bootingPackage(): void
     {
         Gate::policy(Note::class, NotePolicy::class);
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
+            $schedule->command(PurgeTrashCommand::class)->daily()->withoutOverlapping();
+        });
 
         if (Str::of(request()?->path())->startsWith(config('notes.route_prefix'))) {
             app('router')

@@ -5,6 +5,8 @@ namespace Coleus\Notes\Services;
 use Coleus\Notes\Markdown\Hashtags;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Models\Tag;
+use Coleus\Users\Models\Scopes\UserScope;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Keeps a note's tags in step with the hashtags in its body.
@@ -38,5 +40,26 @@ class NoteTags
         }
 
         Tag::query()->whereKey($tagIds)->whereDoesntHave('notes')->get()->each->delete();
+    }
+
+    /**
+     * deleteUnused() for code running without a signed-in user (console,
+     * scheduler): ignores the user scope on both tags and notes, so a tag
+     * still used by any note is kept.
+     *
+     * @param  array<int, int>  $tagIds
+     */
+    public static function deleteUnusedForAllUsers(array $tagIds): void
+    {
+        if ($tagIds === []) {
+            return;
+        }
+
+        Tag::query()
+            ->withoutGlobalScope(UserScope::class)
+            ->whereKey($tagIds)
+            ->whereDoesntHave('notes', fn (Builder $notes) => $notes->withoutGlobalScope(UserScope::class))
+            ->get()
+            ->each->delete();
     }
 }
