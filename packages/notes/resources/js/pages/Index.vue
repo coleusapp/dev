@@ -13,6 +13,7 @@ import {
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import TagTree from '@/components/notes/TagTree.vue';
+import VersionHistory from '@/components/notes/VersionHistory.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
@@ -216,10 +217,14 @@ const emptyTrash = (): void => {
     router.delete(route('notes.trash.empty'));
 };
 
+const showingHistory = ref(false);
+
+const historyItem = (): DropdownMenuItem => ({ label: 'Version history', icon: 'i-lucide-history', onSelect: () => (showingHistory.value = true) });
+
 const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
     if (props.note?.data.trashed) {
         return [
-            [{ label: 'Restore', icon: 'i-lucide-undo-2', onSelect: restoreNote }],
+            [{ label: 'Restore', icon: 'i-lucide-undo-2', onSelect: restoreNote }, historyItem()],
             [{ label: 'Delete forever', icon: 'i-lucide-trash', color: 'error', onSelect: () => (confirmingForceDelete.value = true) }],
         ];
     }
@@ -230,6 +235,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             props.note?.data.archived
                 ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
                 : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
+            historyItem(),
         ],
         [{ label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
     ];
@@ -378,6 +384,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
+        <VersionHistory v-if="note" :key="note.data.id" v-model:open="showingHistory" :note-id="note.data.id" :readonly="note.data.trashed" />
         <ConfirmModal
             v-model:open="creatingLinked"
             :title="`Create “${linkedTitle ?? ''}”?`"

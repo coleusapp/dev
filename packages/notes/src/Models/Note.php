@@ -6,6 +6,7 @@ use Coleus\Notes\Database\Factories\NoteFactory;
 use Coleus\Notes\NotesModelDefaults;
 use Coleus\Notes\Search\NoteSearch;
 use Coleus\Notes\Services\NoteTags;
+use Coleus\Notes\Services\NoteVersions;
 use Coleus\Notes\Support\NoteText;
 use Coleus\Users\Concerns\HasUser;
 use Coleus\Users\Models\Scopes\UserScope;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Coleus\Users\Models\User> $users
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, NoteVersion> $versions
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Note newQuery()
@@ -75,6 +78,7 @@ class Note extends NotesModelDefaults
         static::saved(function (Note $note) {
             if ($note->wasRecentlyCreated || $note->wasChanged('body')) {
                 NoteTags::sync($note);
+                NoteVersions::record($note);
             }
         });
     }
@@ -85,6 +89,14 @@ class Note extends NotesModelDefaults
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, config('notes.table_prefix').'note_tag');
+    }
+
+    /**
+     * @return HasMany<NoteVersion, $this>
+     */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(NoteVersion::class);
     }
 
     /**

@@ -109,7 +109,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O11.3 Embed a base inside a note
 
 ## O12. History and safety
-- [ ] O12.1 Version history: snapshots on save (throttled), view a diff, restore (Bear 8.1) (Box: named versions, compare any two) 📦
+- [x] O12.1 Version history: snapshots on save (throttled), view a diff, restore (Bear 8.1) (Box: named versions, compare any two) 📦
 - [ ] O12.5 Lock / encrypt individual notes (password; client-side encryption) 🧩 (Apple: encrypted at rest, list shows title only, auto-relock; details in A7) 🍎
 
 ## O13. Export and import

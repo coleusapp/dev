@@ -30,4 +30,16 @@ return [
      * Default: 30
      */
     'trash_retention_days' => 30,
+
+    /*
+     * Version history. Saves within interval_minutes of the latest
+     * unnamed version update it instead of adding a new one; only the
+     * newest `keep` unnamed versions are kept (named ones always are).
+     *
+     * Default: 5 minutes, 100 versions
+     */
+    'versions' => [
+        'interval_minutes' => 5,
+        'keep' => 100,
+    ],
 ];
