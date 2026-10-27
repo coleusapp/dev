@@ -2,6 +2,7 @@
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
+import NoteInfo from '@/components/notes/NoteInfo.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
@@ -56,7 +57,10 @@ const html = ref(props.note.html);
 const tags = ref(props.note.tags);
 const backlinks = ref(props.note.backlinks);
 
+const updatedAt = ref(props.note.updated_at);
+
 const onServerSave = (note: NoteDetailData): void => {
+    updatedAt.value = note.updated_at;
     html.value = note.html;
     tags.value = note.tags;
     backlinks.value = note.backlinks;
@@ -829,6 +833,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 />
             </div>
             <span v-if="taskError" class="text-error text-xs" role="alert">{{ taskError }}</span>
+            <NoteInfo :body="body" :created-at="note.created_at" :updated-at="updatedAt" />
             <SaveStatus v-if="!readonly" :status="status" :error="error" @retry="flush" />
         </div>
 
