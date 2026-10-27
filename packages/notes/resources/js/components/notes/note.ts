@@ -68,6 +68,21 @@ export type FolderNode = {
 };
 
 /**
+ * One dialog for folder work: create (inside `parent`), rename or move a
+ * folder, or move a note into a folder.
+ */
+export type FolderDialog =
+    | { type: 'create'; parent: FolderNode | null }
+    | { type: 'rename'; folder: FolderNode; parentId: number | null }
+    | { type: 'move'; folder: FolderNode; parentId: number | null }
+    | { type: 'move-note'; noteId: number; folderId: number | null };
+
+/**
+ * Dragged note rows carry their id under this type.
+ */
+export const NOTE_DRAG_TYPE = 'application/x-coleus-note';
+
+/**
  * The query string that carries the list filters on links and redirects.
  */
 export const filterQuery = (filters: Partial<NoteFilters>): Record<string, string> =>

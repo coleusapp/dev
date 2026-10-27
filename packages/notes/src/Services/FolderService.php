@@ -17,6 +17,48 @@ class FolderService
         return $folder;
     }
 
+    public function update(Folder $folder, string $name, ?Folder $parent): void
+    {
+        $folder->name = $name;
+        $folder->parent()->associate($parent);
+        $folder->save();
+    }
+
+    /**
+     * The folder and every folder nested under it.
+     *
+     * @return list<int>
+     */
+    public function subtreeIds(Folder $folder): array
+    {
+        $ids = [$folder->id];
+        $frontier = [$folder->id];
+
+        while ($frontier !== []) {
+            $frontier = Folder::query()->whereIn('parent_id', $frontier)->pluck('id')->all();
+            $ids = [...$ids, ...$frontier];
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Deletes a folder and its sub-folders. Their notes go to the trash
+     * (through the normal trash path, so tags are cleaned up); restored
+     * later, they come back at the top level.
+     *
+     * @return int how many notes were moved to the trash
+     */
+    public function delete(Folder $folder): int
+    {
+        $notes = Note::query()->whereIn('folder_id', $this->subtreeIds($folder))->get();
+
+        $notes->each(fn (Note $note) => app(NoteService::class)->destroy($note));
+        $folder->delete();
+
+        return $notes->count();
+    }
+
     /**
      * Puts a note in a folder (or at the top level with null) without
      * counting as an edit.

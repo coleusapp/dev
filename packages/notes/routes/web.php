@@ -19,6 +19,9 @@ Route::middleware(['web', 'auth'])
         Route::get('/', IndexController::class)->name('index');
         Route::post('/', [NoteController::class, 'store'])->name('store');
         Route::post('/folders', [FolderController::class, 'store'])->name('folders.store');
+        Route::put('/folders/{folder}', [FolderController::class, 'update'])->name('folders.update')->whereNumber('folder');
+        Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy')->whereNumber('folder');
+        Route::put('/{note}/folder', [FolderController::class, 'moveNote'])->name('folder.move')->whereNumber('note');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

@@ -123,3 +123,94 @@ it('keeps folders private', function () {
 
     $this->get(route('notes.index'))->assertInertia(fn (Assert $page) => $page->where('folders', []));
 });
+
+it('renames a folder', function () {
+    $folder = $this->folders->create('Wrk', null);
+
+    $this->put(route('notes.folders.update', ['folder' => $folder]), ['name' => 'Work', 'parent_id' => null])->assertRedirect();
+
+    expect($folder->refresh()->name)->toBe('Work');
+});
+
+it('keeps its own name when only changing case', function () {
+    $folder = $this->folders->create('work', null);
+
+    $this->put(route('notes.folders.update', ['folder' => $folder]), ['name' => 'Work', 'parent_id' => null])->assertSessionHasNoErrors();
+});
+
+it('moves a folder under another one and back to the top', function () {
+    $work = $this->folders->create('Work', null);
+    $ideas = $this->folders->create('Ideas', null);
+
+    $this->put(route('notes.folders.update', ['folder' => $ideas]), ['name' => 'Ideas', 'parent_id' => $work->id]);
+    expect($ideas->refresh()->parent_id)->toBe($work->id);
+
+    $this->put(route('notes.folders.update', ['folder' => $ideas]), ['name' => 'Ideas', 'parent_id' => null]);
+    expect($ideas->refresh()->parent_id)->toBeNull();
+});
+
+it('refuses to move a folder into itself or its own sub-folder', function () {
+    $work = $this->folders->create('Work', null);
+    $meetings = $this->folders->create('Meetings', $work);
+
+    $this->put(route('notes.folders.update', ['folder' => $work]), ['name' => 'Work', 'parent_id' => $work->id])->assertSessionHasErrors('parent_id');
+    $this->put(route('notes.folders.update', ['folder' => $work]), ['name' => 'Work', 'parent_id' => $meetings->id])->assertSessionHasErrors('parent_id');
+});
+
+it('deletes a folder with its sub-folders, moving their notes to the trash', function () {
+    $work = $this->folders->create('Work', null);
+    $meetings = $this->folders->create('Meetings', $work);
+    $kept = $this->folders->create('Kept', null);
+    $inWork = Note::factory()->create(['body' => '#gone']);
+    $inMeetings = Note::factory()->create();
+    $elsewhere = Note::factory()->create();
+    $this->folders->moveNote($inWork, $work);
+    $this->folders->moveNote($inMeetings, $meetings);
+    $this->folders->moveNote($elsewhere, $kept);
+
+    $this->delete(route('notes.folders.destroy', ['folder' => $work]))->assertRedirect(route('notes.index'));
+
+    expect(Folder::query()->pluck('name')->all())->toBe(['Kept'])
+        ->and($inWork->refresh()->trashed())->toBeTrue()
+        ->and($inMeetings->refresh()->trashed())->toBeTrue()
+        ->and($inWork->folder_id)->toBeNull()
+        ->and($elsewhere->refresh()->trashed())->toBeFalse()
+        ->and(Coleus\Notes\Models\Tag::query()->count())->toBe(0);
+});
+
+it('moves a note into a folder and out again without counting as an edit', function () {
+    $work = $this->folders->create('Work', null);
+    $note = Note::factory()->create(['updated_at' => now()->subWeek()]);
+    $updatedAt = $note->refresh()->updated_at;
+
+    $this->put(route('notes.folder.move', ['note' => $note]), ['folder_id' => $work->id])->assertRedirect();
+    expect($note->refresh()->folder_id)->toBe($work->id)
+        ->and($note->updated_at->equalTo($updatedAt))->toBeTrue();
+
+    $this->put(route('notes.folder.move', ['note' => $note]), ['folder_id' => null]);
+    expect($note->refresh()->folder_id)->toBeNull();
+});
+
+it('puts a restored note back in its folder', function () {
+    $work = $this->folders->create('Work', null);
+    $note = Note::factory()->create();
+    $this->folders->moveNote($note, $work);
+
+    $this->delete(route('notes.destroy', ['note' => $note]));
+    $this->post(route('notes.restore', ['note' => $note]));
+
+    expect($note->refresh()->folder_id)->toBe($work->id);
+});
+
+it('keeps other users folders and notes out of reach', function () {
+    $mine = $this->folders->create('Mine', null);
+    $this->actingAs(User::factory()->create());
+    $theirFolder = app(FolderService::class)->create('Theirs', null);
+    $theirNote = Note::factory()->create();
+    $this->actingAs($this->user);
+
+    $this->put(route('notes.folders.update', ['folder' => $theirFolder]), ['name' => 'x', 'parent_id' => null])->assertNotFound();
+    $this->delete(route('notes.folders.destroy', ['folder' => $theirFolder]))->assertNotFound();
+    $this->put(route('notes.folder.move', ['note' => $theirNote]), ['folder_id' => $mine->id])->assertNotFound();
+    $this->put(route('notes.folder.move', ['note' => Note::factory()->create()]), ['folder_id' => $theirFolder->id])->assertSessionHasErrors('folder_id');
+});

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HighlightedText from '@/components/notes/HighlightedText.vue';
-import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes/note';
+import { filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -57,6 +57,8 @@ const emptyMessage = computed(() => {
             :href="route('notes.show', { note: note.id, ...query })"
             preserve-state
             preserve-scroll
+            draggable="true"
+            @dragstart="(event: DragEvent) => event.dataTransfer?.setData(NOTE_DRAG_TYPE, String(note.id))"
             class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
             :class="{ 'bg-elevated': note.id === selectedId }"
         >

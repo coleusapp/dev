@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import ConfirmModal from '@/components/notes/ConfirmModal.vue';
+import FolderModal from '@/components/notes/FolderModal.vue';
 import FolderTree from '@/components/notes/FolderTree.vue';
-import NewFolderModal from '@/components/notes/NewFolderModal.vue';
 import {
     compareNotes,
     filterQuery,
+    NOTE_DRAG_TYPE,
+    type FolderDialog,
     type FolderNode,
     type NoteCollection,
     type NoteData,
@@ -133,7 +135,55 @@ const flattenFolders = (nodes: FolderNode[]): FolderNode[] => nodes.flatMap((nod
 
 const currentFolder = computed(() => flattenFolders(props.folders).find((folder) => folder.id === props.filters.folder) ?? null);
 
-const creatingFolder = ref(false);
+const folderDialog = ref<FolderDialog | null>(null);
+const deletingFolder = ref<FolderNode | null>(null);
+
+const confirmingFolderDelete = computed({
+    get: () => deletingFolder.value !== null,
+    set: (open: boolean) => {
+        if (!open) {
+            deletingFolder.value = null;
+        }
+    },
+});
+
+const onFolderAction = (type: 'create' | 'rename' | 'move' | 'delete', folder: FolderNode, parentId: number | null): void => {
+    if (type === 'delete') {
+        deletingFolder.value = folder;
+    } else if (type === 'create') {
+        folderDialog.value = { type, parent: folder };
+    } else {
+        folderDialog.value = { type, folder, parentId };
+    }
+};
+
+const deleteFolder = (): void => {
+    if (deletingFolder.value) {
+        router.delete(route('notes.folders.destroy', { folder: deletingFolder.value.id }));
+    }
+};
+
+/**
+ * Notes dropped on a folder (or on "All notes" for no folder) move there.
+ */
+const moveNoteToFolder = (noteId: number, folderId: number | null): void => {
+    router.put(route('notes.folder.move', { note: noteId }), { folder_id: folderId }, { preserveScroll: true, preserveState: true });
+};
+
+const onAllNotesDrop = (event: DragEvent): void => {
+    const noteId = Number(event.dataTransfer?.getData(NOTE_DRAG_TYPE));
+
+    if (noteId) {
+        event.preventDefault();
+        moveNoteToFolder(noteId, null);
+    }
+};
+
+const acceptNoteDrag = (event: DragEvent): void => {
+    if (event.dataTransfer?.types.includes(NOTE_DRAG_TYPE)) {
+        event.preventDefault();
+    }
+};
 
 const deleteNote = (): void => {
     if (props.note) {
@@ -254,6 +304,15 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                 ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
                 : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
             historyItem(),
+            {
+                label: 'Move to folder…',
+                icon: 'i-lucide-folder-input',
+                onSelect: () => {
+                    if (props.note) {
+                        folderDialog.value = { type: 'move-note', noteId: props.note.data.id, folderId: props.note.data.folder_id };
+                    }
+                },
+            },
         ],
         [{ label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
     ];
@@ -280,6 +339,8 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             :href="route('notes.index', filters.q ? { q: filters.q } : {})"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
                             :class="{ 'bg-elevated font-medium': !filters.tag && !filters.folder && filters.view === 'notes' }"
+                            @dragover="acceptNoteDrag"
+                            @drop="onAllNotesDrop"
                         >
                             <UiIcon name="i-lucide-notebook" class="text-dimmed size-4" />
                             All notes
@@ -292,10 +353,17 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                                 variant="ghost"
                                 size="xs"
                                 aria-label="New folder"
-                                @click="creatingFolder = true"
+                                @click="folderDialog = { type: 'create', parent: currentFolder }"
                             />
                         </div>
-                        <FolderTree v-if="folders.length" :key="filters.folder ?? 0" :folders="folders" :selected="filters.folder" />
+                        <FolderTree
+                            v-if="folders.length"
+                            :key="filters.folder ?? 0"
+                            :folders="folders"
+                            :selected="filters.folder"
+                            @action="onFolderAction"
+                            @drop-note="moveNoteToFolder"
+                        />
                         <p v-else class="text-dimmed px-2 py-1 text-xs">No folders yet.</p>
                         <div class="text-dimmed mt-2 px-2 text-xs font-medium">Tags</div>
                         <TagTree
@@ -437,7 +505,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
-        <NewFolderModal v-model:open="creatingFolder" :parent-id="currentFolder?.id ?? null" :parent-name="currentFolder?.name ?? null" />
+        <FolderModal :dialog="folderDialog" :folders="folders" @close="folderDialog = null" />
+        <ConfirmModal
+            v-model:open="confirmingFolderDelete"
+            :title="`Delete “${deletingFolder?.name ?? ''}”?`"
+            description="The folder and its sub-folders are deleted, and every note in them moves to the trash (restore puts notes back at the top level)."
+            confirm-label="Delete folder"
+            @confirm="deleteFolder"
+        />
         <VersionHistory v-if="note" :key="note.data.id" v-model:open="showingHistory" :note-id="note.data.id" :readonly="note.data.trashed" />
         <ConfirmModal
             v-model:open="creatingLinked"
