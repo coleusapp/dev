@@ -3,6 +3,7 @@
 namespace Coleus\Notes\Markdown;
 
 use League\CommonMark\Extension\TaskList\TaskListItemMarker;
+use League\CommonMark\Node\Block\AbstractBlock;
 
 /**
  * Finds and flips "- [ ]" / "- [x]" items in a note body by source line.
@@ -56,5 +57,80 @@ class Checklist
         $parts[$index] = $replaced;
 
         return implode('', $parts);
+    }
+
+    /**
+     * Moves the task item starting on $line (with its sub-items) so it sits
+     * just before the item starting on $beforeLine, or at the end of its
+     * list when $beforeLine is null. Both must be items of the same list.
+     * Returns null when the move isn't possible. Line endings are preserved.
+     */
+    public static function move(string $body, int $line, ?int $beforeLine): ?string
+    {
+        $items = self::itemBlocks($body);
+        $item = $items[$line] ?? null;
+        $target = $beforeLine === null ? null : ($items[$beforeLine] ?? null);
+
+        if ($item === null || ($beforeLine !== null && ($target === null || $target['list'] !== $item['list']))) {
+            return null;
+        }
+
+        $eol = preg_match('/\r\n/', $body) === 1 ? "\r\n" : "\n";
+        $lines = preg_split('/\R/', $body) ?: [];
+        $block = array_slice($lines, $item['start'] - 1, $item['end'] - $item['start'] + 1);
+        $insertAt = $target === null
+            ? max(array_map(fn (array $sibling) => $sibling['end'], array_filter($items, fn (array $sibling) => $sibling['list'] === $item['list'])))
+            : $target['start'] - 1;
+
+        if ($insertAt >= $item['start'] - 1 && $insertAt <= $item['end']) {
+            return $body;
+        }
+
+        array_splice($lines, $item['start'] - 1, count($block));
+
+        if ($insertAt > $item['end']) {
+            $insertAt -= count($block);
+        }
+
+        array_splice($lines, $insertAt, 0, $block);
+
+        return implode($eol, $lines);
+    }
+
+    /**
+     * Task items keyed by their first line: the 1-based line range of the
+     * whole item (sub-items included, trailing blank lines excluded) and an
+     * id for the list it belongs to.
+     *
+     * @return array<int, array{start: int, end: int, list: int}>
+     */
+    private static function itemBlocks(string $body): array
+    {
+        $lines = preg_split('/\R/', $body) ?: [];
+        $items = [];
+
+        foreach (NoteMarkdown::parse($body)->iterator() as $node) {
+            $listItem = $node instanceof TaskListItemMarker ? $node->parent()?->parent() : null;
+            $list = $listItem?->parent();
+
+            if (! $listItem instanceof AbstractBlock || ! $list instanceof AbstractBlock) {
+                continue;
+            }
+
+            $start = $listItem->getStartLine();
+            $end = $listItem->getEndLine();
+
+            if ($start === null || $end === null) {
+                continue;
+            }
+
+            while ($end > $start && trim($lines[$end - 1] ?? '') === '') {
+                $end--;
+            }
+
+            $items[$start] = ['start' => $start, 'end' => $end, 'list' => spl_object_id($list)];
+        }
+
+        return $items;
     }
 }

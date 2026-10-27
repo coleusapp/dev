@@ -4,6 +4,7 @@ import type { ChecklistAction, EditorMode, NoteDetailData } from '@/components/n
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
+import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { jsonHeaders } from '@/lib/http';
 import {
     applyEdit,
@@ -50,15 +51,11 @@ const togglingTask = ref(false);
 const taskError = ref<string | null>(null);
 
 /**
- * Checkboxes carry the source line they were rendered from. The text is
- * saved first so those line numbers match what the server has, then the
- * server flips that one line and sends the note back.
+ * Sends a checklist change made in the preview (tick or move) to the
+ * server. The text is saved first so the preview's line numbers match what
+ * the server has; the server rewrites the Markdown and sends the note back.
  */
-const toggleTask = async (checkbox: HTMLInputElement): Promise<void> => {
-    const line = Number(checkbox.dataset.taskLine);
-    const checked = checkbox.checked;
-    checkbox.checked = !checked;
-
+const changeChecklist = async (url: string, payload: Record<string, unknown>): Promise<void> => {
     togglingTask.value = true;
     taskError.value = null;
 
@@ -68,25 +65,36 @@ const toggleTask = async (checkbox: HTMLInputElement): Promise<void> => {
             return;
         }
 
-        const response = await fetch(route('notes.checklist.update', { note: props.note.id, line }), {
-            method: 'PUT',
-            headers: jsonHeaders(),
-            credentials: 'same-origin',
-            body: JSON.stringify({ checked }),
-        });
-        const payload = await response.json().catch(() => null);
+        const response = await fetch(url, { method: 'PUT', headers: jsonHeaders(), credentials: 'same-origin', body: JSON.stringify(payload) });
+        const result = await response.json().catch(() => null);
 
         if (!response.ok) {
-            taskError.value = payload?.errors?.line?.[0] ?? payload?.message ?? 'Could not update the checklist.';
+            taskError.value = result?.errors?.line?.[0] ?? result?.message ?? 'Could not update the checklist.';
             return;
         }
 
-        adopt(payload.data as NoteDetailData);
-        onServerSave(payload.data as NoteDetailData);
+        adopt(result.data as NoteDetailData);
+        onServerSave(result.data as NoteDetailData);
     } finally {
         togglingTask.value = false;
     }
 };
+
+const toggleTask = (checkbox: HTMLInputElement): Promise<void> => {
+    const checked = checkbox.checked;
+    checkbox.checked = !checked;
+
+    return changeChecklist(route('notes.checklist.update', { note: props.note.id, line: Number(checkbox.dataset.taskLine) }), { checked });
+};
+
+const preview = useTemplateRef<HTMLElement>('preview');
+
+useChecklistDrag(
+    preview,
+    html,
+    () => !props.readonly && !togglingTask.value,
+    (line, beforeLine) => changeChecklist(route('notes.checklist.move', { note: props.note.id }), { line, before_line: beforeLine }),
+);
 
 const onPreviewClick = (event: MouseEvent): void => {
     const target = event.target;
@@ -392,6 +400,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 v-if="mode === 'split' || mode === 'preview'"
                 class="note-preview h-full min-w-0 flex-1 overflow-y-auto"
                 :class="{ 'border-default border-l pl-4': mode === 'split' }"
+                ref="preview"
                 aria-label="Preview"
                 @click="onPreviewClick"
                 v-html="html"

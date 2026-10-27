@@ -58,3 +58,43 @@ it('cannot toggle another user note', function () {
 
     $this->putJson(route('notes.checklist.update', ['note' => $foreign, 'line' => 1]), ['checked' => true])->assertNotFound();
 });
+
+it('moves a checklist item', function () {
+    $note = Note::factory()->create(['body' => "- [ ] a\n- [ ] b\n- [ ] c"]);
+
+    $this->putJson(route('notes.checklist.move', ['note' => $note]), ['line' => 3, 'before_line' => 1])
+        ->assertOk()
+        ->assertJsonPath('data.body', "- [ ] c\n- [ ] a\n- [ ] b");
+
+    $this->putJson(route('notes.checklist.move', ['note' => $note]), ['line' => 1, 'before_line' => null])
+        ->assertJsonPath('data.body', "- [ ] a\n- [ ] b\n- [ ] c");
+});
+
+it('rejects moves that are not within one checklist', function () {
+    $note = Note::factory()->create(['body' => "- [ ] a\n\ntext\n\n- [ ] b"]);
+
+    $this->putJson(route('notes.checklist.move', ['note' => $note]), ['line' => 1, 'before_line' => 5])
+        ->assertJsonValidationErrors('line');
+
+    expect($note->refresh()->body)->toBe("- [ ] a\n\ntext\n\n- [ ] b");
+});
+
+it('validates move input', function (array $payload, string $field) {
+    $note = Note::factory()->create(['body' => '- [ ] a']);
+
+    $this->putJson(route('notes.checklist.move', ['note' => $note]), $payload)->assertJsonValidationErrors($field);
+})->with([
+    'missing line' => [['before_line' => null], 'line'],
+    'missing before_line' => [['line' => 1], 'before_line'],
+    'zero line' => [['line' => 0, 'before_line' => null], 'line'],
+]);
+
+it('cannot move items in another user note or a trashed note', function () {
+    $this->actingAs(User::factory()->create());
+    $foreign = Note::factory()->create(['body' => "- [ ] a\n- [ ] b"]);
+    $this->actingAs($this->user);
+    $trashed = Note::factory()->trashed()->create(['body' => "- [ ] a\n- [ ] b"]);
+
+    $this->putJson(route('notes.checklist.move', ['note' => $foreign]), ['line' => 1, 'before_line' => null])->assertNotFound();
+    $this->putJson(route('notes.checklist.move', ['note' => $trashed]), ['line' => 1, 'before_line' => null])->assertNotFound();
+});

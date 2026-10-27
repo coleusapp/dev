@@ -155,3 +155,15 @@
 .tiptap .selectedCell {
     @apply bg-primary/10;
 }
+
+.note-preview li[draggable='true'] {
+    @apply cursor-grab;
+}
+
+.note-preview li.drop-before {
+    @apply shadow-[inset_0_2px_0_var(--ui-primary)];
+}
+
+.note-preview li.drop-after {
+    @apply shadow-[inset_0_-2px_0_var(--ui-primary)];
+}

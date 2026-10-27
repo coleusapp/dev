@@ -36,5 +36,6 @@ Route::middleware(['web', 'auth'])
             Route::put('/{note}/versions/{version}', [VersionController::class, 'update'])->name('versions.update');
             Route::post('/{note}/versions/{version}/restore', [VersionController::class, 'restore'])->name('versions.restore');
         });
+        Route::put('/{note}/checklist/move', [ChecklistController::class, 'move'])->name('checklist.move')->whereNumber('note');
         Route::put('/{note}/checklist/{line}', [ChecklistController::class, 'update'])->name('checklist.update')->whereNumber(['note', 'line']);
     });
