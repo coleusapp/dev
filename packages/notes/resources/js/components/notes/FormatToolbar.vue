@@ -22,7 +22,9 @@ const buttons: { command: FormatCommand; icon: string; label: string }[] = [
     { command: 'strike', icon: 'i-lucide-strikethrough', label: `Strikethrough (${mod}${isMac ? '⇧' : 'Shift+'}X)` },
     { command: 'heading', icon: 'i-lucide-heading', label: 'Heading' },
     { command: 'list', icon: 'i-lucide-list', label: 'Bulleted list' },
+    { command: 'numbered', icon: 'i-lucide-list-ordered', label: 'Numbered list' },
     { command: 'checklist', icon: 'i-lucide-list-checks', label: 'Checklist' },
+    { command: 'quote', icon: 'i-lucide-text-quote', label: 'Block quote' },
     { command: 'code', icon: 'i-lucide-code', label: 'Code' },
     { command: 'link', icon: 'i-lucide-link', label: `Link (${mod}K)` },
 ];

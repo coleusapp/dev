@@ -19,7 +19,7 @@ export type TextEdit = {
     selectionEnd: number;
 };
 
-export type FormatCommand = 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'heading' | 'list' | 'checklist' | 'link';
+export type FormatCommand = 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'heading' | 'list' | 'numbered' | 'checklist' | 'quote' | 'link';
 
 const INLINE_MARKERS = { bold: '**', italic: '_', underline: '++', strike: '~~', code: '`' } as const;
 
@@ -100,6 +100,43 @@ const toggleLinePrefix = (selection: Selection, prefix: string): TextEdit => {
     return replaceLines(selection, from, to, lines, changed);
 };
 
+/**
+ * Numbers the selected lines 1., 2., 3. … (blank lines keep their place
+ * without a number), or removes the numbers when every line already has one.
+ */
+const toggleNumbered = (selection: Selection): TextEdit => {
+    const { from, to, lines } = lineRange(selection);
+    const numbered = /^\d+[.)]\s+/;
+    const removeAll = lines.every((line) => numbered.test(line) || (line.trim() === '' && lines.length > 1));
+    let next = 1;
+
+    const changed = lines.map((line) => {
+        if (removeAll) {
+            return line.replace(numbered, '');
+        }
+        if (line.trim() === '' && lines.length > 1) {
+            return line;
+        }
+        return `${next++}. ${line.replace(ANY_PREFIX, '')}`;
+    });
+
+    return replaceLines(selection, from, to, lines, changed);
+};
+
+/**
+ * Quotes the selected lines, keeping their other markers (a quoted list
+ * stays a list), or unquotes them when every line is already quoted.
+ */
+const toggleQuote = (selection: Selection): TextEdit => {
+    const { from, to, lines } = lineRange(selection);
+    const quoted = /^>\s?/;
+    const removeAll = lines.every((line) => quoted.test(line));
+
+    const changed = lines.map((line) => (removeAll ? line.replace(quoted, '') : `> ${line}`.replace(/^> $/, '>')));
+
+    return replaceLines(selection, from, to, lines, changed);
+};
+
 export type ParagraphStyle = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled';
 
 const STYLE_PREFIXES = { title: '# ', heading: '## ', subheading: '### ', body: '' } as const;
@@ -149,6 +186,10 @@ export const formatMarkdown = (command: FormatCommand, selection: Selection): Te
         case 'list':
         case 'checklist':
             return toggleLinePrefix(selection, LINE_PREFIXES[command]);
+        case 'numbered':
+            return toggleNumbered(selection);
+        case 'quote':
+            return toggleQuote(selection);
         case 'link':
             return link(selection);
     }

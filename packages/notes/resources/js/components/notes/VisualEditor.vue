@@ -151,6 +151,12 @@ const run = (command: Exclude<FormatCommand, 'link'>): void => {
         case 'checklist':
             chain.toggleTaskList().run();
             break;
+        case 'numbered':
+            chain.toggleOrderedList().run();
+            break;
+        case 'quote':
+            chain.toggleBlockquote().run();
+            break;
         case 'code':
             if (from !== to && !$from.sameParent($to)) {
                 chain.toggleCodeBlock().run();

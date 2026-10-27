@@ -38,3 +38,15 @@ describe('paragraph styles', () => {
         expect(currentParagraphStyle(editor)).toBeNull();
     });
 });
+
+describe('toolbar commands', () => {
+    it('toggles numbered lists and quotes', () => {
+        loadMarkdown(editor, 'one');
+        editor.commands.setTextSelection(2);
+        editor.chain().toggleOrderedList().run();
+        expect(editorMarkdown(editor, '')).toBe('1. one');
+
+        editor.chain().toggleOrderedList().toggleBlockquote().run();
+        expect(editorMarkdown(editor, '')).toBe('> one');
+    });
+});
