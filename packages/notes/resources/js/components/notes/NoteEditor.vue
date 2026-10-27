@@ -42,6 +42,8 @@ const props = defineProps<{
     autosaveDelay?: number;
     firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
     checkedToBottom?: boolean;
+    spellcheck?: boolean;
+    textDirection?: 'auto' | 'ltr' | 'rtl';
 }>();
 
 const emit = defineEmits<{
@@ -745,6 +747,8 @@ const onKeydown = (event: KeyboardEvent): void => {
                 :active="mode === 'edit'"
                 :first-line-style="firstLineStyle"
                 :checked-to-bottom="checkedToBottom"
+                :spellcheck="spellcheck"
+                :text-direction="textDirection"
                 v-model="body"
                 @faithful="(value) => (faithful = value)"
                 @style="(value) => (visualStyle = value)"
@@ -766,6 +770,8 @@ const onKeydown = (event: KeyboardEvent): void => {
                 :readonly="togglingTask"
                 autofocus
                 @paste="onSourcePaste"
+                :spellcheck="spellcheck ?? true"
+                :dir="textDirection ?? 'auto'"
                 @input="detectSourceSlash"
                 @click="detectSourceSlash"
                 @blur="closeSourceSlash"
@@ -777,6 +783,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 class="note-preview h-full min-w-0 flex-1 overflow-y-auto"
                 :class="{ 'border-default border-l pl-4': mode === 'split' }"
                 ref="preview"
+                :dir="textDirection ?? 'auto'"
                 aria-label="Preview"
                 @click="onPreviewClick"
                 v-html="html"

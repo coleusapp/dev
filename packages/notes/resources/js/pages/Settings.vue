@@ -31,6 +31,13 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         help: 'How long to wait after you stop typing before saving.',
         optionLabel: (value) => `${Number(value) / 1000} s`,
     },
+    { key: 'editor.spellcheck', label: 'Check spelling', help: "Underline misspelled words while you type (uses your browser's spellchecker)." },
+    {
+        key: 'editor.text_direction',
+        label: 'Text direction',
+        help: 'Automatic picks left-to-right or right-to-left for each paragraph from its first letters (for Arabic, Hebrew, Persian…).',
+        optionLabel: (value) => ({ auto: 'Automatic', ltr: 'Left to right', rtl: 'Right to left' })[value as string] ?? String(value),
+    },
     {
         key: 'editor.first_line_style',
         label: 'New notes start with',

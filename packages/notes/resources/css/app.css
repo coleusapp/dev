@@ -32,23 +32,23 @@
 }
 
 .note-preview ul {
-    @apply mb-2 list-disc pl-6;
+    @apply mb-2 list-disc ps-6;
 }
 
 .note-preview ol {
-    @apply mb-2 list-decimal pl-6;
+    @apply mb-2 list-decimal ps-6;
 }
 
 .note-preview li:has(> input[type='checkbox']) {
-    @apply -ml-6 list-none;
+    @apply -ms-6 list-none;
 }
 
 .note-preview li > input[type='checkbox'] {
-    @apply mr-2 align-middle;
+    @apply me-2 align-middle;
 }
 
 .note-preview blockquote {
-    @apply border-default text-dimmed mb-2 border-l-2 pl-4;
+    @apply border-default text-dimmed mb-2 border-s-2 ps-4;
 }
 
 .note-preview code {
@@ -129,7 +129,7 @@
 }
 
 .tiptap ul[data-type='taskList'] {
-    @apply list-none pl-0;
+    @apply list-none ps-0;
 }
 
 .tiptap ul[data-type='taskList'] li {
@@ -149,7 +149,7 @@
 }
 
 .tiptap ul[data-type='taskList'] ul[data-type='taskList'] {
-    @apply mt-1 pl-6;
+    @apply mt-1 ps-6;
 }
 
 .tiptap .selectedCell {
@@ -174,4 +174,12 @@
 
 .find-current {
     @apply bg-orange-400 dark:bg-orange-500;
+}
+
+/* Automatic direction: each paragraph, item and the textarea's lines take
+   their direction from their own first strong letters. */
+.note-preview[dir='auto'] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th),
+textarea[dir='auto'] {
+    unicode-bidi: plaintext;
+    text-align: start;
 }

@@ -90,3 +90,14 @@ describe('normalizeMarkdown', () => {
         expect(normalizeMarkdown('\\#x')).not.toBe(normalizeMarkdown('#x'));
     });
 });
+
+describe('text direction', () => {
+    it('marks blocks dir="auto" without changing the Markdown', () => {
+        const rtl = new Editor({ element: document.createElement('div'), extensions: editorExtensions(), textDirection: 'auto' });
+        const { frontMatter } = loadMarkdown(rtl, '# سلام\n\n- [ ] خرید\n\nEnglish line');
+
+        expect(rtl.view.dom.querySelector('h1')?.getAttribute('dir')).toBe('auto');
+        expect(editorMarkdown(rtl, frontMatter)).toBe('# سلام\n\n- [ ] خرید\n\nEnglish line');
+        rtl.destroy();
+    });
+});

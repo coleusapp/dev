@@ -24,6 +24,8 @@ const props = defineProps<{
     firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
     checkedToBottom?: boolean;
     onSlashKey?: (key: string) => boolean;
+    spellcheck?: boolean;
+    textDirection?: 'auto' | 'ltr' | 'rtl';
 }>();
 
 const emit = defineEmits<{
@@ -58,8 +60,9 @@ const editor = useEditor({
         SlashMenu.configure({ onState: (state) => emit('slash', state), onKey: (key) => props.onSlashKey?.(key) ?? false }),
     ],
     editable: !props.readonly,
+    textDirection: props.textDirection ?? 'auto',
     editorProps: {
-        attributes: { class: 'note-preview tiptap h-full focus:outline-none', 'aria-label': 'Note', spellcheck: 'true' },
+        attributes: { class: 'note-preview tiptap h-full focus:outline-none', 'aria-label': 'Note', spellcheck: String(props.spellcheck ?? true) },
         handleDOMEvents: {
             click: (_view, event) => {
                 const target = event.target instanceof Element ? event.target : null;

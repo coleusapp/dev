@@ -90,6 +90,8 @@ export type EditorMode = 'edit' | 'source' | 'split' | 'preview';
 export type NotePreferences = {
     'editor.default_mode': EditorMode;
     'editor.autosave_delay': number;
+    'editor.spellcheck': boolean;
+    'editor.text_direction': 'auto' | 'ltr' | 'rtl';
     'editor.first_line_style': 'title' | 'heading' | 'subheading' | 'body';
     'checklists.checked_to_bottom': boolean;
     'list.relative_dates': boolean;

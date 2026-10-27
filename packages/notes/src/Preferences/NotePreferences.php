@@ -21,6 +21,8 @@ class NotePreferences
     public const array DEFINITIONS = [
         'editor.default_mode' => ['default' => 'edit', 'options' => ['edit', 'source', 'split', 'preview']],
         'editor.autosave_delay' => ['default' => 750, 'options' => [500, 750, 1500, 3000]],
+        'editor.spellcheck' => ['default' => true, 'type' => 'boolean'],
+        'editor.text_direction' => ['default' => 'auto', 'options' => ['auto', 'ltr', 'rtl']],
         'editor.first_line_style' => ['default' => 'body', 'options' => ['title', 'heading', 'subheading', 'body']],
         'checklists.checked_to_bottom' => ['default' => false, 'type' => 'boolean'],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
