@@ -3,6 +3,7 @@ import type { ChecklistAction, TableAction } from '@/components/notes/note';
 import { checkedToBottomTransaction, deleteCheckedTransaction, setAllCheckedTransaction } from '@/editor/checklists';
 import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
+import { findState, replaceCurrent, replaceEvery, setFind, stepFind } from '@/editor/Find';
 import { splitFrontMatter } from '@/editor/frontMatter';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
 import { todayIso, type SlashCommand } from '@/editor/slashCommands';
@@ -31,6 +32,7 @@ const emit = defineEmits<{
     style: [style: ParagraphStyle | null];
     inTable: [inTable: boolean];
     slash: [state: SlashState | null];
+    find: [state: { count: number; current: number }];
     openWikiLink: [title: string];
     openTag: [tag: string];
 }>();
@@ -95,6 +97,8 @@ const editor = useEditor({
     onTransaction: ({ editor: changed }) => {
         emit('style', currentParagraphStyle(changed));
         emit('inTable', changed.isActive('table'));
+        const found = findState(changed);
+        emit('find', { count: found.matches.length, current: found.current });
     },
 });
 
@@ -331,7 +335,39 @@ const insertText = (text: string): void => {
     editor.value?.chain().focus().insertContent(text).run();
 };
 
-defineExpose({ run, setStyle, highlight, checklistAction, tableAction, runSlash, insertText, setLink, unsetLink, isLinkActive, focus });
+/**
+ * Find and replace (editor/Find.ts) on the visual editor; pending source
+ * edits are loaded first so the search sees the latest text.
+ */
+const find = {
+    search: (pattern: RegExp | null): void => {
+        if (!editor.value) {
+            return;
+        }
+        if (pendingMarkdown !== null) {
+            load(pendingMarkdown);
+            pendingMarkdown = null;
+        }
+        setFind(editor.value, pattern);
+    },
+    step: (step: 1 | -1): void => {
+        if (editor.value) {
+            stepFind(editor.value, step);
+        }
+    },
+    replace: (replacement: string, regex: boolean): void => {
+        if (editor.value) {
+            replaceCurrent(editor.value, replacement, regex);
+        }
+    },
+    replaceAll: (replacement: string, regex: boolean): void => {
+        if (editor.value) {
+            replaceEvery(editor.value, replacement, regex);
+        }
+    },
+};
+
+defineExpose({ run, setStyle, highlight, checklistAction, tableAction, runSlash, insertText, find, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

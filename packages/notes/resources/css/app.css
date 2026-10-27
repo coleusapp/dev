@@ -167,3 +167,11 @@
 .note-preview li.drop-after {
     @apply shadow-[inset_0_-2px_0_var(--ui-primary)];
 }
+
+.find-match {
+    @apply rounded-sm bg-amber-200/70 dark:bg-amber-600/50;
+}
+
+.find-current {
+    @apply bg-orange-400 dark:bg-orange-500;
+}

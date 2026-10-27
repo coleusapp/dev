@@ -1,5 +1,6 @@
 import { AutoPair } from '@/editor/AutoPair';
 import { CheckedToBottom } from '@/editor/checklists';
+import { Find } from '@/editor/Find';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
 import { LineCommands } from '@/editor/LineCommands';
@@ -49,5 +50,6 @@ export const editorExtensions = ({
     CheckedToBottom.configure({ enabled: checkedToBottom }),
     AutoPair,
     LineCommands,
+    Find,
     Markdown,
 ];

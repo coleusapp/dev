@@ -60,7 +60,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O4.11 Slash commands: `/` menu to insert headings, lists, tables, callouts, embeds, templates (Box: "+" insert menu) 📦
 - [x] O4.12 Table editor: insert table, add/remove rows/cols, Tab between cells, auto-align (Box: merge cells, cell background colours, resizable columns, header row) 🍎 📦
 - [ ] O4.13 Spellcheck toggle and right-to-left text support (settings)
-- [ ] O4.14 Find and replace inside the current note (regex, case-sensitive) 🍎
+- [x] O4.14 Find and replace inside the current note (regex, case-sensitive) 🍎
 - [ ] O4.15 Word / character count + reading time in status bar / info panel (Bear 7.3) 🍎
 
 ## O5. Markdown extensions (rendering)

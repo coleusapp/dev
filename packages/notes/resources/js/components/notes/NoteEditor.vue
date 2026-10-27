@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
@@ -6,6 +7,7 @@ import SlashMenu from '@/components/notes/SlashMenu.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
+import { useFindReplace } from '@/composables/useFindReplace';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
 import { filterSlashCommands, slashQuery, todayIso, type SlashCommand } from '@/editor/slashCommands';
 import type { SlashState } from '@/editor/SlashMenu';
@@ -387,6 +389,14 @@ const insertAtCursor = (text: string): void => {
     }
 };
 
+const finder = useFindReplace({
+    visualActive: () => mode.value === 'edit',
+    visual: () => visual.value?.find,
+    textarea,
+    body,
+    editSource: (build) => editSource(build),
+});
+
 const visualStyle = ref<ParagraphStyle | null>(null);
 const visualInTable = ref(false);
 
@@ -616,6 +626,12 @@ const pairSourceCharacters = (event: KeyboardEvent): void => {
  * Mod-B/I/U built in); in source mode all of them go through the toolbar.
  */
 const onKeydown = (event: KeyboardEvent): void => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f' && mode.value !== 'preview') {
+        event.preventDefault();
+        finder.show(event.altKey);
+        return;
+    }
+
     if (slash.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
         if (handleSlashKey(event.key)) {
             event.preventDefault();
@@ -697,6 +713,22 @@ const onKeydown = (event: KeyboardEvent): void => {
             @table-action="tableAction"
             @insert="insertAtCursor"
         />
+        <FindBar
+            v-if="finder.open.value && mode !== 'preview'"
+            v-model:query="finder.query.value"
+            v-model:replacement="finder.replacement.value"
+            v-model:case-sensitive="finder.caseSensitive.value"
+            v-model:regex="finder.regex.value"
+            v-model:show-replace="finder.showReplace.value"
+            :count="finder.count.value"
+            :current="finder.current.value"
+            :error="finder.error.value"
+            @next="finder.step(1)"
+            @previous="finder.step(-1)"
+            @replace="finder.replace"
+            @replace-all="finder.replaceAll"
+            @close="finder.close"
+        />
         <div
             v-if="!faithful && mode === 'source' && preferredMode === 'edit'"
             class="bg-elevated flex items-center gap-2 rounded-md px-3 py-2 text-xs"
@@ -718,6 +750,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 @style="(value) => (visualStyle = value)"
                 @in-table="(value) => (visualInTable = value)"
                 @slash="onVisualSlash"
+                @find="(state) => (finder.visualState.value = state)"
                 :on-slash-key="handleSlashKey"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
