@@ -183,3 +183,39 @@ textarea[dir='auto'] {
     unicode-bidi: plaintext;
     text-align: start;
 }
+
+/* Folding (editor/Folding.ts, composables/usePreviewFolding.ts). */
+.fold-toggle {
+    @apply text-dimmed hover:text-default -ms-5 me-1 inline-flex size-4 cursor-pointer items-center justify-center align-middle opacity-0 transition-opacity;
+}
+
+.fold-toggle::before {
+    content: '▾';
+    @apply text-xs transition-transform;
+}
+
+.fold-toggle.is-folded::before {
+    @apply -rotate-90 rtl:rotate-90;
+}
+
+:is(h1, h2, h3, h4, h5, h6, li):hover > .fold-toggle,
+.fold-toggle.is-folded,
+.fold-toggle:focus-visible {
+    @apply opacity-100;
+}
+
+.folded-hidden,
+li.is-folded > :is(ul, ol) {
+    @apply hidden;
+}
+
+h1.is-folded::after,
+h2.is-folded::after,
+h3.is-folded::after,
+h4.is-folded::after,
+h5.is-folded::after,
+h6.is-folded::after,
+li.is-folded::after {
+    content: ' …';
+    @apply text-dimmed font-normal;
+}

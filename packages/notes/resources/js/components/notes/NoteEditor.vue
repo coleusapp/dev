@@ -9,6 +9,7 @@ import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useFindReplace } from '@/composables/useFindReplace';
+import { usePreviewFolding } from '@/composables/usePreviewFolding';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
 import { filterSlashCommands, slashQuery, todayIso, type SlashCommand } from '@/editor/slashCommands';
 import type { SlashState } from '@/editor/SlashMenu';
@@ -122,6 +123,8 @@ const toggleTask = (checkbox: HTMLInputElement): Promise<void> => {
 };
 
 const preview = useTemplateRef<HTMLElement>('preview');
+
+usePreviewFolding(preview, html);
 
 useChecklistDrag(
     preview,
