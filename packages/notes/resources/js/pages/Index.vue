@@ -391,6 +391,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         :default-mode="preferences['editor.default_mode']"
                         :autosave-delay="preferences['editor.autosave_delay']"
                         :first-line-style="preferences['editor.first_line_style']"
+                        :checked-to-bottom="preferences['checklists.checked_to_bottom']"
                         @saved="onNoteSaved"
                         @create-linked="(title) => (linkedTitle = title)"
                     />

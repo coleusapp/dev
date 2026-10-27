@@ -1,3 +1,4 @@
+import { CheckedToBottom } from '@/editor/checklists';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
 import { WikiLink } from '@/editor/WikiLink';
@@ -25,7 +26,15 @@ const NoteLink = Link.extend({
     },
 }).configure({ openOnClick: false, autolink: false, linkOnPaste: true });
 
-export const editorExtensions = (placeholder = 'Start writing...'): AnyExtension[] => [
+export type EditorExtensionOptions = {
+    placeholder?: string;
+    checkedToBottom?: () => boolean;
+};
+
+export const editorExtensions = ({
+    placeholder = 'Start writing...',
+    checkedToBottom = () => false,
+}: EditorExtensionOptions = {}): AnyExtension[] => [
     StarterKit.configure({ link: false }),
     NoteLink,
     TaskList,
@@ -35,5 +44,6 @@ export const editorExtensions = (placeholder = 'Start writing...'): AnyExtension
     WikiLink,
     Hashtags,
     Placeholder.configure({ placeholder }),
+    CheckedToBottom.configure({ enabled: checkedToBottom }),
     Markdown,
 ];

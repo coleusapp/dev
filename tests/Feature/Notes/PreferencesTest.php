@@ -38,6 +38,7 @@ it('saves preferences for the current user only', function () use ($defaults) {
         'editor.default_mode' => 'split',
         'editor.autosave_delay' => 1500,
         'editor.first_line_style' => 'body',
+        'checklists.checked_to_bottom' => false,
         'list.relative_dates' => false,
         'list.show_snippets' => true,
     ]);

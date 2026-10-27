@@ -22,6 +22,7 @@ class NotePreferences
         'editor.default_mode' => ['default' => 'edit', 'options' => ['edit', 'source', 'split', 'preview']],
         'editor.autosave_delay' => ['default' => 750, 'options' => [500, 750, 1500, 3000]],
         'editor.first_line_style' => ['default' => 'body', 'options' => ['title', 'heading', 'subheading', 'body']],
+        'checklists.checked_to_bottom' => ['default' => false, 'type' => 'boolean'],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],
     ];

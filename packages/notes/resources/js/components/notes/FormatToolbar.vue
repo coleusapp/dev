@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ChecklistAction } from '@/components/notes/note';
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/editor/Highlight';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import type { DropdownMenuItem } from '@nuxt/ui';
@@ -12,6 +13,7 @@ const emit = defineEmits<{
     format: [command: FormatCommand];
     style: [style: ParagraphStyle];
     highlight: [color: HighlightColor | null];
+    checklistAction: [action: ChecklistAction];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -46,6 +48,10 @@ const styles: { style: ParagraphStyle; label: string; itemLabel?: string }[] = [
 const highlightColor = ref<HighlightColor | null>(null);
 
 const swatchClass = (color: HighlightColor | null): string => (color ? `mark-${color}` : 'mark-default');
+
+const checklistItems: DropdownMenuItem[] = [
+    { label: 'Move checked items to bottom', icon: 'i-lucide-arrow-down-wide-narrow', onSelect: () => emit('checklistAction', 'checked-to-bottom') },
+];
 
 const highlightItems = computed<DropdownMenuItem[]>(() =>
     [null, ...HIGHLIGHT_COLORS].map((color) => ({
@@ -97,6 +103,19 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                 @click="$emit('format', button.command)"
             />
         </UiTooltip>
+        <UiDropdownMenu :items="checklistItems" :content="{ align: 'start' }">
+            <UiTooltip text="Checklist actions">
+                <UiButton
+                    icon="i-lucide-list-todo"
+                    trailing-icon="i-lucide-chevron-down"
+                    aria-label="Checklist actions"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    @mousedown.prevent
+                />
+            </UiTooltip>
+        </UiDropdownMenu>
         <UiTooltip text="Highlight">
             <UiButton
                 icon="i-lucide-highlighter"

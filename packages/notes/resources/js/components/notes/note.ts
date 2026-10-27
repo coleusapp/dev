@@ -68,6 +68,8 @@ export const filterQuery = (filters: Partial<NoteFilters>): Record<string, strin
         ),
     );
 
+export type ChecklistAction = 'checked-to-bottom';
+
 export type EditorMode = 'edit' | 'source' | 'split' | 'preview';
 
 /**
@@ -77,6 +79,7 @@ export type NotePreferences = {
     'editor.default_mode': EditorMode;
     'editor.autosave_delay': number;
     'editor.first_line_style': 'title' | 'heading' | 'subheading' | 'body';
+    'checklists.checked_to_bottom': boolean;
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
 };

@@ -37,6 +37,11 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         help: 'The style of the first line of an empty note in the visual editor, where you type its title.',
         optionLabel: (value) => ({ title: 'Title', heading: 'Heading', subheading: 'Subheading', body: 'Body' })[value as string] ?? String(value),
     },
+    {
+        key: 'checklists.checked_to_bottom',
+        label: 'Move checked items to the bottom',
+        help: 'When you tick a checklist item in the editor, it moves below the unticked ones.',
+    },
     { key: 'list.relative_dates', label: 'Relative dates in the list', help: 'Show "5 minutes ago" instead of the full date and time.' },
     { key: 'list.show_snippets', label: 'Show snippets in the list', help: 'Show a couple of lines of each note under its title.' },
 ];

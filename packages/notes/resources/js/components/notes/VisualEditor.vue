@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { checkedToBottomTransaction } from '@/editor/checklists';
 import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
 import { splitFrontMatter } from '@/editor/frontMatter';
@@ -16,6 +17,7 @@ const props = defineProps<{
     readonly?: boolean;
     active?: boolean;
     firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
+    checkedToBottom?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -42,7 +44,7 @@ const load = (markdown: string): void => {
 };
 
 const editor = useEditor({
-    extensions: editorExtensions(),
+    extensions: editorExtensions({ checkedToBottom: () => props.checkedToBottom ?? false }),
     editable: !props.readonly,
     editorProps: {
         attributes: { class: 'note-preview tiptap h-full focus:outline-none', 'aria-label': 'Note', spellcheck: 'true' },
@@ -204,6 +206,27 @@ const setStyle = (style: ParagraphStyle): void => {
 };
 
 /**
+ * Moves ticked checklist items below unticked ones in every list. Pending
+ * changes from source mode are loaded first so they aren't lost.
+ */
+const moveCheckedToBottom = (): void => {
+    if (!editor.value) {
+        return;
+    }
+
+    if (pendingMarkdown !== null) {
+        load(pendingMarkdown);
+        pendingMarkdown = null;
+    }
+
+    const tr = checkedToBottomTransaction(editor.value.state);
+
+    if (tr) {
+        editor.value.view.dispatch(tr);
+    }
+};
+
+/**
  * Highlights the selection in a colour, or removes the highlight when it already has that colour.
  */
 const highlight = (color: string | null): void => {
@@ -220,7 +243,7 @@ const highlight = (color: string | null): void => {
     }
 };
 
-defineExpose({ run, setStyle, highlight, setLink, unsetLink, isLinkActive, focus });
+defineExpose({ run, setStyle, highlight, moveCheckedToBottom, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

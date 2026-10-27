@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
-import type { EditorMode, NoteDetailData } from '@/components/notes/note';
+import type { ChecklistAction, EditorMode, NoteDetailData } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
@@ -24,6 +24,7 @@ const props = defineProps<{
     defaultMode?: EditorMode;
     autosaveDelay?: number;
     firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
+    checkedToBottom?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -246,6 +247,22 @@ const highlight = (color: string | null): void => {
     }
 };
 
+/**
+ * Whole-checklist actions go through the visual editor, which knows the
+ * list structure. A note it can't keep exactly is left alone.
+ */
+const canRewriteVisually = computed(() => faithful.value || visualAnyway.value);
+
+const checklistAction = (action: ChecklistAction): void => {
+    if (togglingTask.value || !canRewriteVisually.value) {
+        return;
+    }
+
+    if (action === 'checked-to-bottom') {
+        visual.value?.moveCheckedToBottom();
+    }
+};
+
 const format = (command: FormatCommand): void => {
     if (togglingTask.value) {
         return;
@@ -337,6 +354,7 @@ const onKeydown = (event: KeyboardEvent): void => {
             @format="format"
             @style="setStyle"
             @highlight="highlight"
+            @checklist-action="checklistAction"
         />
         <div
             v-if="!faithful && mode === 'source' && preferredMode === 'edit'"
@@ -353,6 +371,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 ref="visual"
                 :active="mode === 'edit'"
                 :first-line-style="firstLineStyle"
+                :checked-to-bottom="checkedToBottom"
                 v-model="body"
                 @faithful="(value) => (faithful = value)"
                 @style="(value) => (visualStyle = value)"
