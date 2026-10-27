@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
-import type { ChecklistAction, EditorMode, NoteDetailData } from '@/components/notes/note';
+import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
@@ -24,6 +24,7 @@ import {
     type TextEdit,
 } from '@/lib/markdownFormat';
 import { pasteUrlOverSelection } from '@/lib/paste';
+import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
@@ -233,6 +234,27 @@ const saveNow = (event: KeyboardEvent): void => {
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
 
 const visualStyle = ref<ParagraphStyle | null>(null);
+const visualInTable = ref(false);
+
+/**
+ * Table menu: Tiptap table commands in the visual editor, Markdown
+ * insert / line-up helpers in source (lib/tables.ts).
+ */
+const tableAction = (action: TableAction): void => {
+    if (togglingTask.value) {
+        return;
+    }
+
+    if (mode.value === 'edit') {
+        if (action !== 'format') {
+            visual.value?.tableAction(action);
+        }
+
+        return;
+    }
+
+    editSource(action === 'format' ? formatTable : action === 'insert' ? insertTable : () => null);
+};
 
 /**
  * Paragraph styles act on the visual editor's blocks, or on the selected
@@ -316,7 +338,8 @@ const indentSourceList = (event: KeyboardEvent): void => {
     }
 
     const { value, selectionStart, selectionEnd } = textarea.value;
-    const edit = indentListLines({ text: value, start: selectionStart, end: selectionEnd }, event.shiftKey);
+    const selection = { text: value, start: selectionStart, end: selectionEnd };
+    const edit = moveToCell(selection, event.shiftKey) ?? indentListLines(selection, event.shiftKey);
 
     if (edit) {
         event.preventDefault();
@@ -503,10 +526,13 @@ const onKeydown = (event: KeyboardEvent): void => {
         <FormatToolbar
             v-if="mode !== 'preview'"
             :active-style="mode === 'edit' ? visualStyle : null"
+            :in-table="mode === 'edit' && visualInTable"
+            :source="mode !== 'edit'"
             @format="format"
             @style="setStyle"
             @highlight="highlight"
             @checklist-action="checklistAction"
+            @table-action="tableAction"
         />
         <div
             v-if="!faithful && mode === 'source' && preferredMode === 'edit'"
@@ -527,6 +553,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 v-model="body"
                 @faithful="(value) => (faithful = value)"
                 @style="(value) => (visualStyle = value)"
+                @in-table="(value) => (visualInTable = value)"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
             />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChecklistAction } from '@/components/notes/note';
+import type { ChecklistAction, TableAction } from '@/components/notes/note';
 import { checkedToBottomTransaction, deleteCheckedTransaction, setAllCheckedTransaction } from '@/editor/checklists';
 import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
@@ -26,6 +26,7 @@ const emit = defineEmits<{
     'update:modelValue': [markdown: string];
     faithful: [faithful: boolean];
     style: [style: ParagraphStyle | null];
+    inTable: [inTable: boolean];
     openWikiLink: [title: string];
     openTag: [tag: string];
 }>();
@@ -86,6 +87,7 @@ const editor = useEditor({
     },
     onTransaction: ({ editor: changed }) => {
         emit('style', currentParagraphStyle(changed));
+        emit('inTable', changed.isActive('table'));
     },
 });
 
@@ -252,7 +254,33 @@ const highlight = (color: string | null): void => {
     }
 };
 
-defineExpose({ run, setStyle, highlight, checklistAction, setLink, unsetLink, isLinkActive, focus });
+/**
+ * Table commands from the toolbar's Table menu (Tab / Shift+Tab between
+ * cells is built into Tiptap's table extension).
+ */
+const tableAction = (action: Exclude<TableAction, 'format'>): void => {
+    const chain = editor.value?.chain().focus();
+
+    if (!chain) {
+        return;
+    }
+
+    const commands: Record<Exclude<TableAction, 'format'>, () => boolean> = {
+        insert: () => chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+        'row-above': () => chain.addRowBefore().run(),
+        'row-below': () => chain.addRowAfter().run(),
+        'column-left': () => chain.addColumnBefore().run(),
+        'column-right': () => chain.addColumnAfter().run(),
+        'delete-row': () => chain.deleteRow().run(),
+        'delete-column': () => chain.deleteColumn().run(),
+        'toggle-header': () => chain.toggleHeaderRow().run(),
+        'delete-table': () => chain.deleteTable().run(),
+    };
+
+    commands[action]();
+};
+
+defineExpose({ run, setStyle, highlight, checklistAction, tableAction, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

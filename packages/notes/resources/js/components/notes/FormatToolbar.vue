@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChecklistAction } from '@/components/notes/note';
+import type { ChecklistAction, TableAction } from '@/components/notes/note';
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/editor/Highlight';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import type { DropdownMenuItem } from '@nuxt/ui';
@@ -7,6 +7,8 @@ import { computed, ref } from 'vue';
 
 const props = defineProps<{
     activeStyle?: ParagraphStyle | null;
+    inTable?: boolean;
+    source?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -14,6 +16,7 @@ const emit = defineEmits<{
     style: [style: ParagraphStyle];
     highlight: [color: HighlightColor | null];
     checklistAction: [action: ChecklistAction];
+    tableAction: [action: TableAction];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -64,6 +67,45 @@ const checklistItems: DropdownMenuItem[][] = [
     ],
     [{ label: 'Delete checked items', icon: 'i-lucide-trash-2', color: 'error', onSelect: () => emit('checklistAction', 'delete-checked') }],
 ];
+
+/**
+ * Insert is always there. In the visual editor the row/column commands
+ * appear while the cursor is in a table; in Markdown source "Line up
+ * columns" pads the table at the cursor.
+ */
+const tableItems = computed<DropdownMenuItem[][]>(() => {
+    const action = (label: string, icon: string, value: TableAction, extra: Partial<DropdownMenuItem> = {}): DropdownMenuItem => ({
+        label,
+        icon,
+        onSelect: () => emit('tableAction', value),
+        ...extra,
+    });
+    const insert = [action('Insert table', 'i-lucide-table', 'insert')];
+
+    if (props.source) {
+        return [insert, [action('Line up columns', 'i-lucide-align-justify', 'format')]];
+    }
+
+    if (!props.inTable) {
+        return [insert];
+    }
+
+    return [
+        insert,
+        [
+            action('Add row above', 'i-lucide-arrow-up-to-line', 'row-above'),
+            action('Add row below', 'i-lucide-arrow-down-to-line', 'row-below'),
+            action('Add column left', 'i-lucide-arrow-left-to-line', 'column-left'),
+            action('Add column right', 'i-lucide-arrow-right-to-line', 'column-right'),
+            action('Header row on/off', 'i-lucide-heading', 'toggle-header'),
+        ],
+        [
+            action('Delete row', 'i-lucide-minus', 'delete-row', { color: 'error' }),
+            action('Delete column', 'i-lucide-minus', 'delete-column', { color: 'error' }),
+            action('Delete table', 'i-lucide-trash-2', 'delete-table', { color: 'error' }),
+        ],
+    ];
+});
 
 const highlightItems = computed<DropdownMenuItem[]>(() =>
     [null, ...HIGHLIGHT_COLORS].map((color) => ({
@@ -122,6 +164,19 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                     trailing-icon="i-lucide-chevron-down"
                     aria-label="Checklist actions"
                     color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    @mousedown.prevent
+                />
+            </UiTooltip>
+        </UiDropdownMenu>
+        <UiDropdownMenu :items="tableItems" :content="{ align: 'start' }">
+            <UiTooltip text="Table">
+                <UiButton
+                    icon="i-lucide-table"
+                    trailing-icon="i-lucide-chevron-down"
+                    aria-label="Table"
+                    :color="inTable ? 'primary' : 'neutral'"
                     variant="ghost"
                     size="xs"
                     @mousedown.prevent

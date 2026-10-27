@@ -68,6 +68,18 @@ export const filterQuery = (filters: Partial<NoteFilters>): Record<string, strin
         ),
     );
 
+export type TableAction =
+    | 'insert'
+    | 'row-above'
+    | 'row-below'
+    | 'column-left'
+    | 'column-right'
+    | 'delete-row'
+    | 'delete-column'
+    | 'toggle-header'
+    | 'delete-table'
+    | 'format';
+
 export type ChecklistAction = 'checked-to-bottom' | 'check-all' | 'uncheck-all' | 'delete-checked';
 
 export type EditorMode = 'edit' | 'source' | 'split' | 'preview';

@@ -217,3 +217,17 @@ describe('smart lists in the visual editor', () => {
         expect(editorMarkdown(editor, '')).toBe('1. one\n2. two\n\nafter');
     });
 });
+
+describe('tables in the visual editor', () => {
+    it('inserts a table and adds a row and a column', () => {
+        loadMarkdown(editor, '');
+        editor.commands.setTextSelection(1);
+
+        editor.chain().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run();
+        editor.chain().addColumnAfter().addRowAfter().run();
+
+        const markdown = editorMarkdown(editor, '').trim();
+        expect(markdown.split('\n')).toHaveLength(4);
+        expect(markdown.split('\n')[0].split('|').length - 2).toBe(3);
+    });
+});
