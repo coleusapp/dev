@@ -200,7 +200,24 @@ const setStyle = (style: ParagraphStyle): void => {
     }
 };
 
-defineExpose({ run, setStyle, setLink, unsetLink, isLinkActive, focus });
+/**
+ * Highlights the selection in a colour, or removes the highlight when it already has that colour.
+ */
+const highlight = (color: string | null): void => {
+    const chain = editor.value?.chain().focus();
+
+    if (!chain || !editor.value) {
+        return;
+    }
+
+    if (editor.value.isActive('highlight', { color })) {
+        chain.unsetHighlight().run();
+    } else {
+        chain.setHighlight(color ? { color } : undefined).run();
+    }
+};
+
+defineExpose({ run, setStyle, highlight, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

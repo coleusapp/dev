@@ -53,6 +53,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new HighlightExtension);
         $converter->getEnvironment()->addExtension(new ChecklistExtension);
         $converter->getEnvironment()->addExtension(new UnderlineExtension);
+        $converter->getEnvironment()->addExtension(new HighlightColors);
         $converter->getEnvironment()->addExtension(new WikiLinkExtension($wikiLinks));
 
         return $converter;

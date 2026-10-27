@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { HIGHLIGHT_COLORS, type HighlightColor } from '@/editor/Highlight';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import type { DropdownMenuItem } from '@nuxt/ui';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     activeStyle?: ParagraphStyle | null;
@@ -10,6 +11,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     format: [command: FormatCommand];
     style: [style: ParagraphStyle];
+    highlight: [color: HighlightColor | null];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -36,6 +38,27 @@ const styles: { style: ParagraphStyle; label: string; itemLabel?: string }[] = [
     { style: 'body', label: 'Body' },
     { style: 'monostyled', label: 'Monostyled', itemLabel: 'font-mono' },
 ];
+
+/**
+ * The colour the highlighter button applies; picking one from the menu
+ * also applies it, like Apple Notes. null is the default yellow.
+ */
+const highlightColor = ref<HighlightColor | null>(null);
+
+const swatchClass = (color: HighlightColor | null): string => (color ? `mark-${color}` : 'mark-default');
+
+const highlightItems = computed<DropdownMenuItem[]>(() =>
+    [null, ...HIGHLIGHT_COLORS].map((color) => ({
+        label: color ? color[0].toUpperCase() + color.slice(1) : 'Yellow',
+        type: 'checkbox',
+        checked: highlightColor.value === color,
+        swatch: swatchClass(color),
+        onUpdateChecked: () => {
+            highlightColor.value = color;
+            emit('highlight', color);
+        },
+    })),
+);
 
 const styleItems = computed<DropdownMenuItem[]>(() =>
     styles.map(({ style, label, itemLabel }) => ({
@@ -74,5 +97,24 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                 @click="$emit('format', button.command)"
             />
         </UiTooltip>
+        <UiTooltip text="Highlight">
+            <UiButton
+                icon="i-lucide-highlighter"
+                aria-label="Highlight"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                @mousedown.prevent
+                @click="$emit('highlight', highlightColor)"
+            />
+        </UiTooltip>
+        <UiDropdownMenu :items="highlightItems" :content="{ align: 'start' }">
+            <UiButton square color="neutral" variant="ghost" size="xs" aria-label="Highlight colour" @mousedown.prevent>
+                <span class="size-2.5 rounded-full" :class="swatchClass(highlightColor)" />
+            </UiButton>
+            <template #item-leading="{ item }">
+                <span class="size-2.5 rounded-full" :class="(item as { swatch?: string }).swatch" />
+            </template>
+        </UiDropdownMenu>
     </div>
 </template>

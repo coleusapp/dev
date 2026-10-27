@@ -63,8 +63,34 @@
     @apply bg-transparent p-0;
 }
 
-.note-preview mark {
+.note-preview mark,
+.mark-default {
     @apply rounded-sm bg-yellow-200 px-0.5 dark:bg-yellow-700;
+}
+
+.note-preview mark.mark-pink,
+.mark-pink {
+    @apply bg-pink-200 dark:bg-pink-800;
+}
+
+.note-preview mark.mark-purple,
+.mark-purple {
+    @apply bg-purple-200 dark:bg-purple-800;
+}
+
+.note-preview mark.mark-orange,
+.mark-orange {
+    @apply bg-orange-200 dark:bg-orange-800;
+}
+
+.note-preview mark.mark-mint,
+.mark-mint {
+    @apply bg-emerald-200 dark:bg-emerald-800;
+}
+
+.note-preview mark.mark-blue,
+.mark-blue {
+    @apply bg-sky-200 dark:bg-sky-800;
 }
 
 .note-preview hr {

@@ -137,6 +137,24 @@ const toggleQuote = (selection: Selection): TextEdit => {
     return replaceLines(selection, from, to, lines, changed);
 };
 
+/**
+ * Wraps the selection in ==…== with an optional colour suffix ({pink}), or
+ * removes the highlight (and its colour) when the selection is already
+ * highlighted.
+ */
+export const toggleHighlight = ({ text, start, end }: Selection, color: string | null): TextEdit => {
+    const selected = text.slice(start, end);
+    const after = text.slice(end).match(/^==(\{[a-z]+\})?/);
+
+    if (text.slice(start - 2, start) === '==' && after) {
+        return { from: start - 2, to: end + after[0].length, insert: selected, selectionStart: start - 2, selectionEnd: end - 2 };
+    }
+
+    const suffix = color ? `{${color}}` : '';
+
+    return { from: start, to: end, insert: `==${selected}==${suffix}`, selectionStart: start + 2, selectionEnd: end + 2 };
+};
+
 export type ParagraphStyle = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled';
 
 const STYLE_PREFIXES = { title: '# ', heading: '## ', subheading: '### ', body: '' } as const;

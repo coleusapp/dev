@@ -1,4 +1,4 @@
-import { applyParagraphStyle, formatMarkdown, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
+import { applyParagraphStyle, formatMarkdown, toggleHighlight, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
 import { describe, expect, it } from 'vitest';
 
 const apply = (command: FormatCommand, text: string, start: number, end: number): [string, string] => {
@@ -61,5 +61,23 @@ describe('applyParagraphStyle', () => {
 
     it('fences monostyled text', () => {
         expect(style('monostyled', 'code', 0, 4)).toBe('```\ncode\n```\n');
+    });
+});
+
+describe('toggleHighlight', () => {
+    const highlight = (text: string, start: number, end: number, color: string | null): string => {
+        const edit = toggleHighlight({ text, start, end }, color);
+
+        return text.slice(0, edit.from) + edit.insert + text.slice(edit.to);
+    };
+
+    it('highlights with and without a colour', () => {
+        expect(highlight('a hot b', 2, 5, null)).toBe('a ==hot== b');
+        expect(highlight('a hot b', 2, 5, 'pink')).toBe('a ==hot=={pink} b');
+    });
+
+    it('removes a highlight and its colour', () => {
+        expect(highlight('a ==hot=={pink} b', 4, 7, null)).toBe('a hot b');
+        expect(highlight('a ==hot== b', 4, 7, 'mint')).toBe('a hot b');
     });
 });

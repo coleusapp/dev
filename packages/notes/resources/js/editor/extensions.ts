@@ -1,6 +1,6 @@
 import { Hashtags } from '@/editor/Hashtags';
+import { NoteHighlight } from '@/editor/Highlight';
 import { WikiLink } from '@/editor/WikiLink';
-import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -30,7 +30,7 @@ export const editorExtensions = (placeholder = 'Start writing...'): AnyExtension
     NoteLink,
     TaskList,
     TaskItem.configure({ nested: true }),
-    Highlight,
+    NoteHighlight,
     TableKit,
     WikiLink,
     Hashtags,

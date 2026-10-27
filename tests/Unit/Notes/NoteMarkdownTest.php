@@ -61,3 +61,13 @@ it('renders ++underline++', function (string $markdown, string $html) {
 it('leaves other plus signs alone', function (string $markdown) {
     expect(NoteMarkdown::toHtml($markdown))->not->toContain('<u>');
 })->with(['1+1=2', 'C++ and C++', '+++ triple +++', '++ spaced ++']);
+
+it('colours highlights', function (string $markdown, string $html) {
+    expect(NoteMarkdown::toHtml($markdown))->toContain($html);
+})->with([
+    'colour' => ['==hot=={pink} topic', '<mark class="mark-pink">hot</mark> topic'],
+    'colour at end' => ['==done=={mint}', '<mark class="mark-mint">done</mark></p>'],
+    'no colour' => ['==plain== text', '<mark>plain</mark> text'],
+    'unknown colour kept as text' => ['==x=={red}', '<mark>x</mark>{red}'],
+    'braces without highlight' => ['just {pink} text', 'just {pink} text'],
+]);

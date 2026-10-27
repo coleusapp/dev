@@ -29,6 +29,7 @@ describe('round trip', () => {
         ['hashtags', '#inbox\n\nPlan #work/meetings today'],
         ['highlight', '==marked== text'],
         ['underline and strike', '++under++ and ~~gone~~'],
+        ['coloured highlight', 'a ==hot=={pink} and ==calm=={mint} and ==plain== b'],
         ['table', '| a | b |\n| --- | --- |\n| 1 | 2 |'],
         ['quote and code', '> quote\n\n```php\necho 1;\n```'],
         ['link', '[link](https://x.test)'],

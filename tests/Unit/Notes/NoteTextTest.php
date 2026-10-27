@@ -58,3 +58,7 @@ it('shows backslash-escaped characters plainly', function () {
 it('strips underline markers from titles', function () {
     expect(NoteText::title('++Important++ plan'))->toBe('Important plan');
 });
+
+it('strips highlight colours from titles and keeps inline code', function () {
+    expect(NoteText::title('==Hot=={pink} topic `code`'))->toBe('Hot topic code');
+});
