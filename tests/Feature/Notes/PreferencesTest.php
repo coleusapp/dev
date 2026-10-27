@@ -23,7 +23,7 @@ it('renders the settings page', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Settings', false)
-            ->where('definitions', fn ($definitions) => count($definitions['editor.default_mode']['options']) === 3)
+            ->where('definitions', fn ($definitions) => count($definitions['editor.default_mode']['options']) === 4)
             ->where('preferences', fn ($preferences) => $preferences['editor.default_mode'] === 'edit'));
 });
 

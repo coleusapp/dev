@@ -49,3 +49,8 @@ it('limits the title to the column length', function () {
     expect(mb_strlen($title))->toBe(NoteText::TITLE_LENGTH)
         ->and($title)->toEndWith('...');
 });
+
+it('shows backslash-escaped characters plainly', function () {
+    expect(NoteText::title('\\[draft\\] plan for snake\\_case'))->toBe('[draft] plan for snake_case')
+        ->and(NoteText::snippet("T\nprice \\*not\\* bold"))->toBe('price *not* bold');
+});

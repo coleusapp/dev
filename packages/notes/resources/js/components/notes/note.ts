@@ -68,7 +68,7 @@ export const filterQuery = (filters: Partial<NoteFilters>): Record<string, strin
         ),
     );
 
-export type EditorMode = 'edit' | 'split' | 'preview';
+export type EditorMode = 'edit' | 'source' | 'split' | 'preview';
 
 /**
  * The user's Notes preferences (see NotePreferences::DEFINITIONS on the server).

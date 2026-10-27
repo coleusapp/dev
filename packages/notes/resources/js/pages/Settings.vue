@@ -21,8 +21,9 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
     {
         key: 'editor.default_mode',
         label: 'Open notes in',
-        help: 'The editor mode a note opens in. Split only shows on wide screens.',
-        optionLabel: (value) => ({ edit: 'Edit', split: 'Split (edit + preview)', preview: 'Preview' })[value as string] ?? String(value),
+        help: 'How a note opens. Source and preview side by side needs a wide screen.',
+        optionLabel: (value) =>
+            ({ edit: 'Visual editor', source: 'Markdown source', split: 'Source and preview', preview: 'Preview' })[value as string] ?? String(value),
     },
     {
         key: 'editor.autosave_delay',

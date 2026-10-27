@@ -19,7 +19,7 @@ class NotePreferences
      * @var array<string, array{default: string|int|bool, options?: list<string|int>, type?: 'boolean'}>
      */
     public const array DEFINITIONS = [
-        'editor.default_mode' => ['default' => 'edit', 'options' => ['edit', 'split', 'preview']],
+        'editor.default_mode' => ['default' => 'edit', 'options' => ['edit', 'source', 'split', 'preview']],
         'editor.autosave_delay' => ['default' => 750, 'options' => [500, 750, 1500, 3000]],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],

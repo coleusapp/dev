@@ -2,6 +2,7 @@
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { EditorMode, NoteDetailData } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
+import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
 import { applyEdit, formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
@@ -106,27 +107,95 @@ const preferredMode = ref<EditorMode>(props.defaultMode ?? 'edit');
 const isWide = useMediaQuery('(min-width: 1280px)');
 
 /**
- * Split view needs the room; on narrow screens it falls back to the editor.
+ * Whether the visual editor can keep this note's Markdown exactly (see
+ * editor/markdown.ts). If not, the note opens as source, unless the user
+ * chooses to edit it visually anyway.
+ */
+const faithful = ref(true);
+const visualAnyway = ref(false);
+
+/**
+ * The mode actually shown: trashed notes are read-only previews, split
+ * needs a wide screen, and notes the visual editor can't keep exactly open
+ * as source.
  */
 const mode = computed<EditorMode>(() => {
     if (props.readonly) {
         return 'preview';
     }
 
-    return preferredMode.value === 'split' && !isWide.value ? 'edit' : preferredMode.value;
+    if (preferredMode.value === 'split' && !isWide.value) {
+        return 'source';
+    }
+
+    if (preferredMode.value === 'edit' && !faithful.value && !visualAnyway.value) {
+        return 'source';
+    }
+
+    return preferredMode.value;
 });
 
+const showsSource = computed(() => mode.value === 'source' || mode.value === 'split');
+
 const modeItems = computed(() => [
-    { value: 'edit', icon: 'i-lucide-pencil', label: 'Edit' },
-    ...(isWide.value ? [{ value: 'split', icon: 'i-lucide-columns-2', label: 'Split' }] : []),
+    { value: 'edit', icon: 'i-lucide-pencil', label: 'Visual editor' },
+    { value: 'source', icon: 'i-lucide-code-xml', label: 'Markdown source' },
+    ...(isWide.value ? [{ value: 'split', icon: 'i-lucide-columns-2', label: 'Source and preview' }] : []),
     { value: 'preview', icon: 'i-lucide-eye', label: 'Preview' },
 ]);
 
 const setMode = async (next: EditorMode): Promise<void> => {
-    if (next !== 'edit') {
+    if (next === 'split' || next === 'preview') {
         await flush();
     }
+    if (next === 'edit' && preferredMode.value === 'edit') {
+        visualAnyway.value = true;
+    }
     preferredMode.value = next;
+};
+
+const visual = useTemplateRef<InstanceType<typeof VisualEditor>>('visual');
+
+/**
+ * [[Wiki links]] in the visual editor resolve on click, with the same rules
+ * as the preview: open the note, or offer to create it.
+ */
+const openWikiLink = async (title: string): Promise<void> => {
+    const response = await fetch(route('notes.links.resolve', { title, from: props.note.id }), {
+        headers: jsonHeaders(),
+        credentials: 'same-origin',
+    });
+    const payload = await response.json().catch(() => null);
+    const id = payload?.data?.id;
+
+    if (response.ok && typeof id === 'number') {
+        router.visit(route('notes.show', { note: id }));
+    } else if (response.ok) {
+        emit('createLinked', title);
+    }
+};
+
+const openTag = (tag: string): void => {
+    router.visit(route('notes.index', { tag }));
+};
+
+const linkPromptOpen = ref(false);
+const linkUrl = ref('');
+
+/**
+ * Accepts web and mail addresses; anything without a scheme is treated as a web address.
+ */
+const normalizeUrl = (url: string): string => (/^(https?:|mailto:)/i.test(url) ? url : `https://${url}`);
+
+const confirmLink = (): void => {
+    const url = linkUrl.value.trim();
+    linkPromptOpen.value = false;
+
+    if (url) {
+        visual.value?.setLink(normalizeUrl(url));
+    } else {
+        visual.value?.focus();
+    }
 };
 
 const saveNow = (event: KeyboardEvent): void => {
@@ -137,7 +206,24 @@ const saveNow = (event: KeyboardEvent): void => {
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
 
 const format = (command: FormatCommand): void => {
-    if (!textarea.value || togglingTask.value) {
+    if (togglingTask.value) {
+        return;
+    }
+
+    if (mode.value === 'edit') {
+        if (command !== 'link') {
+            visual.value?.run(command);
+        } else if (visual.value?.isLinkActive()) {
+            visual.value.unsetLink();
+        } else {
+            linkUrl.value = '';
+            linkPromptOpen.value = true;
+        }
+
+        return;
+    }
+
+    if (!textarea.value) {
         return;
     }
 
@@ -156,6 +242,8 @@ const onKeydown = (event: KeyboardEvent): void => {
 
     if (key === 's') {
         saveNow(event);
+    } else if (mode.value === 'edit' && key !== 'k') {
+        return;
     } else if (shortcuts[key]) {
         event.preventDefault();
         format(shortcuts[key]);
@@ -166,9 +254,27 @@ const onKeydown = (event: KeyboardEvent): void => {
 <template>
     <div class="flex h-full flex-col gap-2">
         <FormatToolbar v-if="mode !== 'preview'" @format="format" />
-        <div class="flex min-h-0 flex-1 gap-4">
+        <div
+            v-if="!faithful && mode === 'source' && preferredMode === 'edit'"
+            class="bg-elevated flex items-center gap-2 rounded-md px-3 py-2 text-xs"
+        >
+            <UiIcon name="i-lucide-info" class="text-dimmed size-4 shrink-0" />
+            <span class="text-muted flex-1">This note uses Markdown the visual editor can't keep exactly, so it opened as source.</span>
+            <UiButton size="xs" color="neutral" variant="link" @click="visualAnyway = true">Edit visually anyway</UiButton>
+        </div>
+        <div class="flex min-h-0 flex-1 gap-4" @keydown="onKeydown">
+            <VisualEditor
+                v-if="!readonly"
+                v-show="mode === 'edit'"
+                ref="visual"
+                :active="mode === 'edit'"
+                v-model="body"
+                @faithful="(value) => (faithful = value)"
+                @open-wiki-link="openWikiLink"
+                @open-tag="openTag"
+            />
             <textarea
-                v-if="mode !== 'preview'"
+                v-if="showsSource"
                 ref="textarea"
                 v-model="body"
                 class="h-full min-w-0 flex-1 resize-none bg-transparent font-mono text-sm leading-relaxed focus:outline-none"
@@ -176,12 +282,11 @@ const onKeydown = (event: KeyboardEvent): void => {
                 aria-label="Note"
                 :readonly="togglingTask"
                 autofocus
-                @keydown="onKeydown"
             />
             <!-- The HTML is rendered on the server with raw HTML escaped and unsafe links removed (NoteMarkdown). -->
             <!-- eslint-disable-next-line vue/no-v-html -->
             <article
-                v-if="mode !== 'edit'"
+                v-if="mode === 'split' || mode === 'preview'"
                 class="note-preview h-full min-w-0 flex-1 overflow-y-auto"
                 :class="{ 'border-default border-l pl-4': mode === 'split' }"
                 aria-label="Preview"
@@ -231,5 +336,14 @@ const onKeydown = (event: KeyboardEvent): void => {
             <span v-if="taskError" class="text-error text-xs" role="alert">{{ taskError }}</span>
             <SaveStatus v-if="!readonly" :status="status" :error="error" @retry="flush" />
         </div>
+
+        <UiModal v-model:open="linkPromptOpen" title="Add link" description="Link the selected text, or insert the address as a link.">
+            <template #body>
+                <form class="flex gap-2" @submit.prevent="confirmLink">
+                    <UiInput v-model="linkUrl" placeholder="https://example.com" aria-label="Link address" class="flex-1" autofocus />
+                    <UiButton type="submit">Add</UiButton>
+                </form>
+            </template>
+        </UiModal>
     </div>
 </template>

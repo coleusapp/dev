@@ -87,3 +87,45 @@
 .note-preview a.wiki-link-missing {
     @apply text-muted decoration-dashed;
 }
+
+.tiptap p.is-editor-empty:first-child::before {
+    @apply text-dimmed pointer-events-none float-left h-0;
+    content: attr(data-placeholder);
+}
+
+.tiptap .wiki-link {
+    @apply text-primary cursor-pointer underline underline-offset-2;
+}
+
+.tiptap .hashtag,
+.note-preview .hashtag {
+    @apply text-primary;
+}
+
+.tiptap ul[data-type='taskList'] {
+    @apply list-none pl-0;
+}
+
+.tiptap ul[data-type='taskList'] li {
+    @apply flex items-start gap-2;
+}
+
+.tiptap ul[data-type='taskList'] li > label {
+    @apply mt-0.5 shrink-0;
+}
+
+.tiptap ul[data-type='taskList'] li > div {
+    @apply min-w-0 flex-1;
+}
+
+.tiptap ul[data-type='taskList'] li[data-checked='true'] > div {
+    @apply text-dimmed line-through;
+}
+
+.tiptap ul[data-type='taskList'] ul[data-type='taskList'] {
+    @apply mt-1 pl-6;
+}
+
+.tiptap .selectedCell {
+    @apply bg-primary/10;
+}
