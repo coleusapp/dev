@@ -5,6 +5,7 @@ import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
+import { autoPair, deletePair } from '@/lib/autoPair';
 import { jsonHeaders } from '@/lib/http';
 import {
     applyEdit,
@@ -336,6 +337,26 @@ const continueSourceList = (event: KeyboardEvent): void => {
 };
 
 /**
+ * Brackets, quotes and backticks type in pairs in Markdown source, a
+ * selection gets wrapped (also with * _ ~ =), and Backspace removes an
+ * empty pair (lib/autoPair.ts).
+ */
+const pairSourceCharacters = (event: KeyboardEvent): void => {
+    if (!textarea.value || togglingTask.value || event.isComposing) {
+        return;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea.value;
+    const selection = { text: value, start: selectionStart, end: selectionEnd };
+    const edit = event.key === 'Backspace' ? deletePair(selection) : autoPair(selection, event.key);
+
+    if (edit) {
+        event.preventDefault();
+        applyEdit(textarea.value, edit);
+    }
+};
+
+/**
  * Shortcuts the visual editor doesn't already handle itself (Tiptap has
  * Mod-B/I/U built in); in source mode all of them go through the toolbar.
  */
@@ -348,6 +369,18 @@ const onKeydown = (event: KeyboardEvent): void => {
 
     if (event.key === 'Enter' && !event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey && event.target === textarea.value) {
         continueSourceList(event);
+
+        return;
+    }
+
+    if (
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        event.target === textarea.value &&
+        (event.key.length === 1 || event.key === 'Backspace')
+    ) {
+        pairSourceCharacters(event);
 
         return;
     }

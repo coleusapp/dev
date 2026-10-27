@@ -282,6 +282,13 @@ export const formatMarkdown = (command: FormatCommand, selection: Selection): Te
  */
 export const applyEdit = (textarea: HTMLTextAreaElement, edit: TextEdit): void => {
     textarea.focus();
+
+    // Only moving the cursor (e.g. stepping over an auto-paired closer).
+    if (edit.from === edit.to && edit.insert === '') {
+        textarea.setSelectionRange(edit.selectionStart, edit.selectionEnd);
+        return;
+    }
+
     textarea.setSelectionRange(edit.from, edit.to);
 
     const inserted = typeof document.execCommand === 'function' && document.execCommand('insertText', false, edit.insert);

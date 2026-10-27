@@ -1,4 +1,4 @@
-import { mergeAttributes, Node } from '@tiptap/vue-3';
+import { InputRule, mergeAttributes, Node, PasteRule } from '@tiptap/vue-3';
 
 /**
  * A [[Note title]] link as one inline, uneditable chip. It stores the text
@@ -33,6 +33,36 @@ export const WikiLink = Node.create({
 
     renderText({ node }) {
         return `[[${node.attrs.title}]]`;
+    },
+
+    /**
+     * Typing or pasting a complete [[Title]] turns it into a link chip;
+     * otherwise it would stay bracket text and be saved escaped as \[\[…\]\].
+     */
+    addInputRules() {
+        return [
+            new InputRule({
+                find: /\[\[([^[\]\n]{1,255})\]\]$/,
+                handler: ({ state, range, match }) => {
+                    if (match[1].trim() !== '') {
+                        state.tr.replaceWith(range.from, range.to, this.type.create({ title: match[1] }));
+                    }
+                },
+            }),
+        ];
+    },
+
+    addPasteRules() {
+        return [
+            new PasteRule({
+                find: /\[\[([^[\]\n]{1,255})\]\]/g,
+                handler: ({ state, range, match }) => {
+                    if (match[1].trim() !== '') {
+                        state.tr.replaceWith(range.from, range.to, this.type.create({ title: match[1] }));
+                    }
+                },
+            }),
+        ];
     },
 
     markdownTokenName: 'wikiLink',

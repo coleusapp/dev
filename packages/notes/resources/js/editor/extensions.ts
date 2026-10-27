@@ -1,3 +1,4 @@
+import { AutoPair } from '@/editor/AutoPair';
 import { CheckedToBottom } from '@/editor/checklists';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
@@ -45,5 +46,6 @@ export const editorExtensions = ({
     Hashtags,
     Placeholder.configure({ placeholder }),
     CheckedToBottom.configure({ enabled: checkedToBottom }),
+    AutoPair,
     Markdown,
 ];
