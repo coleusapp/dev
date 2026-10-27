@@ -5,6 +5,7 @@ import { Link } from '@inertiajs/vue3';
 defineProps<{
     notes: NoteData[];
     selectedId: number | null;
+    tag: string | null;
 }>();
 
 defineEmits<{
@@ -15,14 +16,16 @@ defineEmits<{
 <template>
     <div v-if="notes.length === 0" class="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
         <UiIcon name="i-lucide-notebook-pen" class="text-dimmed size-8" />
-        <p class="text-dimmed text-sm">No notes yet.</p>
-        <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" size="sm" @click="$emit('create')">Create your first note</UiButton>
+        <p class="text-dimmed text-sm">{{ tag ? `No notes tagged #${tag}.` : 'No notes yet.' }}</p>
+        <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" size="sm" @click="$emit('create')">{{
+            tag ? 'New note with this tag' : 'Create your first note'
+        }}</UiButton>
     </div>
     <nav v-else class="divide-default flex flex-col divide-y">
         <Link
             v-for="note in notes"
             :key="note.id"
-            :href="route('notes.show', { note: note.id })"
+            :href="route('notes.show', { note: note.id, ...(tag ? { tag } : {}) })"
             preserve-scroll
             class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
             :class="{ 'bg-elevated': note.id === selectedId }"

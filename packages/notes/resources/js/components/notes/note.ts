@@ -27,3 +27,14 @@ export type NoteCollection = { data: NoteData[] };
  */
 export const compareNotes = (a: NoteData, b: NoteData): number =>
     Number(b.pinned) - Number(a.pinned) || b.updated_at.localeCompare(a.updated_at) || b.id - a.id;
+
+export type TagNode = {
+    name: string;
+    path: string;
+    count: number;
+    children: TagNode[];
+};
+
+export type NoteFilters = {
+    tag: string | null;
+};

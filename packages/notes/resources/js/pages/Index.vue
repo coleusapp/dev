@@ -1,16 +1,32 @@
 <script setup lang="ts">
-import { compareNotes, type NoteCollection, type NoteData, type NoteResource } from '@/components/notes/note';
+import {
+    compareNotes,
+    type NoteCollection,
+    type NoteData,
+    type NoteDetailData,
+    type NoteFilters,
+    type NoteResource,
+    type TagNode,
+} from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
+import TagTree from '@/components/notes/TagTree.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     notes: NoteCollection;
     note: NoteResource | null;
+    tags: TagNode[];
+    filters: NoteFilters;
 }>();
+
+/**
+ * Query parameters that keep the current list filter on every link and redirect.
+ */
+const listQuery = computed(() => (props.filters.tag ? { tag: props.filters.tag } : {}));
 
 const listedNotes = ref<NoteData[]>(props.notes.data);
 const title = ref(props.note?.data.title ?? '');
@@ -30,23 +46,57 @@ watch(
 );
 
 /**
- * Autosave doesn't reload the page, so the saved note's row is refreshed in
- * place and re-sorted the way the server orders the list.
+ * The open note's hashtags as the sidebar last saw them.
  */
-const onNoteSaved = (saved: NoteData): void => {
+const sidebarTags = ref(props.note?.data.tags.join(' ') ?? '');
+
+watch(
+    () => props.note,
+    (note) => {
+        sidebarTags.value = note?.data.tags.join(' ') ?? '';
+    },
+);
+
+/**
+ * Autosave doesn't reload the page, so the saved note's row is refreshed in
+ * place and re-sorted the way the server orders the list. The tag sidebar is
+ * reloaded only when the note's hashtags changed.
+ */
+const onNoteSaved = (saved: NoteDetailData): void => {
     listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes);
     title.value = saved.title;
+
+    const savedTags = saved.tags.join(' ');
+
+    if (savedTags !== sidebarTags.value) {
+        sidebarTags.value = savedTags;
+        router.reload({ only: ['tags'] });
+    }
 };
 
+/**
+ * A note made while a tag is selected starts with that tag, like Bear.
+ */
 const createNote = (): void => {
-    router.post(route('notes.store'), { body: '' });
+    router.post(route('notes.store', listQuery.value), { body: props.filters.tag ? `\n\n#${props.filters.tag}` : '' });
 };
 
 const deleteNote = (): void => {
     if (props.note) {
-        router.delete(route('notes.destroy', { note: props.note.data.id }));
+        router.delete(route('notes.destroy', { note: props.note.data.id, ...listQuery.value }));
     }
 };
+
+const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);
+
+const tagFilterItems = computed<DropdownMenuItem[]>(() => [
+    { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index') },
+    ...flattenTags(props.tags).map((tag) => ({
+        label: `${tag.path} (${tag.count})`,
+        icon: 'i-lucide-hash',
+        to: route('notes.index', { tag: tag.path }),
+    })),
+]);
 
 const isPinned = computed(() => listedNotes.value.find((listed) => listed.id === props.note?.data.id)?.pinned ?? false);
 
@@ -73,26 +123,54 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
 
     <NotesLayout>
         <template #panels>
+            <UiDashboardPanel id="notes-0" class="hidden lg:flex" :default-size="14" :min-size="10" :max-size="20" resizable>
+                <template #header>
+                    <UiDashboardNavbar title="Tags">
+                        <template #leading>
+                            <UiDashboardSidebarCollapse variant="ghost" />
+                        </template>
+                    </UiDashboardNavbar>
+                </template>
+
+                <template #body>
+                    <nav class="flex flex-col gap-1" aria-label="Filter notes">
+                        <Link
+                            :href="route('notes.index')"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+                            :class="{ 'bg-elevated font-medium': !filters.tag }"
+                        >
+                            <UiIcon name="i-lucide-notebook" class="text-dimmed size-4" />
+                            All notes
+                        </Link>
+                        <TagTree v-if="tags.length" :key="filters.tag ?? ''" :tags="tags" :selected="filters.tag" />
+                        <p v-else class="text-dimmed px-2 py-1.5 text-xs">Add #tags to a note to organize it.</p>
+                    </nav>
+                </template>
+            </UiDashboardPanel>
+
             <UiDashboardPanel id="notes-1" :class="{ 'hidden lg:flex': note }" :default-size="18" :min-size="14" :max-size="24" resizable>
                 <template #header>
                     <UiDashboardNavbar>
                         <template #leading>
-                            <UiDashboardSidebarCollapse variant="ghost" />
+                            <UiDashboardSidebarCollapse variant="ghost" class="lg:hidden" />
                         </template>
                         <template #title>
                             <div class="flex flex-col">
-                                <span>Notes</span>
+                                <span>{{ filters.tag ? `#${filters.tag}` : 'Notes' }}</span>
                                 <small class="text-dimmed text-xs font-normal">{{ listedNotes.length }} notes</small>
                             </div>
                         </template>
                         <template #right>
+                            <UiDropdownMenu :items="tagFilterItems" class="lg:hidden">
+                                <UiButton icon="i-lucide-hash" color="neutral" variant="ghost" aria-label="Filter by tag" class="lg:hidden" />
+                            </UiDropdownMenu>
                             <UiButton icon="i-lucide-file-plus" color="neutral" variant="ghost" aria-label="New note" @click="createNote" />
                         </template>
                     </UiDashboardNavbar>
                 </template>
 
                 <template #body>
-                    <NoteList :notes="listedNotes" :selected-id="note?.data.id ?? null" @create="createNote" />
+                    <NoteList :notes="listedNotes" :selected-id="note?.data.id ?? null" :tag="filters.tag" @create="createNote" />
                 </template>
             </UiDashboardPanel>
 
@@ -107,7 +185,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
                                 color="neutral"
                                 variant="ghost"
                                 aria-label="Back to notes"
-                                :to="route('notes.index')"
+                                :to="route('notes.index', listQuery)"
                             />
                             <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" @click="createNote">New note</UiButton>
                         </template>

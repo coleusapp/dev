@@ -60,8 +60,40 @@ class NoteService extends Service
     /**
      * @return Collection<int, Note>
      */
-    public function list(): Collection
+    public function list(?string $tag = null): Collection
     {
-        return $this->defaultQuery()->get();
+        return $this->defaultQuery()
+            ->when($tag !== null, fn (Builder $query) => $this->whereTagged($query, (string) $tag))
+            ->get();
+    }
+
+    /**
+     * Notes tagged with $tag or any tag nested under it.
+     *
+     * @param  Builder<Note>  $query
+     * @return Builder<Note>
+     */
+    public function whereTagged(Builder $query, string $tag): Builder
+    {
+        return $query->whereHas('tags', fn (Builder $tags) => $tags->where(fn (Builder $names) => $names
+            ->where('name', $tag)
+            ->orWhereRaw("name like ? escape '!'", [self::escapeLike($tag).'/%'])));
+    }
+
+    /**
+     * Escapes LIKE wildcards with "!", which needs no quoting on MariaDB or SQLite
+     * (unlike a backslash). "_" matters: it's valid inside a tag.
+     */
+    public static function escapeLike(string $value): string
+    {
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
+    }
+
+    /**
+     * @return list<array{name: string, path: string, count: int, children: list<mixed>}>
+     */
+    public function tagTree(): array
+    {
+        return TagTree::build(Note::query());
     }
 }

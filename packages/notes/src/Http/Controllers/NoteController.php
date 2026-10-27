@@ -4,25 +4,25 @@ namespace Coleus\Notes\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Coleus\Notes\Facades\Notes;
+use Coleus\Notes\Http\Controllers\Concerns\RendersNotesPage;
+use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Requests\NoteRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
-use Coleus\Notes\Http\Resources\NoteResource;
 use Coleus\Notes\Models\Note;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Inertia\Inertia;
 use Inertia\Response;
 
 class NoteController extends Controller
 {
-    public function show(Note $note): Response
+    use RendersNotesPage;
+
+    public function show(NoteListRequest $request, Note $note): Response
     {
         Gate::authorize('view', $note);
 
-        return Inertia::render('Index', [
-            'notes' => NoteResource::collection(Notes::note()->list()),
-            'note' => new NoteDetailResource($note),
-        ]);
+        return $this->notesPage($request, $note);
     }
 
     public function store(NoteRequest $request): RedirectResponse
@@ -31,7 +31,7 @@ class NoteController extends Controller
 
         $note = Notes::note()->store($request->noteData());
 
-        return to_route('notes.show', ['note' => $note]);
+        return to_route('notes.show', ['note' => $note, ...$this->listQuery($request)]);
     }
 
     /**
@@ -51,12 +51,25 @@ class NoteController extends Controller
         return to_route('notes.show', ['note' => $note]);
     }
 
-    public function destroy(Note $note): RedirectResponse
+    public function destroy(Request $request, Note $note): RedirectResponse
     {
         Gate::authorize('delete', $note);
 
         Notes::note()->destroy($note);
 
-        return to_route('notes.index');
+        return to_route('notes.index', $this->listQuery($request));
+    }
+
+    /**
+     * Keeps the list filter from the query string across a redirect; the
+     * page it lands on validates it.
+     *
+     * @return array<string, string>
+     */
+    private function listQuery(Request $request): array
+    {
+        $tag = $request->query('tag');
+
+        return is_string($tag) && $tag !== '' ? ['tag' => $tag] : [];
     }
 }
