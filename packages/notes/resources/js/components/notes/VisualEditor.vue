@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { applyParagraphStyle, currentParagraphStyle } from '@/editor/commands';
 import { editorExtensions } from '@/editor/extensions';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
-import type { FormatCommand } from '@/lib/markdownFormat';
+import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { watch } from 'vue';
 
@@ -18,6 +19,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     'update:modelValue': [markdown: string];
     faithful: [faithful: boolean];
+    style: [style: ParagraphStyle | null];
     openWikiLink: [title: string];
     openTag: [tag: string];
 }>();
@@ -74,6 +76,9 @@ const editor = useEditor({
     onUpdate: ({ editor: updated }) => {
         lastMarkdown = editorMarkdown(updated, frontMatter);
         emit('update:modelValue', lastMarkdown);
+    },
+    onTransaction: ({ editor: changed }) => {
+        emit('style', currentParagraphStyle(changed));
     },
 });
 
@@ -177,7 +182,13 @@ const focus = (): void => {
     editor.value?.commands.focus();
 };
 
-defineExpose({ run, setLink, unsetLink, isLinkActive, focus });
+const setStyle = (style: ParagraphStyle): void => {
+    if (editor.value) {
+        applyParagraphStyle(editor.value, style);
+    }
+};
+
+defineExpose({ run, setStyle, setLink, unsetLink, isLinkActive, focus });
 </script>
 
 <template>

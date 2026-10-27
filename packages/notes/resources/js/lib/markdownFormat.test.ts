@@ -1,4 +1,4 @@
-import { formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
+import { applyParagraphStyle, formatMarkdown, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
 import { describe, expect, it } from 'vitest';
 
 const apply = (command: FormatCommand, text: string, start: number, end: number): [string, string] => {
@@ -27,5 +27,32 @@ describe('formatMarkdown', () => {
         ['link', '', 0, 0, '[link](url)', 'url'],
     ])('%s on %j (%i-%i)', (command, text, start, end, expected, selected) => {
         expect(apply(command, text, start, end)).toEqual([expected, selected]);
+    });
+});
+
+describe('applyParagraphStyle', () => {
+    const style = (paragraphStyle: ParagraphStyle, text: string, start: number, end: number): string => {
+        const edit = applyParagraphStyle(paragraphStyle, { text, start, end });
+
+        return text.slice(0, edit.from) + edit.insert + text.slice(edit.to);
+    };
+
+    it.each<[ParagraphStyle, string, string]>([
+        ['title', 'Plan', '# Plan'],
+        ['heading', '# Plan', '## Plan'],
+        ['subheading', 'Plan', '### Plan'],
+        ['body', '### Plan', 'Plan'],
+        ['title', '- item', '# item'],
+        ['body', '- [ ] task', 'task'],
+    ])('%s turns %j into %j', (paragraphStyle, text, expected) => {
+        expect(style(paragraphStyle, text, 1, 1)).toBe(expected);
+    });
+
+    it('styles every selected line and skips blank ones', () => {
+        expect(style('heading', 'a\n\nb', 0, 4)).toBe('## a\n\n## b');
+    });
+
+    it('fences monostyled text', () => {
+        expect(style('monostyled', 'code', 0, 4)).toBe('```\ncode\n```\n');
     });
 });

@@ -138,7 +138,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A1.8 Swipe actions on mobile list rows: pin, move, lock, delete
 
 ## A2. Rich text formatting (Apple Notes)
-- [ ] A2.1 Paragraph styles menu: Title, Heading, Subheading, Body, Monostyled, mapped to Markdown (`#`, `##`, `###`, plain, code) (Box: H1–H3, paragraph, quote) 📦
+- [x] A2.1 Paragraph styles menu: Title, Heading, Subheading, Body, Monostyled, mapped to Markdown (`#`, `##`, `###`, plain, code) (Box: H1–H3, paragraph, quote) 📦
 - [ ] A2.2 Default style for the first line of a new note (Title / Heading / Subheading / Body) setting
 - [ ] A2.3 Underline and strikethrough in toolbar and shortcuts (Cmd/Ctrl+U, Cmd/Ctrl+Shift+X) 📦
 - [ ] A2.4 Text highlight colours (pink, purple, orange, mint, blue), stored as a safe Markdown extension (e.g. `==text=={color}`) 📦

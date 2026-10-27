@@ -5,7 +5,7 @@ import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { jsonHeaders } from '@/lib/http';
-import { applyEdit, formatMarkdown, type FormatCommand } from '@/lib/markdownFormat';
+import { applyEdit, applyParagraphStyle, formatMarkdown, type FormatCommand, type ParagraphStyle } from '@/lib/markdownFormat';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, ref, useTemplateRef } from 'vue';
@@ -205,6 +205,25 @@ const saveNow = (event: KeyboardEvent): void => {
 
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
 
+const visualStyle = ref<ParagraphStyle | null>(null);
+
+/**
+ * Paragraph styles act on the visual editor's blocks, or on the selected
+ * source lines as Markdown.
+ */
+const setStyle = (style: ParagraphStyle): void => {
+    if (togglingTask.value) {
+        return;
+    }
+
+    if (mode.value === 'edit') {
+        visual.value?.setStyle(style);
+    } else if (textarea.value) {
+        const { value, selectionStart, selectionEnd } = textarea.value;
+        applyEdit(textarea.value, applyParagraphStyle(style, { text: value, start: selectionStart, end: selectionEnd }));
+    }
+};
+
 const format = (command: FormatCommand): void => {
     if (togglingTask.value) {
         return;
@@ -253,7 +272,7 @@ const onKeydown = (event: KeyboardEvent): void => {
 
 <template>
     <div class="flex h-full flex-col gap-2">
-        <FormatToolbar v-if="mode !== 'preview'" @format="format" />
+        <FormatToolbar v-if="mode !== 'preview'" :active-style="mode === 'edit' ? visualStyle : null" @format="format" @style="setStyle" />
         <div
             v-if="!faithful && mode === 'source' && preferredMode === 'edit'"
             class="bg-elevated flex items-center gap-2 rounded-md px-3 py-2 text-xs"
@@ -270,6 +289,7 @@ const onKeydown = (event: KeyboardEvent): void => {
                 :active="mode === 'edit'"
                 v-model="body"
                 @faithful="(value) => (faithful = value)"
+                @style="(value) => (visualStyle = value)"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
             />

@@ -55,11 +55,35 @@ const fenceCode = ({ text, start, end }: Selection): TextEdit => {
     return { from: start, to: end, insert, selectionStart: innerStart, selectionEnd: innerStart + selected.length };
 };
 
-const toggleLinePrefix = ({ text, start, end }: Selection, prefix: string): TextEdit => {
+/**
+ * The whole lines touched by the selection.
+ */
+const lineRange = ({ text, start, end }: Selection): { from: number; to: number; lines: string[] } => {
     const from = text.lastIndexOf('\n', start - 1) + 1;
     const lineEnd = text.indexOf('\n', end > start && text[end - 1] === '\n' ? end - 1 : end);
     const to = lineEnd === -1 ? text.length : lineEnd;
-    const lines = text.slice(from, to).split('\n');
+
+    return { from, to, lines: text.slice(from, to).split('\n') };
+};
+
+/**
+ * Replaces the selected lines, keeping the caret on the same text for a
+ * single line and selecting the whole result for several.
+ */
+const replaceLines = ({ start, end }: Selection, from: number, to: number, lines: string[], changed: string[]): TextEdit => {
+    const insert = changed.join('\n');
+
+    if (lines.length === 1) {
+        const shift = insert.length - lines[0].length;
+        const caret = Math.max(from, start + shift);
+        return { from, to, insert, selectionStart: caret, selectionEnd: Math.max(caret, end + shift) };
+    }
+
+    return { from, to, insert, selectionStart: from, selectionEnd: from + insert.length };
+};
+
+const toggleLinePrefix = (selection: Selection, prefix: string): TextEdit => {
+    const { from, to, lines } = lineRange(selection);
     const prefixOf = (line: string): string => line.match(ANY_PREFIX)?.[0] ?? '';
     const removeAll = lines.every((line) => prefixOf(line) === prefix);
 
@@ -72,15 +96,29 @@ const toggleLinePrefix = ({ text, start, end }: Selection, prefix: string): Text
         }
         return prefix + line.replace(ANY_PREFIX, '');
     });
-    const insert = changed.join('\n');
 
-    if (lines.length === 1) {
-        const shift = insert.length - lines[0].length;
-        const caret = Math.max(from, start + shift);
-        return { from, to, insert, selectionStart: caret, selectionEnd: Math.max(caret, end + shift) };
+    return replaceLines(selection, from, to, lines, changed);
+};
+
+export type ParagraphStyle = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled';
+
+const STYLE_PREFIXES = { title: '# ', heading: '## ', subheading: '### ', body: '' } as const;
+
+/**
+ * Apple Notes' paragraph styles in Markdown: Title/Heading/Subheading are
+ * #/##/### headings and Body is plain text (each replaces a heading or list
+ * marker on the line, as in Apple Notes), Monostyled fences a code block.
+ */
+export const applyParagraphStyle = (style: ParagraphStyle, selection: Selection): TextEdit => {
+    if (style === 'monostyled') {
+        return fenceCode(selection);
     }
 
-    return { from, to, insert, selectionStart: from, selectionEnd: from + insert.length };
+    const { from, to, lines } = lineRange(selection);
+    const prefix = STYLE_PREFIXES[style];
+    const changed = lines.map((line) => (line.trim() === '' && lines.length > 1 ? line : prefix + line.replace(ANY_PREFIX, '')));
+
+    return replaceLines(selection, from, to, lines, changed);
 };
 
 const link = ({ text, start, end }: Selection): TextEdit => {
