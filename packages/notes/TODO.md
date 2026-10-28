@@ -93,7 +93,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 ## O9. Daily notes, templates, productivity
 - [ ] O9.1 Daily notes: "today's note" command, configurable title format and template, folder
 - [ ] O9.2 Periodic navigation: previous/next daily note, calendar picker (could use the Calendar package)
-- [ ] O9.3 Templates: notes in a templates folder; insert with variables `{{title}}`, `{{date}}`, `{{time}}`, custom formats (Box: template gallery) 📦
+- [x] O9.3 Templates: notes in a templates folder; insert with variables `{{title}}`, `{{date}}`, `{{time}}`, custom formats (Box: template gallery) 📦
 - [ ] O9.4 New note from template
 - [ ] O9.5 Note composer: merge notes; extract selection into a new note, leaving a link or embed
 - [ ] O9.6 Tasks view: all open/done checklist items across notes, filters by tag/folder/note, toggle from the list

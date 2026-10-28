@@ -16,6 +16,7 @@ import RecorderModal from '@/components/notes/RecorderModal.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
 import TagMenu from '@/components/notes/TagMenu.vue';
+import TemplatePicker, { type NoteTemplate } from '@/components/notes/TemplatePicker.vue';
 import UnlinkedMentions from '@/components/notes/UnlinkedMentions.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAttachmentUpload, type PendingUpload } from '@/composables/useAttachmentUpload';
@@ -64,6 +65,7 @@ import { noteOutline, type OutlineHeading } from '@/lib/outline';
 import { pasteUrlOverSelection } from '@/lib/paste';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
+import { fillTemplate } from '@/lib/templates';
 import { renameFirstLine, titleOf } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
 import { useLocalStorage, useMediaQuery } from '@vueuse/core';
@@ -782,6 +784,8 @@ const chooseSlash = (command: SlashCommand): void => {
             pickFiles(command.action.capture);
         } else if (command.action.type === 'record') {
             record(command.action.kind);
+        } else if (command.action.type === 'template') {
+            pickingTemplate.value = true;
         }
 
         return;
@@ -836,6 +840,9 @@ const chooseSlash = (command: SlashCommand): void => {
             break;
         case 'record':
             record(action.kind);
+            break;
+        case 'template':
+            pickingTemplate.value = true;
             break;
     }
 };
@@ -909,6 +916,22 @@ const recording = ref<'camera' | 'screen' | 'audio' | null>(null);
 const record = (kind: 'camera' | 'screen' | 'audio'): void => {
     if (!props.readonly) {
         recording.value = kind;
+    }
+};
+
+/**
+ * Templates (O9.3): the chosen one is filled in ({{title}} is this note's)
+ * and inserted at the cursor, without its front matter.
+ */
+const pickingTemplate = ref(false);
+
+const insertTemplate = (template: NoteTemplate): void => {
+    const text = splitFrontMatter(fillTemplate(template.body, { title: savedTitle.value })).body;
+
+    if (mode.value === 'edit') {
+        visual.value?.insertMarkdown(text);
+    } else {
+        insertAtCursor(text);
     }
 };
 
@@ -1379,6 +1402,7 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
         })),
         { id: 'highlight', label: 'Highlight', icon: 'i-lucide-highlighter', run: () => highlight(null) },
         { id: 'table', label: 'Insert table', icon: 'i-lucide-table', run: () => tableAction('insert') },
+        { id: 'template', label: 'Insert template…', icon: 'i-lucide-file-text', run: () => (pickingTemplate.value = true) },
         ...(mode.value === 'edit' && visualInTable.value
             ? [
                   { id: 'table.row', label: 'Table: add row below', icon: 'i-lucide-table', run: () => tableAction('row-below') },
@@ -1621,6 +1645,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
         <LinkPreviewCard v-if="linkPreview.card.value" :preview="linkPreview.card.value" @enter="linkPreview.keep" @leave="linkPreview.hide" />
         <ImageViewer :image="viewedImage" @close="viewedImage = null" />
         <RecorderModal :kind="recording" @close="recording = null" @recorded="(file) => attachFiles([file])" />
+        <TemplatePicker v-model:open="pickingTemplate" @choose="insertTemplate" />
         <UiSlideover v-if="!isLarge" v-model:open="outlineSheetOpen" title="Outline" description="Jump to a heading in this note.">
             <template #body>
                 <OutlinePanel :headings="outline" @jump="jumpToHeading" />

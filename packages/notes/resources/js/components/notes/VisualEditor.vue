@@ -396,6 +396,7 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
             break;
         case 'attach':
         case 'record':
+        case 'template':
             // The file picker and the recorder belong to NoteEditor, which opens them after this.
             break;
     }
@@ -434,6 +435,13 @@ const insertAttachment = (attachment: UploadedAttachment): void => {
  */
 const replaceRange = (range: { from: number; to: number }, text: string): void => {
     editor.value?.chain().focus().insertContentAt(range, text).run();
+};
+
+/**
+ * Inserts Markdown (a filled-in template) as formatted content at the cursor.
+ */
+const insertMarkdown = (markdown: string): void => {
+    editor.value?.chain().focus().insertContent(markdown, { contentType: 'markdown' }).run();
 };
 
 const insertText = (text: string): void => {
@@ -481,6 +489,7 @@ defineExpose({
     runSlash,
     insertWikiLink,
     insertAttachment,
+    insertMarkdown,
     replaceRange,
     insertText,
     find,

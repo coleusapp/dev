@@ -19,7 +19,8 @@ export type SlashCommand = {
         | { type: 'wikiLink' }
         | { type: 'date' }
         | { type: 'attach'; capture?: 'photo' | 'video' }
-        | { type: 'record'; kind: 'camera' | 'screen' | 'audio' };
+        | { type: 'record'; kind: 'camera' | 'screen' | 'audio' }
+        | { type: 'template' };
 };
 
 export const SLASH_COMMANDS: SlashCommand[] = [
@@ -102,6 +103,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
         keywords: ['audio', 'record', 'dictaphone'],
         action: { type: 'record', kind: 'audio' },
     },
+    { id: 'template', label: 'Template…', icon: 'i-lucide-file-text', keywords: ['snippet', 'boilerplate'], action: { type: 'template' } },
     { id: 'date', label: "Today's date", icon: 'i-lucide-calendar', keywords: ['today', 'now'], action: { type: 'date' } },
 ];
 

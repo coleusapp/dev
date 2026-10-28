@@ -71,6 +71,16 @@ describe('round trip', () => {
         expect(editor.view.dom.querySelectorAll('img:not(.ProseMirror-separator)')).toHaveLength(1);
     });
 
+    it('inserts Markdown (a filled template) as formatted content', () => {
+        loadMarkdown(editor, '# Meeting\n\nintro');
+        editor.commands.setTextSelection(editor.state.doc.content.size - 1);
+
+        editor.chain().insertContent('## Agenda\n\n- [ ] first [[Plan]]', { contentType: 'markdown' }).run();
+
+        expect(editorMarkdown(editor, '')).toContain('## Agenda');
+        expect(editorMarkdown(editor, '')).toContain('- [ ] first [[Plan]]');
+    });
+
     it('keeps TeX exactly as written', () => {
         const markdown = 'Area $\\pi r^2$ and $a_1 * b_2$\n\n$$\n\\int_0^1 x\\,dx\n$$';
 
