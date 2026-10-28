@@ -14,6 +14,7 @@ export type SlashCommand = {
         | { type: 'format'; command: FormatCommand }
         | { type: 'table' }
         | { type: 'divider' }
+        | { type: 'tableOfContents' }
         | { type: 'wikiLink' }
         | { type: 'date' };
 };
@@ -47,6 +48,13 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     },
     { id: 'table', label: 'Table', icon: 'i-lucide-table', keywords: ['grid'], action: { type: 'table' } },
     { id: 'divider', label: 'Divider', icon: 'i-lucide-minus', keywords: ['hr', 'rule', 'separator'], action: { type: 'divider' } },
+    {
+        id: 'toc',
+        label: 'Table of contents',
+        icon: 'i-lucide-table-of-contents',
+        keywords: ['toc', 'contents', 'outline'],
+        action: { type: 'tableOfContents' },
+    },
     { id: 'link', label: 'Link to note', icon: 'i-lucide-link-2', keywords: ['wiki', '[['], action: { type: 'wikiLink' } },
     { id: 'date', label: "Today's date", icon: 'i-lucide-calendar', keywords: ['today', 'now'], action: { type: 'date' } },
 ];

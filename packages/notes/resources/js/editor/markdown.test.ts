@@ -36,6 +36,7 @@ describe('round trip', () => {
         ['bare url and email', 'Visit https://x.test or mail sam@x.test'],
         ['soft line break', 'line one\nline two'],
         ['front matter', '---\ntitle: x\ntags: [a, b]\n---\n\nbody'],
+        ['table of contents placeholder', '# A\n\n[TOC]\n\n## B'],
     ])('keeps %s', (_, markdown) => {
         expect(normalizeMarkdown(roundTrip(markdown))).toBe(normalizeMarkdown(markdown));
     });
@@ -46,6 +47,14 @@ describe('round trip', () => {
 
     it('does not escape wiki links or hashtags', () => {
         expect(roundTrip('[[A note]] #tag')).toBe('[[A note]] #tag');
+    });
+
+    it('keeps [TOC] unescaped, but only on a line of its own', () => {
+        expect(roundTrip('# A\n\n[TOC]\n\n## B')).toBe('# A\n\n[TOC]\n\n## B');
+        expect(editor.getJSON().content?.[1]?.type).toBe('tableOfContents');
+
+        loadMarkdown(editor, 'see [TOC] here');
+        expect(editor.getJSON().content?.[0]?.type).toBe('paragraph');
     });
 
     it('drops trailing blank lines', () => {

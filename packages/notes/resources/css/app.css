@@ -110,6 +110,35 @@
     @apply border-default border px-2 py-1;
 }
 
+.note-preview .heading-anchor {
+    @apply text-dimmed ms-2 no-underline opacity-0 transition-opacity;
+}
+
+.note-preview .heading-anchor::before {
+    content: '#';
+}
+
+.note-preview :is(h1, h2, h3, h4, h5, h6):hover > .heading-anchor,
+.note-preview .heading-anchor:focus-visible {
+    @apply opacity-100;
+}
+
+.note-preview ul.table-of-contents {
+    @apply bg-elevated mb-4 list-none rounded-md p-3 ps-3;
+}
+
+.note-preview ul.table-of-contents ul {
+    @apply mb-0 list-none ps-4;
+}
+
+.tiptap .table-of-contents-placeholder {
+    @apply bg-elevated text-muted mb-2 rounded-md px-3 py-2 text-xs;
+}
+
+.tiptap .table-of-contents-placeholder.ProseMirror-selectednode {
+    @apply ring-primary ring-2;
+}
+
 .note-preview a.wiki-link-missing {
     @apply text-muted decoration-dashed;
 }

@@ -175,6 +175,21 @@ const toggleTask = (checkbox: HTMLInputElement): Promise<void> => {
 
 const preview = useTemplateRef<HTMLElement>('preview');
 
+/**
+ * In-note links ("#heading-day-one" from the table of contents or a
+ * heading's anchor, or a hand-written "#day-one") scroll the reading view
+ * instead of changing the page URL.
+ */
+const scrollToAnchor = (id: string): void => {
+    if (id === '') {
+        return;
+    }
+
+    const escaped = CSS.escape(id);
+
+    preview.value?.querySelector<HTMLElement>(`[id="${escaped}"], [id="heading-${escaped}"]`)?.scrollIntoView({ block: 'start' });
+};
+
 usePreviewFolding(preview, html);
 
 useChecklistDrag(
@@ -187,6 +202,14 @@ useChecklistDrag(
 const onPreviewClick = (event: MouseEvent): void => {
     const target = event.target;
     const wikiLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a.wiki-link') : null;
+    const inNoteLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
+
+    if (inNoteLink) {
+        event.preventDefault();
+        scrollToAnchor(decodeURIComponent(inNoteLink.getAttribute('href')?.slice(1) ?? ''));
+
+        return;
+    }
 
     if (wikiLink && !event.metaKey && !event.ctrlKey) {
         event.preventDefault();
@@ -480,6 +503,9 @@ const chooseSlash = (command: SlashCommand): void => {
             break;
         case 'divider':
             editSource(insertText('---\n'));
+            break;
+        case 'tableOfContents':
+            editSource(insertText('[TOC]\n'));
             break;
         case 'wikiLink':
             editSource(insertText('[[]]', 2));

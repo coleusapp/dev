@@ -5,6 +5,7 @@ import { Folding } from '@/editor/Folding';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
 import { LineCommands } from '@/editor/LineCommands';
+import { TableOfContents } from '@/editor/TableOfContents';
 import { WikiLink } from '@/editor/WikiLink';
 import Link from '@tiptap/extension-link';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
@@ -46,6 +47,7 @@ export const editorExtensions = ({
     NoteHighlight,
     TableKit,
     WikiLink,
+    TableOfContents,
     Hashtags,
     Placeholder.configure({ placeholder }),
     CheckedToBottom.configure({ enabled: checkedToBottom }),

@@ -17,7 +17,7 @@ it('sends parsed properties and keeps front matter out of the title and preview'
             ->where('note.data.properties', ['status' => 'draft', 'rating' => 3])
             ->where('note.data.title', 'Plan')
             ->where('note.data.snippet', 'Text')
-            ->where('note.data.html', "<h1>Plan</h1>\n<p>Text</p>\n"));
+            ->where('note.data.html', '<h1 id="heading-plan">Plan<a href="#heading-plan" class="heading-anchor" aria-hidden="true" title="Link to this heading"></a></h1>'."\n<p>Text</p>\n"));
 });
 
 it('sends null properties for front matter it cannot read, and an empty list without any', function () {

@@ -40,7 +40,7 @@ it('keeps front matter out of the title, snippet and rendered note', function ()
 
     expect(Coleus\Notes\Support\NoteText::title($body))->toBe('Real title')
         ->and(Coleus\Notes\Support\NoteText::snippet($body))->toBe('Body text')
-        ->and(Coleus\Notes\Markdown\NoteMarkdown::toHtml($body))->toBe("<h1>Real title</h1>\n<p>Body text</p>\n");
+        ->and(Coleus\Notes\Markdown\NoteMarkdown::toHtml($body))->toBe('<h1 id="heading-real-title">Real title<a href="#heading-real-title" class="heading-anchor" aria-hidden="true" title="Link to this heading"></a></h1>'."\n<p>Body text</p>\n");
 });
 
 it('keeps checklist line numbers right below front matter', function () {

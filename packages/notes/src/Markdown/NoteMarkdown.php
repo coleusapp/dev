@@ -5,7 +5,9 @@ namespace Coleus\Notes\Markdown;
 use Coleus\Notes\Markdown\Underline\UnderlineExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
+use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\Highlight\HighlightExtension;
+use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 use League\CommonMark\Node\Block\Document;
 use League\CommonMark\Parser\MarkdownParser;
@@ -20,6 +22,11 @@ use League\CommonMark\Parser\MarkdownParser;
  * Built the same way as Str::markdown (GitHub-flavoured converter plus extra
  * extensions), but kept here so parsing for checklists and rendering share
  * one environment.
+ *
+ * Headings get ids ("heading-" + slug, unique per note) and an empty anchor
+ * the stylesheet shows as "#" on hover; a "[TOC]" line becomes a table of
+ * contents linking to them. The prefix keeps a heading like "Notes 2" from
+ * clashing with ids on the page around the note.
  */
 class NoteMarkdown
 {
@@ -30,6 +37,20 @@ class NoteMarkdown
         'html_input' => 'escape',
         'allow_unsafe_links' => false,
         'max_nesting_level' => 50,
+        'heading_permalink' => [
+            'apply_id_to_heading' => true,
+            'id_prefix' => 'heading',
+            'fragment_prefix' => 'heading',
+            'insert' => 'after',
+            'html_class' => 'heading-anchor',
+            'symbol' => '',
+            'title' => 'Link to this heading',
+        ],
+        'table_of_contents' => [
+            'position' => 'placeholder',
+            'placeholder' => '[TOC]',
+            'html_class' => 'table-of-contents',
+        ],
     ];
 
     /**
@@ -55,6 +76,8 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new UnderlineExtension);
         $converter->getEnvironment()->addExtension(new HighlightColors);
         $converter->getEnvironment()->addExtension(new WikiLinkExtension($wikiLinks));
+        $converter->getEnvironment()->addExtension(new HeadingPermalinkExtension);
+        $converter->getEnvironment()->addExtension(new TableOfContentsExtension);
 
         return $converter;
     }

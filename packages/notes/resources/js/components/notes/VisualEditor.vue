@@ -324,6 +324,9 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
         case 'divider':
             current.chain().focus().setHorizontalRule().run();
             break;
+        case 'tableOfContents':
+            current.chain().focus().insertContent({ type: 'tableOfContents' }).run();
+            break;
         case 'wikiLink':
             current.chain().focus().insertContent('[[]]').run();
             current.commands.setTextSelection(current.state.selection.from - 2);
