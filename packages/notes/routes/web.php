@@ -1,6 +1,7 @@
 <?php
 
 use Coleus\Notes\Http\Controllers\ArchiveController;
+use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
@@ -24,6 +25,10 @@ Route::middleware(['web', 'auth'])
         Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy')->whereNumber('folder');
         Route::put('/{note}/folder', [FolderController::class, 'moveNote'])->name('folder.move')->whereNumber('note');
         Route::put('/sort', [SortController::class, 'update'])->name('sort.update');
+        Route::put('/bookmarks/{bookmark}', [BookmarkController::class, 'update'])->name('bookmarks.update')->whereNumber('bookmark');
+        Route::post('/bookmarks/{bookmark}/move', [BookmarkController::class, 'move'])->name('bookmarks.move')->whereNumber('bookmark');
+        Route::delete('/bookmarks/{bookmark}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy')->whereNumber('bookmark');
+        Route::post('/{note}/bookmark', [BookmarkController::class, 'store'])->name('bookmarks.store')->whereNumber('note');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import BookmarkList from '@/components/notes/BookmarkList.vue';
+import BookmarkModal from '@/components/notes/BookmarkModal.vue';
 import ConfirmModal from '@/components/notes/ConfirmModal.vue';
 import FolderModal from '@/components/notes/FolderModal.vue';
 import FolderTree from '@/components/notes/FolderTree.vue';
@@ -7,6 +9,9 @@ import {
     describeTags,
     filterQuery,
     NOTE_DRAG_TYPE,
+    noteHeadings,
+    type BookmarkGroup,
+    type BookmarkItem,
     type FolderDialog,
     type FolderNode,
     type ListSort,
@@ -24,7 +29,7 @@ import NoteList from '@/components/notes/NoteList.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
@@ -35,6 +40,7 @@ const props = defineProps<{
     tags: TagNode[];
     folders: FolderNode[];
     counts: { notes: number; archive: number; trash: number };
+    bookmarks: BookmarkGroup[];
     filters: NoteFilters;
     preferences: NotePreferences;
     sort: ListSort;
@@ -79,6 +85,8 @@ watchDebounced(
     },
     { debounce: 300 },
 );
+
+const page = usePage();
 
 const listedNotes = ref<NoteData[]>(props.notes.data);
 const title = ref(props.note?.data.title ?? '');
@@ -218,6 +226,32 @@ const sortItems = computed<DropdownMenuItem[][]>(() => {
             : []),
     ];
 });
+
+const noteBookmark = computed(() =>
+    props.bookmarks.flatMap((group) => group.bookmarks).find((bookmark) => bookmark.type === 'note' && bookmark.note_id === props.note?.data.id),
+);
+
+const editingBookmark = ref<BookmarkItem | null>(null);
+const headingsToBookmark = ref<{ noteId: number; headings: string[] } | null>(null);
+
+const toggleBookmark = (): void => {
+    if (!props.note) {
+        return;
+    }
+
+    const options = { preserveScroll: true, preserveState: true };
+
+    if (noteBookmark.value) {
+        router.delete(route('notes.bookmarks.destroy', { bookmark: noteBookmark.value.id }), options);
+    } else {
+        router.post(route('notes.bookmarks.store', { note: props.note.data.id }), {}, options);
+    }
+};
+
+/**
+ * The heading to scroll to when the note was opened from a heading bookmark.
+ */
+const focusHeading = computed(() => new URL(page.url, window.location.origin).searchParams.get('heading'));
 
 const duplicateNote = (): void => {
     if (props.note) {
@@ -397,6 +431,20 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             historyItem(),
             { label: 'Duplicate', icon: 'i-lucide-copy', onSelect: duplicateNote },
             {
+                label: noteBookmark.value ? 'Remove bookmark' : 'Bookmark',
+                icon: noteBookmark.value ? 'i-lucide-bookmark-x' : 'i-lucide-bookmark',
+                onSelect: toggleBookmark,
+            },
+            {
+                label: 'Bookmark a heading…',
+                icon: 'i-lucide-bookmark-plus',
+                onSelect: () => {
+                    if (props.note) {
+                        headingsToBookmark.value = { noteId: props.note.data.id, headings: noteHeadings(props.note.data.body) };
+                    }
+                },
+            },
+            {
                 label: 'Move to folder…',
                 icon: 'i-lucide-folder-input',
                 onSelect: () => {
@@ -438,6 +486,10 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             All notes
                             <span class="text-dimmed ms-auto text-xs">{{ counts.notes }}</span>
                         </Link>
+                        <template v-if="bookmarks.length">
+                            <div class="text-dimmed mt-2 px-2 text-xs font-medium">Bookmarks</div>
+                            <BookmarkList :groups="bookmarks" @edit="(bookmark) => (editingBookmark = bookmark)" />
+                        </template>
                         <div class="text-dimmed mt-2 flex items-center justify-between px-2 text-xs font-medium">
                             Folders
                             <UiButton
@@ -601,6 +653,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             :spellcheck="preferences['editor.spellcheck']"
                             :text-direction="preferences['editor.text_direction']"
                             :readable-width="preferences['editor.readable_width']"
+                            :focus-heading="focusHeading"
                             @saved="onNoteSaved"
                             @create-linked="(title) => (linkedTitle = title)"
                         />
@@ -612,6 +665,15 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
+        <BookmarkModal
+            :editing="editingBookmark"
+            :headings-of="headingsToBookmark"
+            :groups="bookmarks"
+            @close="
+                editingBookmark = null;
+                headingsToBookmark = null;
+            "
+        />
         <FolderModal :dialog="folderDialog" :folders="folders" @close="folderDialog = null" />
         <ConfirmModal
             v-model:open="confirmingFolderDelete"

@@ -10,6 +10,7 @@ use Coleus\Notes\Models\Folder;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Notes\Search\NoteSearch;
+use Coleus\Notes\Services\BookmarkService;
 use Coleus\Notes\Services\FolderService;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -38,6 +39,7 @@ trait RendersNotesPage
             'tags' => Notes::note()->tagTree(),
             'folders' => app(FolderService::class)->tree(),
             'counts' => Notes::note()->counts(),
+            'bookmarks' => app(BookmarkService::class)->grouped(),
             'filters' => $request->filters(),
             'preferences' => NotePreferences::all(),
         ]);

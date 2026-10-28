@@ -37,7 +37,7 @@ import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { renameFirstLine } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
-import { computed, onActivated, ref, useTemplateRef, watch } from 'vue';
+import { computed, onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     note: NoteDetailData;
@@ -49,6 +49,7 @@ const props = defineProps<{
     spellcheck?: boolean;
     textDirection?: 'auto' | 'ltr' | 'rtl';
     readableWidth?: boolean;
+    focusHeading?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -62,6 +63,29 @@ const tags = ref(props.note.tags);
 const backlinks = ref(props.note.backlinks);
 
 const updatedAt = ref(props.note.updated_at);
+
+/**
+ * Opened from a heading bookmark: scroll that heading into view once the
+ * editor or the reading view has rendered.
+ */
+const scrollToHeading = (heading: string): void => {
+    const target = Array.from(document.querySelectorAll<HTMLElement>('.tiptap :is(h1,h2,h3,h4,h5,h6), .note-preview > :is(h1,h2,h3,h4,h5,h6)')).find(
+        (element) => element.offsetParent !== null && element.textContent?.trim() === heading,
+    );
+
+    target?.scrollIntoView({ block: 'start' });
+};
+
+const focusRequestedHeading = (): void => {
+    if (props.focusHeading) {
+        const heading = props.focusHeading;
+        setTimeout(() => scrollToHeading(heading), 50);
+    }
+};
+
+onMounted(focusRequestedHeading);
+onActivated(focusRequestedHeading);
+watch(() => props.focusHeading, focusRequestedHeading);
 const savedTitle = ref(props.note.title);
 
 /**

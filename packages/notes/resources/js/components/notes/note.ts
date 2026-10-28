@@ -178,3 +178,51 @@ export type NotePreferences = {
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
 };
+
+export type BookmarkItem = {
+    id: number;
+    type: 'note' | 'heading' | 'search';
+    note_id: number | null;
+    heading: string | null;
+    filters: Partial<NoteFilters> | null;
+    label: string | null;
+    title: string;
+    group: string | null;
+};
+
+export type BookmarkGroup = { group: string | null; bookmarks: BookmarkItem[] };
+
+/**
+ * Where a bookmark leads: the note, the note scrolled to a heading, or the
+ * list with the saved filters.
+ */
+export const bookmarkHref = (bookmark: BookmarkItem): string => {
+    if (bookmark.type === 'search') {
+        return route('notes.index', filterQuery(bookmark.filters ?? {}));
+    }
+
+    return route('notes.show', { note: bookmark.note_id, ...(bookmark.heading ? { heading: bookmark.heading } : {}) });
+};
+
+/**
+ * The headings in a note's Markdown (outside code blocks), for bookmarking.
+ */
+export const noteHeadings = (markdown: string): string[] => {
+    const headings: string[] = [];
+    let inFence = false;
+
+    for (const line of markdown.split('\n')) {
+        if (/^\s*(```|~~~)/.test(line)) {
+            inFence = !inFence;
+            continue;
+        }
+
+        const match = /^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/.exec(line);
+
+        if (!inFence && match) {
+            headings.push(match[1].replace(/[*_`~=]|\+\+/g, '').trim());
+        }
+    }
+
+    return headings.filter((heading) => heading !== '');
+};

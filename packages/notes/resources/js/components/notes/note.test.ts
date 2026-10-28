@@ -41,3 +41,11 @@ describe('tag filters', () => {
         expect(tagList(null)).toEqual([]);
     });
 });
+
+describe('noteHeadings', () => {
+    it('lists headings outside code with formatting removed', async () => {
+        const { noteHeadings } = await import('@/components/notes/note');
+
+        expect(noteHeadings('# Trip\ntext\n## **Packing** list\n```\n# not this\n```\n### Done ##')).toEqual(['Trip', 'Packing list', 'Done']);
+    });
+});
