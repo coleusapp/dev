@@ -54,3 +54,36 @@ it('does not list headings of another users note', function () {
 
     $this->getJson(route('notes.headings', $theirs))->assertNotFound();
 });
+
+it('previews the note a link leads to, rendered', function () {
+    $target = Note::factory()->create(['body' => "---\naliases: [Lisbon]\n---\n# Trip to Lisbon\n**Day** one, see [[Missing]]"]);
+
+    $this->getJson(route('notes.links.preview', ['title' => 'lisbon']))
+        ->assertOk()
+        ->assertJsonPath('data.id', $target->id)
+        ->assertJsonPath('data.title', 'Trip to Lisbon')
+        ->assertJsonPath('data.html', fn (string $html) => str_contains($html, '<strong>Day</strong>') && str_contains($html, 'wiki-link-missing') && ! str_contains($html, 'aliases'));
+
+    $this->getJson(route('notes.links.preview', ['title' => 'Nowhere']))->assertOk()->assertJsonPath('data', null);
+});
+
+it('does not preview another users note or the linking note itself', function () {
+    $own = Note::factory()->create(['body' => '# Self']);
+    $this->actingAs(User::factory()->create());
+    Note::factory()->create(['body' => '# Theirs']);
+    $this->actingAs($this->user);
+
+    $this->getJson(route('notes.links.preview', ['title' => 'Theirs']))->assertJsonPath('data', null);
+    $this->getJson(route('notes.links.preview', ['title' => 'Self', 'from' => $own->id]))->assertJsonPath('data', null);
+});
+
+it('previews by note id, only the users own notes, and needs a title or id', function () {
+    $own = Note::factory()->create(['body' => '# Mine']);
+    $this->actingAs(User::factory()->create());
+    $theirs = Note::factory()->create(['body' => '# Theirs']);
+    $this->actingAs($this->user);
+
+    $this->getJson(route('notes.links.preview', ['note' => $own->id]))->assertJsonPath('data.title', 'Mine');
+    $this->getJson(route('notes.links.preview', ['note' => $theirs->id]))->assertJsonPath('data', null);
+    $this->getJson(route('notes.links.preview'))->assertUnprocessable();
+});

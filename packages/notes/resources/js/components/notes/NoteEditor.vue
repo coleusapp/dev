@@ -4,6 +4,7 @@ import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import HighlightedText from '@/components/notes/HighlightedText.vue';
 import LinkMenu from '@/components/notes/LinkMenu.vue';
+import LinkPreviewCard from '@/components/notes/LinkPreviewCard.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import NoteInfo from '@/components/notes/NoteInfo.vue';
 import NoteTitle from '@/components/notes/NoteTitle.vue';
@@ -18,6 +19,7 @@ import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useFindReplace } from '@/composables/useFindReplace';
 import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
+import { useLinkPreview } from '@/composables/useLinkPreview';
 import { usePreviewFolding } from '@/composables/usePreviewFolding';
 import { useRelink } from '@/composables/useRelink';
 import { useTagMenu, type OpenTagMenu } from '@/composables/useTagMenu';
@@ -144,6 +146,12 @@ onActivated(() => {
 /**
  * Links to this note's old title in other notes, after a rename (O2.6).
  */
+/**
+ * Hovering a link previews the linked note (O2.10), in both the visual
+ * editor and the reading view; typing, clicking or scrolling closes it.
+ */
+const linkPreview = useLinkPreview({ from: () => props.note.id });
+
 const relink = useRelink({ noteId: () => props.note.id, title: () => savedTitle.value });
 
 const unlinkedMentions = useTemplateRef<InstanceType<typeof UnlinkedMentions>>('unlinkedMentions');
@@ -1264,6 +1272,11 @@ defineExpose({ paletteCommands });
             :class="{ 'readable-width': readableWidth !== false && mode !== 'split' }"
             @keydown.capture="onShortcutKeydown"
             @keydown="onKeydown"
+            @mouseover="linkPreview.onOver"
+            @mouseout="linkPreview.onOut"
+            @mousedown="linkPreview.close"
+            @scroll.capture="linkPreview.close"
+            @keydown.passive="linkPreview.close"
         >
             <VisualEditor
                 v-if="!readonly"
@@ -1335,6 +1348,8 @@ defineExpose({ paletteCommands });
                 <OutlinePanel :headings="outline" @jump="jumpToHeading" />
             </aside>
         </div>
+        <!-- Outside the editing area, so pressing on the card doesn't close it before its link is followed. -->
+        <LinkPreviewCard v-if="linkPreview.card.value" :preview="linkPreview.card.value" @enter="linkPreview.keep" @leave="linkPreview.hide" />
         <UiSlideover v-if="!isLarge" v-model:open="outlineSheetOpen" title="Outline" description="Jump to a heading in this note.">
             <template #body>
                 <OutlinePanel :headings="outline" @jump="jumpToHeading" />

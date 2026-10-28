@@ -42,6 +42,7 @@ Route::middleware(['web', 'auth'])
         Route::post('/{note}/bookmark', [BookmarkController::class, 'store'])->name('bookmarks.store')->whereNumber('note');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
+        Route::get('/links/preview', [WikiLinkController::class, 'preview'])->name('links.preview');
         Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');

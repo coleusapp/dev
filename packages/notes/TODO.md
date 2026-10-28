@@ -33,7 +33,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O2.7 Backlinks with context: show the surrounding line/paragraph for each backlink, not just the title
 - [x] O2.8 Unlinked mentions: notes that contain the title as plain text, with a one-click "link" action
 - [x] O2.9 Outgoing links panel: links from this note, resolved and unresolved
-- [ ] O2.10 Hover preview: hovering a wiki link shows a popover with the target note's rendered content
+- [x] O2.10 Hover preview: hovering a wiki link shows a popover with the target note's rendered content
 
 ## O3. Embeds and attachments
 - [ ] O3.1 Media upload: images, videos, audio and other files (paste, drag-and-drop, button), stored per user, served through a policy-checked route 🧩 (Box: embed files from storage with inline preview) 🍎 📦
