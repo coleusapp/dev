@@ -17,6 +17,7 @@ import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useFindReplace } from '@/composables/useFindReplace';
 import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
 import { usePreviewFolding } from '@/composables/usePreviewFolding';
+import { useRelink } from '@/composables/useRelink';
 import { useTagMenu, type OpenTagMenu } from '@/composables/useTagMenu';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
 import type { LinkMenuState } from '@/editor/LinkMenu';
@@ -137,9 +138,15 @@ onActivated(() => {
     }
 });
 
+/**
+ * Links to this note's old title in other notes, after a rename (O2.6).
+ */
+const relink = useRelink({ noteId: () => props.note.id, title: () => savedTitle.value });
+
 const onServerSave = (note: NoteDetailData): void => {
     updatedAt.value = note.updated_at;
     savedTitle.value = note.title;
+    void relink.check();
     html.value = note.html;
     tags.value = note.tags;
     backlinks.value = note.backlinks;
@@ -1211,6 +1218,15 @@ defineExpose({ paletteCommands });
             @replace-all="finder.replaceAll"
             @close="finder.close"
         />
+        <div v-if="relink.offer.value && !readonly" class="bg-elevated flex items-center gap-2 rounded-md px-3 py-2 text-xs" role="status">
+            <UiIcon name="i-lucide-link" class="text-dimmed size-4 shrink-0" />
+            <span class="text-muted flex-1">
+                {{ relink.offer.value.count }} {{ relink.offer.value.count === 1 ? 'note links' : 'notes link' }} to “{{ relink.offer.value.from }}”.
+                Point {{ relink.offer.value.count === 1 ? 'it' : 'them' }} at “{{ savedTitle }}”?
+            </span>
+            <UiButton size="xs" :loading="relink.working.value" @click="relink.relink">Update links</UiButton>
+            <UiButton size="xs" color="neutral" variant="ghost" @click="relink.keep">Keep</UiButton>
+        </div>
         <div
             v-if="!faithful && mode === 'source' && preferredMode === 'edit'"
             class="bg-elevated flex items-center gap-2 rounded-md px-3 py-2 text-xs"

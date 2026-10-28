@@ -56,3 +56,15 @@ it('does not turn wiki links into reference links', function () {
 it('does not read hashtags inside wiki links', function () {
     expect(Hashtags::parse('[[#not a tag]] #real'))->toBe(['real']);
 });
+
+it('renames links to a title, keeping headings and aliases', function () {
+    $body = "---\nsee: \"[[Old]]\"\n---\n# Notes\n[[old]] and [[Old  #Day one]] and [[ OLD |the old one]] and [[Older]]\n`[[Old]]` stays\n```\n[[Old]]\n```\n~~~~\n```\n[[Old]]\n~~~~\nafter [[Old]]";
+
+    expect(WikiLinks::renameTitle($body, 'Old', 'New title'))->toBe(
+        "---\nsee: \"[[Old]]\"\n---\n# Notes\n[[New title]] and [[New title#Day one]] and [[New title|the old one]] and [[Older]]\n`[[Old]]` stays\n```\n[[Old]]\n```\n~~~~\n```\n[[Old]]\n~~~~\nafter [[New title]]"
+    );
+});
+
+it('keeps Windows line endings when renaming links', function () {
+    expect(WikiLinks::renameTitle("[[Old]]\r\n[[Old]]", 'old', 'New'))->toBe("[[New]]\r\n[[New]]");
+});

@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown\WikiLinks;
 
+use Coleus\Notes\Markdown\FrontMatter;
 use Coleus\Notes\Markdown\NoteMarkdown;
 use League\CommonMark\Extension\CommonMark\Node\Block\Heading;
 use League\CommonMark\Node\Node;
@@ -45,6 +46,56 @@ class WikiLinks
             'heading' => $heading === '' ? null : $heading,
             'label' => $label === '' ? null : $label,
         ];
+    }
+
+    /**
+     * Points every [[link]] to the note $from at $to instead, keeping any
+     * #heading and |alias exactly as written; titles compare like the
+     * resolver (any case, runs of spaces). Front matter, fenced code and
+     * `code spans` are left alone.
+     */
+    public static function renameTitle(string $body, string $from, string $to): string
+    {
+        $key = mb_strtolower(self::normalizeTitle($from));
+        [$frontMatter, $text] = FrontMatter::split($body);
+        $fence = null;
+
+        $lines = preg_split('/(\R)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [$text];
+
+        foreach ($lines as $index => $line) {
+            if ($index % 2 === 1) {
+                continue;
+            }
+
+            if (preg_match('/^ {0,3}(`{3,}|~{3,})/', $line, $marker) === 1) {
+                if ($fence === null) {
+                    $fence = $marker[1];
+                } elseif ($marker[1][0] === $fence[0] && strlen($marker[1]) >= strlen($fence)) {
+                    $fence = null;
+                }
+
+                continue;
+            }
+
+            if ($fence !== null) {
+                continue;
+            }
+
+            $lines[$index] = (string) preg_replace_callback('/(`+).*?\1|'.self::PATTERN_BODY.'/u', function (array $match) use ($key, $to): string {
+                if (($match[1] ?? '') !== '' || ! isset($match[2])) {
+                    return $match[0];
+                }
+
+                $inner = $match[2];
+                $cut = strcspn($inner, '#|');
+
+                return mb_strtolower(self::normalizeTitle(substr($inner, 0, $cut))) === $key
+                    ? '[['.$to.substr($inner, $cut).']]'
+                    : $match[0];
+            }, $line);
+        }
+
+        return $frontMatter.implode('', $lines);
     }
 
     /**

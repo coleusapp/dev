@@ -8,6 +8,7 @@ use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
 use Coleus\Notes\Http\Controllers\PropertyController;
+use Coleus\Notes\Http\Controllers\RelinkController;
 use Coleus\Notes\Http\Controllers\SettingsController;
 use Coleus\Notes\Http\Controllers\SmartFolderController;
 use Coleus\Notes\Http\Controllers\SortController;
@@ -42,6 +43,8 @@ Route::middleware(['web', 'auth'])
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
+        Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');
+        Route::post('/{note}/relink', [RelinkController::class, 'store'])->name('relink.store')->whereNumber('note');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::get('/{note}', [NoteController::class, 'show'])->name('show')->whereNumber('note')->withTrashed();
         Route::put('/{note}', [NoteController::class, 'update'])->name('update')->whereNumber('note');
