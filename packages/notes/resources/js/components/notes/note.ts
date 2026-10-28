@@ -98,6 +98,17 @@ export type NoteFilters = {
 };
 
 /**
+ * Searches offered under the search box and in the command palette (A10.1).
+ */
+export const SUGGESTED_SEARCHES: { label: string; query: string; icon: string }[] = [
+    { label: 'Notes with checklists', query: 'has:checklist', icon: 'i-lucide-list-checks' },
+    { label: 'Notes with open tasks', query: 'task-todo:', icon: 'i-lucide-square' },
+    { label: 'Notes with tags', query: 'has:tags', icon: 'i-lucide-hash' },
+    { label: 'Notes with links', query: 'has:links', icon: 'i-lucide-link' },
+    { label: 'Notes with properties', query: 'has:properties', icon: 'i-lucide-list-tree' },
+];
+
+/**
  * "status", or "status: draft" when filtering by a value too.
  */
 export const describeProperty = (filters: Pick<NoteFilters, 'prop' | 'value'>): string =>

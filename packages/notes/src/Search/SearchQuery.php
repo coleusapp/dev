@@ -20,6 +20,11 @@ use Illuminate\Support\Collection;
  *   task:call                a checklist item mentioning "call"
  *   task-todo:call           …an unticked one (task-todo: alone: any open item)
  *   task-done:call           …a ticked one
+ *   has:checklist            any checklist item (same as "task:" alone)
+ *   has:tags  has:links  has:properties
+ *                            any #tag / any [[wiki link]] or [link](url) /
+ *                            any front matter property; other has: values
+ *                            match nothing
  *
  * Operator values can be quoted (folder:"Trip plans"). Everything must
  * match. Task operators narrow in SQL, then check the item lines on the
@@ -29,9 +34,14 @@ final class SearchQuery
 {
     public const int MAX_OPERATORS = 10;
 
-    private const string TOKEN = '/(?<op>task-todo|task-done|task|tag|folder):(?:"(?<quoted>[^"]*)"|(?<value>[^\s"]*))|"(?<phrase>[^"]+)"/iu';
+    private const string TOKEN = '/(?<op>task-todo|task-done|task|tag|folder|has):(?:"(?<quoted>[^"]*)"|(?<value>[^\s"]*))|"(?<phrase>[^"]+)"/iu';
 
     private const string TASK_LINE = '/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+\[( |x|X)\][ \t]+(.*)$/mu';
+
+    /**
+     * The has: values understood (A10.1's suggested searches).
+     */
+    public const array HAS = ['checklist', 'tags', 'links', 'properties'];
 
     /**
      * @param  list<string>  $words
@@ -39,6 +49,7 @@ final class SearchQuery
      * @param  list<string>  $tags
      * @param  list<string>  $folders
      * @param  list<array{state: 'any'|'todo'|'done', text: string}>  $tasks
+     * @param  list<string>  $has  has: values other than checklist (which becomes a task)
      */
     private function __construct(
         public readonly array $words,
@@ -46,15 +57,16 @@ final class SearchQuery
         public readonly array $tags,
         public readonly array $folders,
         public readonly array $tasks,
+        public readonly array $has,
     ) {
         //
     }
 
     public static function parse(string $terms): self
     {
-        $phrases = $tags = $folders = $tasks = [];
+        $phrases = $tags = $folders = $tasks = $has = [];
 
-        $rest = (string) preg_replace_callback(self::TOKEN, function (array $match) use (&$phrases, &$tags, &$folders, &$tasks): string {
+        $rest = (string) preg_replace_callback(self::TOKEN, function (array $match) use (&$phrases, &$tags, &$folders, &$tasks, &$has): string {
             if (($match['phrase'] ?? '') !== '') {
                 $phrases[] = mb_strtolower(trim((string) preg_replace('/\s+/u', ' ', $match['phrase'])));
 
@@ -69,6 +81,9 @@ final class SearchQuery
                 'task' => $tasks[] = ['state' => 'any', 'text' => mb_strtolower($value)],
                 'task-todo' => $tasks[] = ['state' => 'todo', 'text' => mb_strtolower($value)],
                 'task-done' => $tasks[] = ['state' => 'done', 'text' => mb_strtolower($value)],
+                'has' => mb_strtolower($value) === 'checklist'
+                    ? $tasks[] = ['state' => 'any', 'text' => '']
+                    : $has[] = mb_strtolower($value),
             };
 
             return ' ';
@@ -82,6 +97,7 @@ final class SearchQuery
             $keep($tags),
             $keep($folders),
             array_slice(array_values(array_unique($tasks, SORT_REGULAR)), 0, self::MAX_OPERATORS),
+            $keep($has),
         );
     }
 
@@ -120,6 +136,15 @@ final class SearchQuery
 
         foreach ($this->folders as $name) {
             $query->whereIn('folder_id', $this->folderIds($name));
+        }
+
+        foreach ($this->has as $what) {
+            match ($what) {
+                'tags' => $query->whereHas('tags'),
+                'properties' => $query->whereHas('properties'),
+                'links' => $query->where(fn (Builder $links) => $links->where('body', 'like', '%[[%')->orWhere('body', 'like', '%](%')),
+                default => $query->whereRaw('1 = 0'),
+            };
         }
 
         foreach ($this->tasks as $task) {

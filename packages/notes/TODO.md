@@ -180,7 +180,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A9.4 Voice dictation into the editor (browser speech recognition, where supported)
 
 ## A10. Search (Apple Notes)
-- [ ] A10.1 Suggested searches: Locked notes, Notes with checklists, Notes with tags, Notes with drawings, Notes with scanned documents, Notes with attachments
+- [x] A10.1 Suggested searches: Locked notes, Notes with checklists, Notes with tags, Notes with drawings, Notes with scanned documents, Notes with attachments
 - [x] A10.2 Search scoped to the current folder vs all notes
 - [ ] A10.3 Search results grouped: Top Hits, then notes, then attachments (with OCR matches) (needs A4.5)
 

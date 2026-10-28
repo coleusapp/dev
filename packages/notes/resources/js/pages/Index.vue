@@ -13,6 +13,7 @@ import {
     filterQuery,
     NOTE_DRAG_TYPE,
     noteHeadings,
+    SUGGESTED_SEARCHES,
     type BookmarkGroup,
     type BookmarkItem,
     type FolderDialog,
@@ -642,6 +643,12 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                 ? [{ id: 'go.forward', label: 'Go forward', icon: 'i-lucide-arrow-right', kbds: shortcutKeys('forward'), run: noteHistory.forward }]
                 : []),
             { id: 'go.search', label: 'Search notes', icon: 'i-lucide-text-search', kbds: shortcutKeys('search'), run: focusSearch },
+            ...SUGGESTED_SEARCHES.map((suggestion) => ({
+                id: `go.suggested.${suggestion.query}`,
+                label: `Search: ${suggestion.label.toLowerCase()}`,
+                icon: suggestion.icon,
+                run: () => (search.value = suggestion.query),
+            })),
             ...(listedNotes.value.length
                 ? [
                       {
@@ -903,7 +910,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                                 aria-label="Clear search"
                                 @click="search = ''"
                             />
-                            <SearchTips v-else @insert="insertSearchOperator" />
+                            <SearchTips v-else @insert="insertSearchOperator" @search="(query) => (search = query)" />
                         </template>
                     </UiInput>
                     <div v-if="searchScope.label.value" class="mb-2 flex gap-1" role="group" aria-label="Search in">

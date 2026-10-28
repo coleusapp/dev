@@ -111,3 +111,20 @@ it('does not let one user search another users folders', function () {
 
     expect(searchIds('folder:"shared name"'))->toBe([]);
 });
+
+it('finds notes that have checklists, tags, links or properties', function () {
+    $checklist = Note::factory()->create(['body' => "# A\n- [x] done"]);
+    $tagged = Note::factory()->create(['body' => '# B #inbox']);
+    $wiki = Note::factory()->create(['body' => '# C see [[Other]]']);
+    $markdown = Note::factory()->create(['body' => '# D [site](https://x.test)']);
+    $properties = Note::factory()->create(['body' => "---\nstatus: draft\n---\n# E"]);
+    Note::factory()->create(['body' => '# F plain - [ ] not a list item']);
+
+    expect(searchIds('has:checklist'))->toBe([$checklist->id])
+        ->and(searchIds('has:tags'))->toBe([$tagged->id])
+        ->and(searchIds('has:links'))->toBe([$wiki->id, $markdown->id])
+        ->and(searchIds('has:properties'))->toBe([$properties->id])
+        ->and(searchIds('has:Tags has:links'))->toBe([])
+        ->and(searchIds('has:drawings'))->toBe([])
+        ->and(SearchQuery::parse('has:checklist has:tags')->tasks)->toBe([['state' => 'any', 'text' => '']]);
+});
