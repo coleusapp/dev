@@ -74,3 +74,16 @@ it('has no backlinks for an untitled note', function () use ($backlinkIds) {
 
     expect($backlinkIds($target))->toBe([]);
 });
+
+it('shows the lines that link, with the link marked', function () {
+    $target = Note::factory()->create(['body' => "---\naliases: [Lisbon]\n---\n# Trip to Lisbon"]);
+    $source = Note::factory()->create(['body' => "# Plans\nunrelated line\nBook **flights** for [[Trip to Lisbon|the trip]] soon\n`[[Trip to Lisbon]]` in code\n```\n[[Lisbon]]\n```\nhotels near [[lisbon#Center]]\n[[Lisbon]] a\n[[Lisbon]] b"]);
+
+    $this->get(route('notes.show', $target))->assertInertia(fn (Assert $page) => $page
+        ->where('note.data.backlinks.0.id', $source->id)
+        ->where('note.data.backlinks.0.context', [
+            [['text' => 'Book flights for ', 'match' => false], ['text' => 'the trip', 'match' => true], ['text' => ' soon', 'match' => false]],
+            [['text' => 'hotels near ', 'match' => false], ['text' => 'lisbon > Center', 'match' => true]],
+            [['text' => 'Lisbon', 'match' => true], ['text' => ' a', 'match' => false]],
+        ]));
+});

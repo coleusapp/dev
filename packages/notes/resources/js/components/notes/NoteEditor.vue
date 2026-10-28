@@ -2,6 +2,7 @@
 import type { PaletteCommand } from '@/components/notes/commands';
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
+import HighlightedText from '@/components/notes/HighlightedText.vue';
 import LinkMenu from '@/components/notes/LinkMenu.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import NoteInfo from '@/components/notes/NoteInfo.vue';
@@ -1330,10 +1331,19 @@ defineExpose({ paletteCommands });
                     <Link
                         :href="route('notes.show', { note: backlink.id })"
                         preserve-state
-                        class="hover:bg-elevated flex items-center justify-between gap-2 rounded px-2 py-1"
+                        class="hover:bg-elevated flex flex-col gap-0.5 rounded px-2 py-1"
                     >
-                        <span class="truncate">{{ backlink.title || 'Untitled note' }}</span>
-                        <span class="text-dimmed shrink-0 text-xs">{{ backlink.updated_at_for_humans }}</span>
+                        <span class="flex items-center justify-between gap-2">
+                            <span class="truncate">{{ backlink.title || 'Untitled note' }}</span>
+                            <span class="text-dimmed shrink-0 text-xs">{{ backlink.updated_at_for_humans }}</span>
+                        </span>
+                        <span
+                            v-for="(line, index) in backlink.context"
+                            :key="index"
+                            class="text-muted border-default line-clamp-2 border-s-2 ps-2 text-xs"
+                        >
+                            <HighlightedText :parts="line" />
+                        </span>
                     </Link>
                 </li>
             </ul>

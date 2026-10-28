@@ -30,7 +30,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O2.4 Link autocomplete: typing `[[` suggests note titles (fuzzy), then headings after `#` (Apple: "Add Link" on a selection picks a note) 🍎
 - [x] O2.5 Tag autocomplete when typing `#`
 - [x] O2.6 Update links on rename: when a note's title changes, rewrite `[[Old]]` → `[[New]]` in other notes (with confirm) 🍎
-- [ ] O2.7 Backlinks with context: show the surrounding line/paragraph for each backlink, not just the title
+- [x] O2.7 Backlinks with context: show the surrounding line/paragraph for each backlink, not just the title
 - [ ] O2.8 Unlinked mentions: notes that contain the title as plain text, with a one-click "link" action
 - [ ] O2.9 Outgoing links panel: links from this note, resolved and unresolved
 - [ ] O2.10 Hover preview: hovering a wiki link shows a popover with the target note's rendered content

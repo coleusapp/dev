@@ -32,6 +32,10 @@ export type Backlink = {
     id: number;
     title: string;
     updated_at_for_humans: string;
+    /**
+     * Up to three lines of the linking note that hold the link, with the link marked.
+     */
+    context: HighlightPart[][];
 };
 
 export type NoteDetailData = NoteData & {

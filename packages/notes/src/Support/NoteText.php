@@ -112,7 +112,7 @@ class NoteText
      * Text cut to $length, starting a little before the match (on a word
      * boundary) when the match would otherwise be far in.
      */
-    private static function clipAround(string $text, ?int $offset, int $length = self::SNIPPET_LENGTH): string
+    public static function clipAround(string $text, ?int $offset, int $length = self::SNIPPET_LENGTH): string
     {
         if ($offset === null || $offset < self::SEARCH_CONTEXT) {
             return Str::limit($text, $length);
