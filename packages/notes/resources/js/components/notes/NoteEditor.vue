@@ -16,7 +16,7 @@ import SlashMenu from '@/components/notes/SlashMenu.vue';
 import TagMenu from '@/components/notes/TagMenu.vue';
 import UnlinkedMentions from '@/components/notes/UnlinkedMentions.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
-import { useAttachmentUpload } from '@/composables/useAttachmentUpload';
+import { useAttachmentUpload, type PendingUpload } from '@/composables/useAttachmentUpload';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useDateMenu, type OpenDateMenu } from '@/composables/useDateMenu';
@@ -869,6 +869,8 @@ const attachFiles = (files: File[]): void => {
 
 const pickFiles = (): void => fileInput.value?.click();
 
+const percent = (pending: PendingUpload): number => Math.round((pending.loaded / Math.max(pending.total, 1)) * 100);
+
 const onSourceDrop = (event: DragEvent): void => {
     if (event.dataTransfer?.files.length) {
         event.preventDefault();
@@ -1414,29 +1416,36 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
         />
         <div
             v-if="uploads.uploading.value || uploads.errors.value.length"
-            class="bg-elevated flex items-start gap-2 rounded-md px-3 py-2 text-xs"
+            class="bg-elevated flex flex-col gap-1.5 rounded-md px-3 py-2 text-xs"
             role="status"
+            aria-label="Uploads"
         >
-            <UiIcon
-                :name="uploads.uploading.value ? 'i-lucide-loader-circle' : 'i-lucide-circle-alert'"
-                class="size-4 shrink-0"
-                :class="uploads.uploading.value ? 'text-dimmed animate-spin' : 'text-error'"
-            />
-            <div class="flex-1">
-                <p v-if="uploads.uploading.value" class="text-muted">
-                    Uploading {{ uploads.uploading.value }} file{{ uploads.uploading.value === 1 ? '' : 's' }}…
-                </p>
-                <p v-for="message in uploads.errors.value" :key="message" class="text-error">{{ message }}</p>
+            <div v-for="pending in uploads.queue.value" :key="pending.id" class="flex items-center gap-2">
+                <UiIcon name="i-lucide-paperclip" class="text-dimmed size-3.5 shrink-0" />
+                <span class="text-muted w-40 shrink-0 truncate" :title="pending.name">{{ pending.name }}</span>
+                <UiProgress
+                    :model-value="pending.started ? percent(pending) : null"
+                    size="xs"
+                    class="flex-1"
+                    :aria-label="`Uploading ${pending.name}`"
+                />
+                <span class="text-dimmed w-12 shrink-0 text-end tabular-nums">{{ pending.started ? `${percent(pending)}%` : 'Waiting' }}</span>
+                <UiButton
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-x"
+                    :aria-label="`Cancel ${pending.name}`"
+                    @click="uploads.cancel(pending.id)"
+                />
             </div>
-            <UiButton
-                v-if="uploads.errors.value.length"
-                size="xs"
-                color="neutral"
-                variant="ghost"
-                icon="i-lucide-x"
-                aria-label="Dismiss"
-                @click="uploads.dismiss"
-            />
+            <div v-if="uploads.errors.value.length" class="flex items-start gap-2">
+                <UiIcon name="i-lucide-circle-alert" class="text-error size-4 shrink-0" />
+                <div class="flex-1">
+                    <p v-for="message in uploads.errors.value" :key="message" class="text-error">{{ message }}</p>
+                </div>
+                <UiButton size="xs" color="neutral" variant="ghost" icon="i-lucide-x" aria-label="Dismiss" @click="uploads.dismiss" />
+            </div>
         </div>
         <FindBar
             v-if="finder.open.value && mode !== 'preview'"

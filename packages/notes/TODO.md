@@ -42,7 +42,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
   - [ ] O3.1d Video processing: poster frame, duration and dimensions, HTTP range requests so playback can seek (queued job) ⚠️ dep (FFmpeg) for poster frames
   - [ ] O3.1e Mobile camera capture: take a photo or record a video straight into the note (`capture` on file inputs)
   - [ ] O3.1f In-browser video recording (camera / screen) into the note, alongside the voice memo in O3.6
-  - [ ] O3.1g Upload progress bar and cancel
+  - [x] O3.1g Upload progress bar and cancel
 - [ ] O3.2 Image embeds `![[image.png]]` with size syntax `![[image.png|300]]` (Apple: small/large size toggle, full-screen viewer) 🍎 📦
 - [x] O3.3 Note transclusion `![[Other note]]`, `![[Note#Heading]]` (rendered inline, loop-safe)
 - [ ] O3.4 PDF, audio and video embeds with inline players/viewer 🍎 📦
