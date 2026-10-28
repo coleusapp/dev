@@ -479,6 +479,7 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
     { label: 'Properties', icon: 'i-lucide-list-tree', to: route('notes.properties.index') },
+    { label: 'Attachments', icon: 'i-lucide-paperclip', to: route('notes.attachments.index') },
     { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
     ...props.smartFolders.map((smart) => ({
         label: `${smart.name} (${smart.count})`,
@@ -803,6 +804,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
             { id: 'go.archive', label: 'Archive', icon: 'i-lucide-archive', run: () => visitList({ view: 'archive' }) },
             { id: 'go.trash', label: 'Trash', icon: 'i-lucide-trash-2', run: () => visitList({ view: 'trash' }) },
             { id: 'go.properties', label: 'Properties', icon: 'i-lucide-list-tree', run: () => router.visit(route('notes.properties.index')) },
+            { id: 'go.attachments', label: 'Attachments', icon: 'i-lucide-paperclip', run: () => router.visit(route('notes.attachments.index')) },
             { id: 'go.settings', label: 'Settings', icon: 'i-lucide-settings', run: () => router.visit(route('notes.settings.edit')) },
             {
                 id: 'go.shortcuts',
@@ -966,6 +968,13 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                         >
                             <UiIcon name="i-lucide-list-tree" class="text-dimmed size-4" />
                             Properties
+                        </Link>
+                        <Link
+                            :href="route('notes.attachments.index')"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+                        >
+                            <UiIcon name="i-lucide-paperclip" class="text-dimmed size-4" />
+                            Attachments
                         </Link>
                         <Link :href="route('notes.settings.edit')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
                             <UiIcon name="i-lucide-settings" class="text-dimmed size-4" />

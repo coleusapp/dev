@@ -7,9 +7,14 @@ use Coleus\Notes\Http\Requests\AttachmentRequest;
 use Coleus\Notes\Models\Attachment;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Services\Attachments;
+use Coleus\Notes\Services\AttachmentUsage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,6 +26,48 @@ class AttachmentController extends Controller
     public function __construct(private readonly Attachments $attachments)
     {
         //
+    }
+
+    /**
+     * The attachment manager (O3.5): every file, grouped by kind, with the
+     * notes that use it.
+     */
+    public function index(AttachmentUsage $usage): InertiaResponse
+    {
+        Gate::authorize('viewAny', Note::class);
+
+        $attachments = Attachment::query()->latest('id')->get();
+        $users = $usage->notesUsing($attachments);
+
+        return Inertia::render('Attachments', [
+            'attachments' => $attachments->map(fn (Attachment $attachment) => [
+                ...$attachment->toClient(),
+                'width' => $attachment->width,
+                'height' => $attachment->height,
+                'duration_ms' => $attachment->duration_ms,
+                'poster' => $attachment->poster_path !== null,
+                'created_at' => $attachment->created_at?->toIso8601String(),
+                'notes' => $users[$attachment->uuid] ?? [],
+            ])->values()->all(),
+            'hasLockedNotes' => Note::query()->withTrashed()->whereNotNull('lock_key_id')->exists(),
+        ]);
+    }
+
+    /**
+     * Deletes an attachment no note uses (files in use are refused, so a
+     * note never loses a picture by accident).
+     */
+    public function destroy(Attachment $attachment, AttachmentUsage $usage): RedirectResponse
+    {
+        Gate::authorize('create', Note::class);
+
+        if (($usage->notesUsing(collect([$attachment]))[$attachment->uuid] ?? []) !== []) {
+            throw ValidationException::withMessages(['attachment' => '“'.$attachment->name.'” is used in a note; remove it there first.']);
+        }
+
+        $usage->delete($attachment);
+
+        return back()->with('status', 'Attachment deleted.');
     }
 
     public function store(AttachmentRequest $request): JsonResponse

@@ -48,7 +48,9 @@ Route::middleware(['web', 'auth'])
         Route::get('/lock-keys/current', [LockKeyController::class, 'current'])->name('lock-keys.current');
         Route::get('/lock-keys/{lockKey}', [LockKeyController::class, 'show'])->name('lock-keys.show')->whereNumber('lockKey');
         Route::post('/lock-keys', [LockKeyController::class, 'store'])->name('lock-keys.store');
+        Route::get('/attachments', [AttachmentController::class, 'index'])->name('attachments.index');
         Route::post('/attachments', [AttachmentController::class, 'store'])->name('attachments.store');
+        Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
         Route::get('/attachments/{attachment}/{name?}', [AttachmentController::class, 'show'])->name('attachments.show')->where('name', '.*');
         Route::get('/lock-keys/{lockKey}/notes', [LockKeyController::class, 'notes'])->name('lock-keys.notes')->whereNumber('lockKey');
         Route::put('/lock-keys/{lockKey}', [LockKeyController::class, 'update'])->name('lock-keys.update')->whereNumber('lockKey');
