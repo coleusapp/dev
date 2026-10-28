@@ -30,6 +30,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/{note}', [NoteController::class, 'show'])->name('show')->whereNumber('note')->withTrashed();
         Route::put('/{note}', [NoteController::class, 'update'])->name('update')->whereNumber('note');
         Route::delete('/{note}', [NoteController::class, 'destroy'])->name('destroy')->whereNumber('note');
+        Route::post('/{note}/duplicate', [NoteController::class, 'duplicate'])->name('duplicate')->whereNumber('note');
         Route::post('/{note}/pin', [PinController::class, 'store'])->name('pin')->whereNumber('note');
         Route::delete('/{note}/pin', [PinController::class, 'destroy'])->name('unpin')->whereNumber('note');
         Route::post('/{note}/archive', [ArchiveController::class, 'store'])->name('archive')->whereNumber('note');

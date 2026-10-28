@@ -66,6 +66,16 @@ class NoteController extends Controller
         return to_route('notes.index', $this->listQuery($request));
     }
 
+    public function duplicate(Request $request, Note $note): RedirectResponse
+    {
+        Gate::authorize('update', $note);
+        Gate::authorize('create', Note::class);
+
+        $copy = Notes::note()->duplicate($note);
+
+        return to_route('notes.show', ['note' => $copy, ...$this->listQuery($request)]);
+    }
+
     /**
      * Keeps the list filters from the query string across a redirect; the
      * page it lands on validates them.

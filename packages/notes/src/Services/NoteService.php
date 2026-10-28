@@ -124,6 +124,22 @@ class NoteService extends Service
     }
 
     /**
+     * A new note with the same text, in the same folder. It's a fresh
+     * note: not pinned, not archived, with its own history and dates;
+     * tags follow from the copied text.
+     */
+    public function duplicate(Note $note): Note
+    {
+        $copy = $this->store(['body' => $note->body]);
+
+        if ($note->folder_id !== null) {
+            Note::withoutTimestamps(fn () => $copy->forceFill(['folder_id' => $note->folder_id])->save());
+        }
+
+        return $copy;
+    }
+
+    /**
      * Pinning is not an edit, so it leaves updated_at (and the list order within pinned notes) alone.
      */
     public function pin(Note $note): void

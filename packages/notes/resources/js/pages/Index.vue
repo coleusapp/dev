@@ -186,6 +186,12 @@ const sortItems = computed<DropdownMenuItem[][]>(() => {
     ];
 });
 
+const duplicateNote = (): void => {
+    if (props.note) {
+        router.post(route('notes.duplicate', { note: props.note.data.id, ...listQuery.value }));
+    }
+};
+
 const folderDialog = ref<FolderDialog | null>(null);
 const deletingFolder = ref<FolderNode | null>(null);
 
@@ -355,6 +361,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                 ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
                 : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
             historyItem(),
+            { label: 'Duplicate', icon: 'i-lucide-copy', onSelect: duplicateNote },
             {
                 label: 'Move to folder…',
                 icon: 'i-lucide-folder-input',
