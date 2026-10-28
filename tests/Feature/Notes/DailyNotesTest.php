@@ -44,3 +44,17 @@ it('validates the date, and keeps users apart', function () {
 
     expect(Note::query()->sole()->title)->toBe('Mine');
 });
+
+it('knows the daily notes before and after a day, skipping gaps and the trash', function () {
+    foreach (['2026-10-20', '2026-10-25', '2026-10-28', '2026-11-02'] as $date) {
+        $this->post(route('notes.daily.store'), ['date' => $date, 'body' => "# {$date}"]);
+    }
+    $ids = Note::query()->orderBy('daily_on')->pluck('id', 'title');
+    Note::query()->find($ids['2026-11-02'])->delete();
+    $plain = Note::factory()->create(['body' => '# Plain']);
+
+    $this->get(route('notes.show', $ids['2026-10-25']))->assertInertia(fn ($page) => $page
+        ->where('note.data.daily', ['date' => '2026-10-25', 'previous' => $ids['2026-10-20'], 'next' => $ids['2026-10-28']]));
+    $this->get(route('notes.show', $ids['2026-10-28']))->assertInertia(fn ($page) => $page->where('note.data.daily.next', null));
+    $this->get(route('notes.show', $plain))->assertInertia(fn ($page) => $page->where('note.data.daily', null));
+});

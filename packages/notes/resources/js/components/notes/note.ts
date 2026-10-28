@@ -59,6 +59,10 @@ export type NoteDetailData = NoteData & {
      * A password-locked note's encrypted text (O12.5); body is empty then.
      */
     lock: { key_id: number; iv: string; ciphertext: string } | null;
+    /**
+     * A daily note's day and its neighbours (O9.1 / O9.2), or null for other notes.
+     */
+    daily: { date: string; previous: number | null; next: number | null } | null;
 };
 
 export type NoteResource = Resource<NoteDetailData>;

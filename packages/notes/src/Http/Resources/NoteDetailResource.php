@@ -29,6 +29,7 @@ class NoteDetailResource extends NoteResource
             'properties' => FrontMatter::parse($this->body),
             'backlinks' => $this->backlinks(),
             'outgoing' => $this->outgoing($resolver),
+            'daily' => $this->daily(),
             'lock' => $this->lock_key_id === null ? null : ['key_id' => $this->lock_key_id, 'iv' => $this->locked_iv, 'ciphertext' => $this->locked_body],
         ];
     }
@@ -51,6 +52,27 @@ class NoteDetailResource extends NoteResource
 
             return ['title' => $title, 'note' => $id === null ? null : ['id' => $id, 'title' => (string) $notes->get($id, $title)]];
         }, $titles);
+    }
+
+    /**
+     * For a daily note (O9.1): its day and the nearest daily notes before
+     * and after it, for stepping through days (O9.2).
+     *
+     * @return array{date: string, previous: int|null, next: int|null}|null
+     */
+    private function daily(): ?array
+    {
+        if ($this->daily_on === null) {
+            return null;
+        }
+
+        $date = $this->daily_on->toDateString();
+
+        return [
+            'date' => $date,
+            'previous' => Note::query()->whereNotNull('daily_on')->whereDate('daily_on', '<', $date)->orderByDesc('daily_on')->value('id'),
+            'next' => Note::query()->whereNotNull('daily_on')->whereDate('daily_on', '>', $date)->orderBy('daily_on')->value('id'),
+        ];
     }
 
     /**

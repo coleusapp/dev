@@ -1230,6 +1230,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                             v-bind="editorProps"
                             @saved="onNoteSaved"
                             @create-linked="(title) => (linkedTitle = title)"
+                            @open-day="openDailyNote"
                         />
                     </KeepAlive>
                     <!-- Locked notes are never kept alive: their text leaves memory when another note opens. -->
@@ -1241,6 +1242,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                         v-bind="editorProps"
                         @saved="onNoteSaved"
                         @create-linked="(title) => (linkedTitle = title)"
+                        @open-day="openDailyNote"
                     />
                     <div v-if="!note" class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.

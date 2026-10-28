@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PaletteCommand } from '@/components/notes/commands';
+import DailyNav from '@/components/notes/DailyNav.vue';
 import DateMenu from '@/components/notes/DateMenu.vue';
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
@@ -94,6 +95,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     saved: [note: NoteDetailData];
     createLinked: [title: string];
+    openDay: [date: Date];
 }>();
 
 const body = ref(props.note.body);
@@ -1464,6 +1466,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
                 />
             </UiTooltip>
         </div>
+        <DailyNav v-if="note.daily" :daily="note.daily" @open-day="(date) => emit('openDay', date)" />
         <PropertiesPanel ref="propertiesPanel" :markdown="body" :readonly="readonly" @update="(markdown) => (body = markdown)" />
         <FormatToolbar
             v-if="mode !== 'preview'"
