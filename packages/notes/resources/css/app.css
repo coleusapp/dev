@@ -230,6 +230,15 @@
     @apply text-primary px-0.5 text-xs;
 }
 
+.note-preview .date-chip,
+.tiptap .date-chip {
+    @apply bg-elevated text-primary rounded px-1 py-0.5 text-xs font-medium whitespace-nowrap;
+}
+
+.note-preview a.date-chip-link {
+    @apply no-underline;
+}
+
 .tiptap .callout-marker {
     @apply bg-elevated text-primary rounded px-1.5 py-0.5 text-xs font-semibold;
 }

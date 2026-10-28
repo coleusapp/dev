@@ -2,6 +2,7 @@
 import type { ChecklistAction, TableAction } from '@/components/notes/note';
 import { checkedToBottomTransaction, deleteCheckedTransaction, setAllCheckedTransaction } from '@/editor/checklists';
 import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
+import { DateMenu, type DateMenuState } from '@/editor/DateChips';
 import { editorExtensions } from '@/editor/extensions';
 import { findState, replaceCurrent, replaceEvery, setFind, stepFind } from '@/editor/Find';
 import { splitFrontMatter } from '@/editor/frontMatter';
@@ -28,6 +29,7 @@ const props = defineProps<{
     onSlashKey?: (key: string) => boolean;
     onLinkKey?: (key: string) => boolean;
     onTagKey?: (key: string) => boolean;
+    onDateKey?: (key: string) => boolean;
     spellcheck?: boolean;
     textDirection?: 'auto' | 'ltr' | 'rtl';
 }>();
@@ -40,6 +42,7 @@ const emit = defineEmits<{
     slash: [state: SlashState | null];
     link: [state: LinkMenuState | null];
     tag: [state: TagMenuState | null];
+    date: [state: DateMenuState | null];
     find: [state: { count: number; current: number }];
     openWikiLink: [title: string, heading: string | null];
     openTag: [tag: string];
@@ -66,6 +69,7 @@ const editor = useEditor({
         SlashMenu.configure({ onState: (state) => emit('slash', state), onKey: (key) => props.onSlashKey?.(key) ?? false }),
         LinkMenu.configure({ onState: (state) => emit('link', state as LinkMenuState | null), onKey: (key) => props.onLinkKey?.(key) ?? false }),
         TagMenu.configure({ onState: (state) => emit('tag', state as TagMenuState | null), onKey: (key) => props.onTagKey?.(key) ?? false }),
+        DateMenu.configure({ onState: (state) => emit('date', state as DateMenuState | null), onKey: (key) => props.onDateKey?.(key) ?? false }),
     ],
     editable: !props.readonly,
     textDirection: props.textDirection ?? 'auto',

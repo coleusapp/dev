@@ -42,4 +42,12 @@ return [
         'interval_minutes' => 5,
         'keep' => 100,
     ],
+
+    /*
+     * Where an "@2026-10-28" date chip in a note links to, with {date} as
+     * YYYY-MM-DD, e.g. a calendar day view. Null: chips don't link.
+     *
+     * Default: null
+     */
+    'calendar_url' => env('NOTES_CALENDAR_URL'),
 ];

@@ -197,7 +197,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] A13.1 Undo/redo history that survives switching notes in a session
 
 ## B5. Date chips (Box Notes)
-- [ ] B5.4 Date chips: insert a date (`@today`, date picker) rendered as a chip, clickable to the Calendar app
+- [x] B5.4 Date chips: insert a date (`@today`, date picker) rendered as a chip, clickable to the Calendar app
 
 ## B6. Embeds and integrations (Box Notes)
 - [ ] B6.1 Smart embeds via an oEmbed allow-list: YouTube, Vimeo, Loom, Figma, Miro, Google Maps, rendered in sandboxed iframes 🧩

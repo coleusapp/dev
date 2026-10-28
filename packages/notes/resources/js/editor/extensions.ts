@@ -1,6 +1,7 @@
 import { AutoPair } from '@/editor/AutoPair';
 import { CalloutMarker } from '@/editor/CalloutMarker';
 import { CheckedToBottom } from '@/editor/checklists';
+import { DateChips } from '@/editor/DateChips';
 import { Find } from '@/editor/Find';
 import { Folding } from '@/editor/Folding';
 import { FootnoteDefinition, FootnoteMarker } from '@/editor/FootnoteMarker';
@@ -54,6 +55,7 @@ export const editorExtensions = ({
     FootnoteMarker,
     FootnoteDefinition,
     Hashtags,
+    DateChips,
     Placeholder.configure({ placeholder }),
     CheckedToBottom.configure({ enabled: checkedToBottom }),
     AutoPair,

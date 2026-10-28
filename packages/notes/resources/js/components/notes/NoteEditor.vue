@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PaletteCommand } from '@/components/notes/commands';
+import DateMenu from '@/components/notes/DateMenu.vue';
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import HighlightedText from '@/components/notes/HighlightedText.vue';
@@ -17,12 +18,14 @@ import UnlinkedMentions from '@/components/notes/UnlinkedMentions.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
+import { useDateMenu, type OpenDateMenu } from '@/composables/useDateMenu';
 import { useFindReplace } from '@/composables/useFindReplace';
 import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
 import { useLinkPreview } from '@/composables/useLinkPreview';
 import { usePreviewFolding } from '@/composables/usePreviewFolding';
 import { useRelink } from '@/composables/useRelink';
 import { useTagMenu, type OpenTagMenu } from '@/composables/useTagMenu';
+import type { DateMenuState } from '@/editor/DateChips';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
 import type { LinkMenuState } from '@/editor/LinkMenu';
 import { linkQuery } from '@/editor/linkQuery';
@@ -32,6 +35,7 @@ import type { TagMenuState } from '@/editor/TagMenu';
 import { tagQuery } from '@/editor/tagQuery';
 import { autoPair, deletePair } from '@/lib/autoPair';
 import { textareaCaretPosition } from '@/lib/caret';
+import { dateQuery } from '@/lib/dates';
 import { jsonHeaders } from '@/lib/http';
 import {
     applyEdit,
@@ -603,10 +607,59 @@ const detectSourceTag = (): void => {
     tagMenu.show({ source: true, query: found.query, range: { from, to: cursor }, position: textareaCaretPosition(area, from) });
 };
 
+/**
+ * Date suggestions: "@…" offers today, tomorrow, weekdays (composables/useDateMenu.ts).
+ */
+const dateMenu = useDateMenu({
+    insert: (open: OpenDateMenu, text: string) => {
+        if (!open.source) {
+            visual.value?.replaceRange(open.range, text);
+
+            return;
+        }
+
+        editSource(() => ({
+            from: open.range.from,
+            to: open.range.to,
+            insert: text,
+            selectionStart: open.range.from + text.length,
+            selectionEnd: open.range.from + text.length,
+        }));
+    },
+});
+let sourceDateDismissedAt: number | null = null;
+
+const onVisualDate = (state: DateMenuState | null): void => {
+    dateMenu.show(state ? { source: false, query: state.query, range: state.range, position: state.position } : null);
+};
+
+const detectSourceDate = (): void => {
+    const area = textarea.value;
+
+    if (!area || area.selectionStart !== area.selectionEnd) {
+        dateMenu.show(null);
+        return;
+    }
+
+    const cursor = area.selectionStart;
+    const lineStart = area.value.lastIndexOf('\n', cursor - 1) + 1;
+    const found = dateQuery(area.value.slice(lineStart, cursor));
+    const from = found ? cursor - found.before : null;
+
+    if (!found || from === null || from === sourceDateDismissedAt) {
+        sourceDateDismissedAt = found ? sourceDateDismissedAt : null;
+        dateMenu.show(null);
+        return;
+    }
+
+    dateMenu.show({ source: true, query: found.query, range: { from, to: cursor }, position: textareaCaretPosition(area, from) });
+};
+
 const detectSourceMenus = (): void => {
     detectSourceSlash();
     detectSourceLink();
     detectSourceTag();
+    detectSourceDate();
 };
 
 const closeSourceMenus = (): void => {
@@ -618,6 +671,10 @@ const closeSourceMenus = (): void => {
 
     if (tagMenu.open.value?.source) {
         tagMenu.show(null);
+    }
+
+    if (dateMenu.open.value?.source) {
+        dateMenu.show(null);
     }
 };
 
@@ -985,6 +1042,18 @@ const onKeydown = (event: KeyboardEvent): void => {
         return;
     }
 
+    if (dateMenu.open.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
+        if (event.key === 'Escape') {
+            sourceDateDismissedAt = dateMenu.open.value.range.from;
+        }
+
+        if (dateMenu.handleKey(event.key)) {
+            event.preventDefault();
+
+            return;
+        }
+    }
+
     if (tagMenu.open.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
         if (event.key === 'Escape') {
             sourceTagDismissedAt = tagMenu.open.value.range.from;
@@ -1299,12 +1368,21 @@ defineExpose({ paletteCommands });
                 :on-link-key="linkMenu.handleKey"
                 @tag="onVisualTag"
                 :on-tag-key="tagMenu.handleKey"
+                @date="onVisualDate"
+                :on-date-key="dateMenu.handleKey"
                 @find="(state) => (finder.visualState.value = state)"
                 :on-slash-key="handleSlashKey"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
             />
             <SlashMenu v-if="slash" :commands="slashCommands" :selected="slashSelected" :position="slash.position" @choose="chooseSlash" />
+            <DateMenu
+                v-if="dateMenu.open.value"
+                :choices="dateMenu.choices.value"
+                :selected="dateMenu.selected.value"
+                :position="dateMenu.open.value.position"
+                @choose="dateMenu.choose"
+            />
             <TagMenu
                 v-if="tagMenu.open.value"
                 :choices="tagMenu.choices.value"
