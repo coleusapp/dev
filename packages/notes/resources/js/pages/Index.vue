@@ -38,6 +38,7 @@ import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import { useNoteHistory } from '@/composables/useNoteHistory';
+import { useSearchScope } from '@/composables/useSearchScope';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
@@ -450,6 +451,12 @@ const listTitle = computed(() => {
         .join(' · ');
 
     return narrowing ? `${base === 'Notes' ? '' : `${base} · `}${narrowing}` : base;
+});
+
+const searchScope = useSearchScope({
+    filters: () => props.filters,
+    listTitle: () => listTitle.value,
+    url: () => (props.note ? route('notes.show', { note: props.note.data.id }) : route('notes.index')),
 });
 
 const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);
@@ -899,6 +906,27 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                             <SearchTips v-else @insert="insertSearchOperator" />
                         </template>
                     </UiInput>
+                    <div v-if="searchScope.label.value" class="mb-2 flex gap-1" role="group" aria-label="Search in">
+                        <UiButton
+                            size="xs"
+                            color="neutral"
+                            :variant="searchScope.narrowed.value ? 'soft' : 'ghost'"
+                            :aria-pressed="searchScope.narrowed.value"
+                            class="min-w-0"
+                            :ui="{ label: 'truncate' }"
+                            @click="searchScope.searchInScope"
+                            >{{ searchScope.label.value }}</UiButton
+                        >
+                        <UiButton
+                            size="xs"
+                            color="neutral"
+                            :variant="searchScope.narrowed.value ? 'ghost' : 'soft'"
+                            :aria-pressed="!searchScope.narrowed.value"
+                            class="shrink-0"
+                            @click="searchScope.searchEverywhere"
+                            >All notes</UiButton
+                        >
+                    </div>
                     <NoteList
                         :notes="listedNotes"
                         :selected-id="note?.data.id ?? null"
