@@ -44,6 +44,36 @@ class FrontMatter
     }
 
     /**
+     * Renames a top-level property key in the front matter (matched
+     * case-insensitively), leaving its value and the rest untouched. The
+     * body comes back unchanged when the key isn't there or the new name is
+     * already used by another property.
+     */
+    public static function renameKey(string $body, string $from, string $to): string
+    {
+        [$block, $rest] = self::split($body);
+        $properties = self::parse($body);
+
+        if ($block === '' || $properties === null) {
+            return $body;
+        }
+
+        $keys = array_map(mb_strtolower(...), array_keys($properties));
+
+        if (! in_array(mb_strtolower($from), $keys, true) || (mb_strtolower($to) !== mb_strtolower($from) && in_array(mb_strtolower($to), $keys, true))) {
+            return $body;
+        }
+
+        $renamed = preg_replace_callback(
+            '/^'.preg_quote($from, '/').'(?=\s*:)/mi',
+            fn () => $to,
+            $block,
+        );
+
+        return ($renamed ?? $block).$rest;
+    }
+
+    /**
      * The properties in the front matter, or [] when there is none, or
      * null when it uses YAML this parser doesn't read.
      *

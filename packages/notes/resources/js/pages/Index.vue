@@ -351,6 +351,7 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'Recents', icon: 'i-lucide-clock', to: route('notes.index', filterQuery({ view: 'recent' })) },
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
+    { label: 'Properties', icon: 'i-lucide-list-tree', to: route('notes.properties.index') },
     { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
     ...props.smartFolders.map((smart) => ({
         label: `${smart.name} (${smart.count})`,
@@ -603,6 +604,13 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             <UiIcon name="i-lucide-trash-2" class="text-dimmed size-4" />
                             Trash
                             <span class="text-dimmed ms-auto text-xs">{{ counts.trash }}</span>
+                        </Link>
+                        <Link
+                            :href="route('notes.properties.index')"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+                        >
+                            <UiIcon name="i-lucide-list-tree" class="text-dimmed size-4" />
+                            Properties
                         </Link>
                         <Link :href="route('notes.settings.edit')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
                             <UiIcon name="i-lucide-settings" class="text-dimmed size-4" />

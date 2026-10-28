@@ -6,6 +6,7 @@ use Coleus\Notes\Database\Factories\NoteFactory;
 use Coleus\Notes\NotesModelDefaults;
 use Coleus\Notes\Search\NoteSearch;
 use Coleus\Notes\Services\NoteAliases;
+use Coleus\Notes\Services\NoteProperties;
 use Coleus\Notes\Services\NoteTags;
 use Coleus\Notes\Services\NoteVersions;
 use Coleus\Notes\Support\NoteText;
@@ -84,6 +85,7 @@ class Note extends NotesModelDefaults
             if ($note->wasRecentlyCreated || $note->wasChanged('body')) {
                 NoteTags::sync($note);
                 NoteAliases::sync($note);
+                NoteProperties::sync($note);
                 NoteVersions::record($note);
             }
         });
@@ -103,6 +105,14 @@ class Note extends NotesModelDefaults
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, config('notes.table_prefix').'note_tag');
+    }
+
+    /**
+     * @return HasMany<NoteProperty, $this>
+     */
+    public function properties(): HasMany
+    {
+        return $this->hasMany(NoteProperty::class);
     }
 
     /**

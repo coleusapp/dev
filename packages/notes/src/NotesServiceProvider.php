@@ -3,6 +3,7 @@
 namespace Coleus\Notes;
 
 use Coleus\Notes\Commands\PurgeTrashCommand;
+use Coleus\Notes\Commands\ReindexCommand;
 use Coleus\Notes\Http\Middleware\HandleInertiaRequests;
 use Coleus\Notes\Models\App as NotesApp;
 use Coleus\Notes\Models\Note;
@@ -23,6 +24,7 @@ class NotesServiceProvider extends PackageServiceProvider
             ->runsMigrations()
             ->hasCommands([
                 PurgeTrashCommand::class,
+                ReindexCommand::class,
             ])
             ->hasRoute('web')
             ->hasAssets()

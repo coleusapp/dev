@@ -7,6 +7,7 @@ use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
+use Coleus\Notes\Http\Controllers\PropertyController;
 use Coleus\Notes\Http\Controllers\SettingsController;
 use Coleus\Notes\Http\Controllers\SmartFolderController;
 use Coleus\Notes\Http\Controllers\SortController;
@@ -25,6 +26,8 @@ Route::middleware(['web', 'auth'])
         Route::put('/folders/{folder}', [FolderController::class, 'update'])->name('folders.update')->whereNumber('folder');
         Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy')->whereNumber('folder');
         Route::put('/{note}/folder', [FolderController::class, 'moveNote'])->name('folder.move')->whereNumber('note');
+        Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+        Route::put('/properties', [PropertyController::class, 'rename'])->name('properties.rename');
         Route::put('/sort', [SortController::class, 'update'])->name('sort.update');
         Route::post('/smart-folders', [SmartFolderController::class, 'store'])->name('smart-folders.store');
         Route::put('/smart-folders/{smartFolder}', [SmartFolderController::class, 'update'])->name('smart-folders.update')->whereNumber('smartFolder');

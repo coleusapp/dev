@@ -77,7 +77,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O6.1 YAML front matter parsed and hidden from preview/title/snippet
 - [x] O6.2 Properties panel: typed fields (text, list, number, checkbox, date, datetime) editable in UI, written back to YAML (Box: metadata templates on notes) 📦
 - [x] O6.3 Special properties: `tags` (merged with #tags), `aliases` (used by link resolution/autocomplete)
-- [ ] O6.4 All-properties view: every property used across notes with counts; rename a property everywhere
+- [x] O6.4 All-properties view: every property used across notes with counts; rename a property everywhere
 - [ ] O6.5 Search/filter by property values
 
 ## O7. Search and navigation
