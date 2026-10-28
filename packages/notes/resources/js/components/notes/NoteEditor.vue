@@ -12,6 +12,7 @@ import PropertiesPanel from '@/components/notes/PropertiesPanel.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
 import TagMenu from '@/components/notes/TagMenu.vue';
+import UnlinkedMentions from '@/components/notes/UnlinkedMentions.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
@@ -144,7 +145,22 @@ onActivated(() => {
  */
 const relink = useRelink({ noteId: () => props.note.id, title: () => savedTitle.value });
 
+const unlinkedMentions = useTemplateRef<InstanceType<typeof UnlinkedMentions>>('unlinkedMentions');
+
+/**
+ * Backlinks change when another note gains a link here (e.g. linking an
+ * unlinked mention reloads the note), not only when this one is saved.
+ */
+watch(
+    () => props.note.backlinks,
+    (next) => (backlinks.value = next),
+);
+
 const onServerSave = (note: NoteDetailData): void => {
+    if (note.title !== savedTitle.value) {
+        unlinkedMentions.value?.reset();
+    }
+
     updatedAt.value = note.updated_at;
     savedTitle.value = note.title;
     void relink.check();
@@ -1348,6 +1364,7 @@ defineExpose({ paletteCommands });
                 </li>
             </ul>
         </details>
+        <UnlinkedMentions v-if="!readonly" ref="unlinkedMentions" :note-id="note.id" />
         <div class="flex items-center justify-between gap-2">
             <p v-if="readonly" class="text-dimmed flex items-center gap-1 text-xs">
                 <UiIcon name="i-lucide-trash-2" class="size-3" />

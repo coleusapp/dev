@@ -5,6 +5,7 @@ use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
+use Coleus\Notes\Http\Controllers\MentionController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
 use Coleus\Notes\Http\Controllers\PropertyController;
@@ -45,6 +46,8 @@ Route::middleware(['web', 'auth'])
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');
         Route::post('/{note}/relink', [RelinkController::class, 'store'])->name('relink.store')->whereNumber('note');
+        Route::get('/{note}/mentions', [MentionController::class, 'index'])->name('mentions.index')->whereNumber('note');
+        Route::post('/{note}/mentions/{source}', [MentionController::class, 'store'])->name('mentions.store')->whereNumber(['note', 'source']);
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::get('/{note}', [NoteController::class, 'show'])->name('show')->whereNumber('note')->withTrashed();
         Route::put('/{note}', [NoteController::class, 'update'])->name('update')->whereNumber('note');
