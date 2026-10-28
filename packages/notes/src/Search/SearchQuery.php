@@ -21,9 +21,10 @@ use Illuminate\Support\Collection;
  *   task-todo:call           …an unticked one (task-todo: alone: any open item)
  *   task-done:call           …a ticked one
  *   has:checklist            any checklist item (same as "task:" alone)
- *   has:tags  has:links  has:properties  has:locked
+ *   has:tags  has:links  has:properties  has:locked  has:attachments
  *                            any #tag / any [[wiki link]] or [link](url) /
- *                            any front matter property / password-locked;
+ *                            any front matter property / password-locked /
+ *                            an attached file (by link or ![[file.ext]]);
  *                            other has: values
  *                            match nothing
  *
@@ -42,7 +43,7 @@ final class SearchQuery
     /**
      * The has: values understood (A10.1's suggested searches).
      */
-    public const array HAS = ['checklist', 'tags', 'links', 'properties', 'locked'];
+    public const array HAS = ['checklist', 'tags', 'links', 'properties', 'locked', 'attachments'];
 
     /**
      * @param  list<string>  $words
@@ -144,6 +145,13 @@ final class SearchQuery
                 'tags' => $query->whereHas('tags'),
                 'properties' => $query->whereHas('properties'),
                 'locked' => $query->whereNotNull('lock_key_id'),
+                'attachments' => $query->where(function (Builder $files) {
+                    $files->where('body', 'like', '%/notes/attachments/%');
+
+                    foreach (['png', 'jpg', 'jpeg', 'gif', 'webp', 'heic', 'svg', 'mp4', 'webm', 'mov', 'mp3', 'm4a', 'wav', 'weba', 'pdf'] as $ending) {
+                        $files->orWhereRaw('lower(body) like ?', ['%![[%.'.$ending.']]%'])->orWhereRaw('lower(body) like ?', ['%![[%.'.$ending.'|%']);
+                    }
+                }),
                 'links' => $query->where(fn (Builder $links) => $links->where('body', 'like', '%[[%')->orWhere('body', 'like', '%](%')),
                 default => $query->whereRaw('1 = 0'),
             };

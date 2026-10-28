@@ -128,6 +128,7 @@ export const SUGGESTED_SEARCHES: { label: string; query: string; icon: string }[
     { label: 'Notes with links', query: 'has:links', icon: 'i-lucide-link' },
     { label: 'Notes with properties', query: 'has:properties', icon: 'i-lucide-list-tree' },
     { label: 'Locked notes', query: 'has:locked', icon: 'i-lucide-lock' },
+    { label: 'Notes with attachments', query: 'has:attachments', icon: 'i-lucide-paperclip' },
 ];
 
 /**

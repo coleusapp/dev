@@ -128,3 +128,11 @@ it('finds notes that have checklists, tags, links or properties', function () {
         ->and(searchIds('has:drawings'))->toBe([])
         ->and(SearchQuery::parse('has:checklist has:tags')->tasks)->toBe([['state' => 'any', 'text' => '']]);
 });
+
+it('finds notes with attachments, linked or embedded', function () {
+    $linked = Note::factory()->create(['body' => "# A\n![photo](/notes/attachments/0b7b9c1e-1f2a-4c3d-9e8f-123456789abc/photo.png)"]);
+    $embedded = Note::factory()->create(['body' => "# B\n![[Clip.MP4|640]]"]);
+    Note::factory()->create(['body' => "# C\n![[Other note]] and https://x.test/a.png"]);
+
+    expect(searchIds('has:attachments'))->toBe([$linked->id, $embedded->id]);
+});
