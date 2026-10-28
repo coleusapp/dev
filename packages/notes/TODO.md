@@ -168,7 +168,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## A7. Security (Apple Notes)
 - [x] A7.1 Notes password management: set, change, reset (reset only affects future locks), password hint
-- [ ] A7.3 Locked notes are left out of search content, snippets, backlinks and exports until unlocked
+- [x] A7.3 Locked notes are left out of search content, snippets, backlinks and exports until unlocked
 
 ## A8. Copy as (Apple Notes)
 - [ ] A8.6 Copy a note as Markdown / plain text / HTML

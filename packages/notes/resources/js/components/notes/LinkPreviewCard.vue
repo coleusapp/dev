@@ -41,7 +41,11 @@ defineEmits<{
             class="border-default hover:bg-elevated truncate border-b px-3 py-2 text-xs font-semibold"
             >{{ preview.title || 'Untitled note' }}</Link
         >
+        <p v-if="preview.locked" class="text-dimmed flex items-center gap-1 px-3 py-2 text-xs">
+            <UiIcon name="i-lucide-lock" class="size-3" />
+            This note is locked.
+        </p>
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div ref="body" class="note-preview pointer-events-none overflow-y-auto px-3 py-2" v-html="preview.html" />
+        <div v-else ref="body" class="note-preview pointer-events-none overflow-y-auto px-3 py-2" v-html="preview.html" />
     </div>
 </template>

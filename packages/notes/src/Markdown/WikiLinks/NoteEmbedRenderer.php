@@ -65,6 +65,13 @@ class NoteEmbedRenderer implements NodeRendererInterface
             return new HtmlElement('p', ['class' => 'note-embed-skipped'], $title);
         }
 
+        if ($note->isLocked()) {
+            return new HtmlElement('div', ['class' => 'note-embed', 'data-embed-id' => (string) $note->id], [
+                new HtmlElement('div', ['class' => 'note-embed-title'], $title),
+                new HtmlElement('div', ['class' => 'note-embed-body'], new HtmlElement('p', ['class' => 'note-embed-missing'], 'This note is locked.')),
+            ]);
+        }
+
         $body = $node->heading === null ? $note->body : WikiLinks::section($note->body, $node->heading);
         $content = $body === null
             ? new HtmlElement('p', ['class' => 'note-embed-missing'], 'No heading “'.Xml::escape($node->heading ?? '').'” in this note.')

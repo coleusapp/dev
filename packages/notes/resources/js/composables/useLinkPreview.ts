@@ -1,7 +1,7 @@
 import { jsonHeaders } from '@/lib/http';
 import { ref } from 'vue';
 
-export type LinkPreview = { id: number; title: string; html: string };
+export type LinkPreview = { id: number; title: string; html: string; locked?: boolean };
 
 export type OpenLinkPreview = LinkPreview & { left: number; top: number };
 

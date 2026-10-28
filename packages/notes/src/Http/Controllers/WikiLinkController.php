@@ -52,7 +52,8 @@ class WikiLinkController extends Controller
             'data' => $note === null ? null : [
                 'id' => $note->id,
                 'title' => $note->title,
-                'html' => NoteMarkdown::toHtml($note->body, WikiLinkResolver::forBody($note->body, $note->id)),
+                'locked' => $note->isLocked(),
+                'html' => $note->isLocked() ? '' : NoteMarkdown::toHtml($note->body, WikiLinkResolver::forBody($note->body, $note->id)),
             ],
         ]);
     }
