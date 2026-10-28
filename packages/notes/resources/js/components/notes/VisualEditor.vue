@@ -9,6 +9,7 @@ import { LinkMenu, type LinkMenuState } from '@/editor/LinkMenu';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
 import { todayIso, type SlashCommand } from '@/editor/slashCommands';
 import { SlashMenu, type SlashState } from '@/editor/SlashMenu';
+import { TagMenu, type TagMenuState } from '@/editor/TagMenu';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
 import type { EditorState, Transaction } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
@@ -26,6 +27,7 @@ const props = defineProps<{
     checkedToBottom?: boolean;
     onSlashKey?: (key: string) => boolean;
     onLinkKey?: (key: string) => boolean;
+    onTagKey?: (key: string) => boolean;
     spellcheck?: boolean;
     textDirection?: 'auto' | 'ltr' | 'rtl';
 }>();
@@ -37,6 +39,7 @@ const emit = defineEmits<{
     inTable: [inTable: boolean];
     slash: [state: SlashState | null];
     link: [state: LinkMenuState | null];
+    tag: [state: TagMenuState | null];
     find: [state: { count: number; current: number }];
     openWikiLink: [title: string, heading: string | null];
     openTag: [tag: string];
@@ -61,7 +64,8 @@ const editor = useEditor({
     extensions: [
         ...editorExtensions({ checkedToBottom: () => props.checkedToBottom ?? false }),
         SlashMenu.configure({ onState: (state) => emit('slash', state), onKey: (key) => props.onSlashKey?.(key) ?? false }),
-        LinkMenu.configure({ onState: (state) => emit('link', state), onKey: (key) => props.onLinkKey?.(key) ?? false }),
+        LinkMenu.configure({ onState: (state) => emit('link', state as LinkMenuState | null), onKey: (key) => props.onLinkKey?.(key) ?? false }),
+        TagMenu.configure({ onState: (state) => emit('tag', state as TagMenuState | null), onKey: (key) => props.onTagKey?.(key) ?? false }),
     ],
     editable: !props.readonly,
     textDirection: props.textDirection ?? 'auto',
@@ -353,6 +357,13 @@ const insertWikiLink = (range: { from: number; to: number }, link: string): void
         .run();
 };
 
+/**
+ * Replaces a range with plain text (a chosen #tag).
+ */
+const replaceRange = (range: { from: number; to: number }, text: string): void => {
+    editor.value?.chain().focus().insertContentAt(range, text).run();
+};
+
 const insertText = (text: string): void => {
     editor.value?.chain().focus().insertContent(text).run();
 };
@@ -397,6 +408,7 @@ defineExpose({
     tableAction,
     runSlash,
     insertWikiLink,
+    replaceRange,
     insertText,
     find,
     setLink,

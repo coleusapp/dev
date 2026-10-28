@@ -10,17 +10,21 @@ import OutlinePanel from '@/components/notes/OutlinePanel.vue';
 import PropertiesPanel from '@/components/notes/PropertiesPanel.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
+import TagMenu from '@/components/notes/TagMenu.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useFindReplace } from '@/composables/useFindReplace';
 import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
 import { usePreviewFolding } from '@/composables/usePreviewFolding';
+import { useTagMenu, type OpenTagMenu } from '@/composables/useTagMenu';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
 import type { LinkMenuState } from '@/editor/LinkMenu';
 import { linkQuery } from '@/editor/linkQuery';
 import { filterSlashCommands, slashQuery, todayIso, type SlashCommand } from '@/editor/slashCommands';
 import type { SlashState } from '@/editor/SlashMenu';
+import type { TagMenuState } from '@/editor/TagMenu';
+import { tagQuery } from '@/editor/tagQuery';
 import { autoPair, deletePair } from '@/lib/autoPair';
 import { textareaCaretPosition } from '@/lib/caret';
 import { jsonHeaders } from '@/lib/http';
@@ -59,6 +63,7 @@ const props = defineProps<{
     textDirection?: 'auto' | 'ltr' | 'rtl';
     readableWidth?: boolean;
     focusHeading?: string | null;
+    tags?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -510,9 +515,59 @@ const detectSourceLink = (): void => {
     });
 };
 
+/**
+ * Tag autocomplete: "#…" suggests the user's tags (composables/useTagMenu.ts).
+ */
+const tagMenu = useTagMenu({
+    tags: () => props.tags ?? [],
+    insert: (open: OpenTagMenu, text: string) => {
+        if (!open.source) {
+            visual.value?.replaceRange(open.range, text);
+
+            return;
+        }
+
+        editSource(() => ({
+            from: open.range.from,
+            to: open.range.to,
+            insert: text,
+            selectionStart: open.range.from + text.length,
+            selectionEnd: open.range.from + text.length,
+        }));
+    },
+});
+let sourceTagDismissedAt: number | null = null;
+
+const onVisualTag = (state: TagMenuState | null): void => {
+    tagMenu.show(state ? { source: false, query: state.query, range: state.range, position: state.position } : null);
+};
+
+const detectSourceTag = (): void => {
+    const area = textarea.value;
+
+    if (!area || area.selectionStart !== area.selectionEnd) {
+        tagMenu.show(null);
+        return;
+    }
+
+    const cursor = area.selectionStart;
+    const lineStart = area.value.lastIndexOf('\n', cursor - 1) + 1;
+    const found = tagQuery(area.value.slice(lineStart, cursor));
+    const from = found ? cursor - found.before : null;
+
+    if (!found || from === null || from === sourceTagDismissedAt) {
+        sourceTagDismissedAt = found ? sourceTagDismissedAt : null;
+        tagMenu.show(null);
+        return;
+    }
+
+    tagMenu.show({ source: true, query: found.query, range: { from, to: cursor }, position: textareaCaretPosition(area, from) });
+};
+
 const detectSourceMenus = (): void => {
     detectSourceSlash();
     detectSourceLink();
+    detectSourceTag();
 };
 
 const closeSourceMenus = (): void => {
@@ -520,6 +575,10 @@ const closeSourceMenus = (): void => {
 
     if (linkMenu.open.value?.source) {
         linkMenu.show(null);
+    }
+
+    if (tagMenu.open.value?.source) {
+        tagMenu.show(null);
     }
 };
 
@@ -884,6 +943,18 @@ const onKeydown = (event: KeyboardEvent): void => {
         return;
     }
 
+    if (tagMenu.open.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
+        if (event.key === 'Escape') {
+            sourceTagDismissedAt = tagMenu.open.value.range.from;
+        }
+
+        if (tagMenu.handleKey(event.key)) {
+            event.preventDefault();
+
+            return;
+        }
+    }
+
     if (slash.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
         if (handleSlashKey(event.key)) {
             event.preventDefault();
@@ -1170,12 +1241,21 @@ defineExpose({ paletteCommands });
                 @slash="onVisualSlash"
                 @link="onVisualLink"
                 :on-link-key="linkMenu.handleKey"
+                @tag="onVisualTag"
+                :on-tag-key="tagMenu.handleKey"
                 @find="(state) => (finder.visualState.value = state)"
                 :on-slash-key="handleSlashKey"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
             />
             <SlashMenu v-if="slash" :commands="slashCommands" :selected="slashSelected" :position="slash.position" @choose="chooseSlash" />
+            <TagMenu
+                v-if="tagMenu.open.value"
+                :choices="tagMenu.choices.value"
+                :selected="tagMenu.selected.value"
+                :position="tagMenu.open.value.position"
+                @choose="tagMenu.choose"
+            />
             <LinkMenu
                 v-if="linkMenu.open.value"
                 :choices="linkMenu.choices.value"

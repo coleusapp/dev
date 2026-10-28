@@ -51,6 +51,11 @@ describe('link menu trigger', () => {
         editor.commands.setTextSelection(2);
         typeText('[[x');
         expect(state).toBeNull();
+
+        loadMarkdown(editor, 'see `a b` there');
+        editor.commands.setTextSelection(7);
+        typeText('[[x');
+        expect(state).toBeNull();
     });
 
     it('closes on Escape until the trigger is retyped, and routes keys while open', () => {

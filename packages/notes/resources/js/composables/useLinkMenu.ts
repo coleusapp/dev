@@ -1,4 +1,5 @@
 import type { HighlightPart } from '@/components/notes/note';
+import { useMenuKeys } from '@/composables/useMenuKeys';
 import { splitLinkQuery, type LinkTrigger } from '@/editor/linkQuery';
 import { fuzzyRank, highlightPositions } from '@/lib/fuzzy';
 import { jsonHeaders } from '@/lib/http';
@@ -38,7 +39,6 @@ export const useLinkMenu = (options: {
     insert: (open: OpenLinkMenu, link: string) => void;
 }) => {
     const open = ref<OpenLinkMenu | null>(null);
-    const selected = ref(0);
     const notes = ref<SwitcherNote[]>([]);
     const headings = ref(new Map<number, string[]>());
 
@@ -117,8 +117,6 @@ export const useLinkMenu = (options: {
         return exists ? found : [...found, { key: 'new', kind: 'new', link: note, parts: [{ text: note, match: false }], hint: 'New note' }];
     });
 
-    watch(choices, () => (selected.value = 0));
-
     /**
      * Headings are fetched as soon as "Note#" names a note.
      */
@@ -154,31 +152,7 @@ export const useLinkMenu = (options: {
         options.insert(current, choice.link);
     };
 
-    /**
-     * Arrow keys move, Enter/Tab choose, Escape closes. Returns whether the
-     * key was used.
-     */
-    const handleKey = (key: string): boolean => {
-        const count = choices.value.length;
-
-        if (!open.value) {
-            return false;
-        }
-
-        if (key === 'Escape') {
-            open.value = null;
-        } else if (key === 'ArrowDown' && count) {
-            selected.value = (selected.value + 1) % count;
-        } else if (key === 'ArrowUp' && count) {
-            selected.value = (selected.value - 1 + count) % count;
-        } else if ((key === 'Enter' || key === 'Tab') && count) {
-            choose(choices.value[selected.value]);
-        } else {
-            return false;
-        }
-
-        return true;
-    };
+    const { selected, handleKey } = useMenuKeys(choices, { isOpen: () => open.value !== null, choose, close: () => (open.value = null) });
 
     return { open, selected, choices, show, choose, handleKey };
 };

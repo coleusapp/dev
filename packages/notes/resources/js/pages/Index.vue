@@ -462,6 +462,11 @@ const searchScope = useSearchScope({
 
 const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);
 
+/**
+ * Every tag's full path, for tag autocomplete in the editor.
+ */
+const tagPaths = computed(() => flattenTags(props.tags).map((tag) => tag.path));
+
 const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ q: props.filters.q })) },
     { label: 'Recents', icon: 'i-lucide-clock', to: route('notes.index', filterQuery({ view: 'recent' })) },
@@ -1009,6 +1014,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                             :text-direction="preferences['editor.text_direction']"
                             :readable-width="preferences['editor.readable_width']"
                             :focus-heading="focusHeading"
+                            :tags="tagPaths"
                             @saved="onNoteSaved"
                             @create-linked="(title) => (linkedTitle = title)"
                         />
