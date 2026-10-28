@@ -7,6 +7,7 @@ use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\LayoutController;
+use Coleus\Notes\Http\Controllers\LinkPreviewController;
 use Coleus\Notes\Http\Controllers\LockKeyController;
 use Coleus\Notes\Http\Controllers\MentionController;
 use Coleus\Notes\Http\Controllers\NoteController;
@@ -59,6 +60,7 @@ Route::middleware(['web', 'auth'])
         Route::patch('/lock-keys/{lockKey}/hint', [LockKeyController::class, 'hint'])->name('lock-keys.hint')->whereNumber('lockKey');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::get('/links/preview', [WikiLinkController::class, 'preview'])->name('links.preview');
+        Route::get('/link-preview', [LinkPreviewController::class, 'show'])->name('link-preview')->middleware('throttle:60,1');
         Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');

@@ -116,6 +116,30 @@
     @apply border-default mb-2 h-[36rem] w-full rounded-md border;
 }
 
+.note-preview a.link-card {
+    @apply border-default hover:bg-elevated mb-2 flex max-w-xl overflow-hidden rounded-md border no-underline;
+}
+
+.note-preview .link-card-image {
+    @apply m-0 h-24 w-32 shrink-0 cursor-pointer rounded-none object-cover;
+}
+
+.note-preview .link-card-text {
+    @apply flex min-w-0 flex-col gap-0.5 p-2;
+}
+
+.note-preview .link-card-title {
+    @apply text-default truncate text-sm font-semibold;
+}
+
+.note-preview .link-card-description {
+    @apply text-muted line-clamp-2 text-xs;
+}
+
+.note-preview .link-card-site {
+    @apply text-dimmed text-xs;
+}
+
 .note-preview .attachment-missing {
     @apply text-muted rounded border border-dashed px-1 text-xs;
 }

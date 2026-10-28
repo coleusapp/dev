@@ -154,7 +154,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] A3.6 Checking items directly in the editor (not only in preview), with a strike-through look for done items
 
 ## A4. Attachments and media (Apple Notes)
-- [ ] A4.1 Rich link previews: pasting a URL shows a card (title, description, image) fetched server-side safely (no SSRF, timeouts, cached) 📦
+- [x] A4.1 Rich link previews: pasting a URL shows a card (title, description, image) fetched server-side safely (no SSRF, timeouts, cached) 📦
 - [ ] A4.3 Scan documents: take photos (camera on mobile), crop/straighten, save as a multi-page PDF attachment 🧩 ⚠️ dep likely
 - [ ] A4.4 Scan text / Live Text: OCR text from an image into the note 🧩 ⚠️ dep (OCR engine, e.g. Tesseract)
 - [ ] A4.5 Search inside attachments: OCR text in images/scans and text in PDFs becomes searchable 🧩 ⚠️ dep

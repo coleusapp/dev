@@ -42,6 +42,7 @@ import { textareaCaretPosition } from '@/lib/caret';
 import { dateQuery } from '@/lib/dates';
 import { renderDiagrams } from '@/lib/diagrams';
 import { jsonHeaders } from '@/lib/http';
+import { renderLinkCards } from '@/lib/linkCards';
 import {
     applyEdit,
     applyParagraphStyle,
@@ -268,6 +269,7 @@ const typesetPreview = (): void =>
     void nextTick(() => {
         void renderMath(preview.value);
         void renderDiagrams(preview.value);
+        void renderLinkCards(preview.value);
     });
 
 onMounted(typesetPreview);
