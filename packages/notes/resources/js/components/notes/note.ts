@@ -123,6 +123,7 @@ export const SUGGESTED_SEARCHES: { label: string; query: string; icon: string }[
     { label: 'Notes with tags', query: 'has:tags', icon: 'i-lucide-hash' },
     { label: 'Notes with links', query: 'has:links', icon: 'i-lucide-link' },
     { label: 'Notes with properties', query: 'has:properties', icon: 'i-lucide-list-tree' },
+    { label: 'Locked notes', query: 'has:locked', icon: 'i-lucide-lock' },
 ];
 
 /**

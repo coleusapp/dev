@@ -57,3 +57,13 @@ it('keeps a locked note out of tags, properties and version history', function (
     $this->get(route('notes.properties.index'))->assertInertia(fn (Assert $page) => $page->where('properties', []));
     $this->getJson(route('notes.versions.index', $note))->assertOk()->assertJsonCount(0, 'data');
 });
+
+it('lists locked notes with has:locked', function () {
+    $locked = Note::factory()->create(['body' => '# Vault']);
+    Note::factory()->create(['body' => '# Open']);
+    ($this->lock)($locked, 'Vault');
+
+    $this->get(route('notes.index', ['q' => 'has:locked']))->assertInertia(fn (Assert $page) => $page
+        ->has('notes.data', 1)
+        ->where('notes.data.0.id', $locked->id));
+});

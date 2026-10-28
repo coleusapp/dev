@@ -17,7 +17,7 @@ const tips: { text: string; description: string }[] = [
     { text: 'task:', description: 'a checklist item mentioning a word' },
     { text: 'task-todo:', description: 'an unticked item (alone: any)' },
     { text: 'task-done:', description: 'a ticked item (alone: any)' },
-    { text: 'has:', description: 'checklist, tags, links or properties' },
+    { text: 'has:', description: 'checklist, tags, links, properties or locked' },
 ];
 </script>
 

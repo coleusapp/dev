@@ -21,9 +21,10 @@ use Illuminate\Support\Collection;
  *   task-todo:call           …an unticked one (task-todo: alone: any open item)
  *   task-done:call           …a ticked one
  *   has:checklist            any checklist item (same as "task:" alone)
- *   has:tags  has:links  has:properties
+ *   has:tags  has:links  has:properties  has:locked
  *                            any #tag / any [[wiki link]] or [link](url) /
- *                            any front matter property; other has: values
+ *                            any front matter property / password-locked;
+ *                            other has: values
  *                            match nothing
  *
  * Operator values can be quoted (folder:"Trip plans"). Everything must
@@ -41,7 +42,7 @@ final class SearchQuery
     /**
      * The has: values understood (A10.1's suggested searches).
      */
-    public const array HAS = ['checklist', 'tags', 'links', 'properties'];
+    public const array HAS = ['checklist', 'tags', 'links', 'properties', 'locked'];
 
     /**
      * @param  list<string>  $words
@@ -142,6 +143,7 @@ final class SearchQuery
             match ($what) {
                 'tags' => $query->whereHas('tags'),
                 'properties' => $query->whereHas('properties'),
+                'locked' => $query->whereNotNull('lock_key_id'),
                 'links' => $query->where(fn (Builder $links) => $links->where('body', 'like', '%[[%')->orWhere('body', 'like', '%](%')),
                 default => $query->whereRaw('1 = 0'),
             };
