@@ -67,3 +67,23 @@ it('never links a note to itself', function () {
     $this->get(route('notes.show', ['note' => $note]))
         ->assertInertia(fn (Assert $page) => $page->where('note.data.html', fn (string $html) => ! str_contains($html, 'data-note-id')));
 });
+
+it('shows the alias text of [[Title|shown text]] and links to the title', function () {
+    $target = Note::factory()->create(['body' => '# Trip to Lisbon']);
+    $note = Note::factory()->create(['body' => 'Plan [[Trip to Lisbon|the trip]] and [[Someday | later ]] and [[Trip to Lisbon|]]']);
+
+    $this->get(route('notes.show', ['note' => $note]))
+        ->assertInertia(fn (Assert $page) => $page->where('note.data.html', fn (string $html) => str_contains($html, 'data-note-id="'.$target->id.'">the trip</a>')
+            && str_contains($html, 'data-wiki-title="Someday" title="Create &quot;Someday&quot;">later</a>')
+            && str_contains($html, 'data-note-id="'.$target->id.'">Trip to Lisbon</a>')));
+});
+
+it('counts an aliased link as a backlink and reads it as its alias in the list', function () {
+    $target = Note::factory()->create(['body' => '# Trip to Lisbon']);
+    $source = Note::factory()->create(['body' => "# Plans\nsee [[Trip to Lisbon|the trip]] soon"]);
+
+    $this->get(route('notes.show', ['note' => $target]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('note.data.backlinks.0.id', $source->id)
+            ->where('notes.data', fn ($notes) => collect($notes)->firstWhere('id', $source->id)['snippet'] === 'see the trip soon'));
+});

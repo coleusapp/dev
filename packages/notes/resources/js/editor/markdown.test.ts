@@ -26,6 +26,7 @@ describe('round trip', () => {
         ['bullets and numbers', '- a\n- b\n\n1. one\n2. two'],
         ['wiki links', 'See [[Trip to Lisbon]] and [[Ideas]].'],
         ['wiki link spacing kept', 'See [[  Trip  ]] here'],
+        ['wiki link alias', 'See [[Trip to Lisbon|the trip]] and [[Ideas | ideas ]]'],
         ['hashtags', '#inbox\n\nPlan #work/meetings today'],
         ['highlight', '==marked== text'],
         ['underline and strike', '++under++ and ~~gone~~'],
@@ -59,6 +60,16 @@ describe('round trip', () => {
 
     it('drops trailing blank lines', () => {
         expect(roundTrip('- a\n- b')).toBe('- a\n- b');
+    });
+
+    it('shows a wiki link alias and links to the title', () => {
+        loadMarkdown(editor, 'See [[Trip  to Lisbon|the trip]] and [[|nothing]]');
+        const chip = editor.view.dom.querySelector<HTMLElement>('[data-wiki-link]');
+
+        expect(chip?.textContent).toBe('the trip');
+        expect(chip?.dataset.wikiLink).toBe('Trip to Lisbon');
+        expect(editor.view.dom.querySelectorAll('[data-wiki-link]')).toHaveLength(1);
+        expect(editorMarkdown(editor, '')).toBe('See [[Trip  to Lisbon|the trip]] and \\[\\[|nothing\\]\\]');
     });
 
     it('does not treat [[…]] in code as a wiki link', () => {

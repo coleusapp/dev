@@ -24,13 +24,14 @@ class WikiLinkRenderer implements NodeRendererInterface
         WikiLink::assertInstanceOf($node);
 
         $noteId = $this->resolver?->resolve($node->title);
+        $text = Xml::escape($node->label ?? $node->title);
 
         if ($noteId !== null) {
             return new HtmlElement('a', [
                 'href' => route('notes.show', ['note' => $noteId], false),
                 'class' => 'wiki-link',
                 'data-note-id' => (string) $noteId,
-            ], Xml::escape($node->title));
+            ], $text);
         }
 
         return new HtmlElement('a', [
@@ -38,6 +39,6 @@ class WikiLinkRenderer implements NodeRendererInterface
             'class' => 'wiki-link wiki-link-missing',
             'data-wiki-title' => $node->title,
             'title' => 'Create "'.$node->title.'"',
-        ], Xml::escape($node->title));
+        ], $text);
     }
 }

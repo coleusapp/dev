@@ -20,6 +20,21 @@ class WikiLinks
     }
 
     /**
+     * The target and the shown text of what's between the brackets:
+     * "Title|shown text" splits at the first "|"; no "|" (or nothing after
+     * it) means the title is shown.
+     *
+     * @return array{title: string, label: string|null}
+     */
+    public static function split(string $inner): array
+    {
+        [$title, $label] = array_pad(explode('|', $inner, 2), 2, null);
+        $label = $label === null ? '' : trim($label);
+
+        return ['title' => self::normalizeTitle($title), 'label' => $label === '' ? null : $label];
+    }
+
+    /**
      * The distinct titles a body links to, as the Markdown parser sees them
      * (so [[...]] inside code doesn't count), in order of appearance.
      *

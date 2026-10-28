@@ -3,6 +3,7 @@
 namespace Coleus\Notes\Support;
 
 use Coleus\Notes\Markdown\FrontMatter;
+use Coleus\Notes\Markdown\WikiLinks\WikiLinks;
 use Coleus\Notes\Search\Highlighter;
 use Illuminate\Support\Str;
 
@@ -137,6 +138,13 @@ class NoteText
      */
     public static function plainLine(string $line): string
     {
+        // [[Title|shown text]] reads as its shown text.
+        $line = (string) preg_replace_callback('/!?\[\[([^\[\]\n]+)\]\]/u', function (array $match): string {
+            $link = WikiLinks::split($match[1]);
+
+            return $link['label'] ?? $link['title'];
+        }, $line);
+
         $text = preg_replace([
             '/^\s{0,3}#{1,6}\s+/',
             '/^\s*>+\s?/',

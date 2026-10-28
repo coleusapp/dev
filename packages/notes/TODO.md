@@ -25,7 +25,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O1.6 Duplicate note (Bear 7.4)
 
 ## O2. Links and graph
-- [ ] O2.1 Link aliases: `[[Title|shown text]]`
+- [x] O2.1 Link aliases: `[[Title|shown text]]`
 - [ ] O2.2 Heading links: `[[Title#Heading]]` scroll to the heading; `[[#Heading]]` within the same note
 - [ ] O2.4 Link autocomplete: typing `[[` suggests note titles (fuzzy), then headings after `#` (Apple: "Add Link" on a selection picks a note) 🍎
 - [ ] O2.5 Tag autocomplete when typing `#`
