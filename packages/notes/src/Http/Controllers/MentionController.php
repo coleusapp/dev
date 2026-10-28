@@ -27,7 +27,7 @@ class MentionController extends Controller
     public function store(Note $note, Note $source): JsonResponse
     {
         Gate::authorize('view', $note);
-        Gate::authorize('update', $source);
+        Gate::authorize('edit', $source);
 
         return response()->json(['data' => ['count' => UnlinkedMentions::link($source, $note)]]);
     }

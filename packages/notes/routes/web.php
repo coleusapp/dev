@@ -9,6 +9,7 @@ use Coleus\Notes\Http\Controllers\MentionController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
 use Coleus\Notes\Http\Controllers\PropertyController;
+use Coleus\Notes\Http\Controllers\ReadOnlyController;
 use Coleus\Notes\Http\Controllers\RelinkController;
 use Coleus\Notes\Http\Controllers\SettingsController;
 use Coleus\Notes\Http\Controllers\SmartFolderController;
@@ -55,6 +56,8 @@ Route::middleware(['web', 'auth'])
         Route::delete('/{note}', [NoteController::class, 'destroy'])->name('destroy')->whereNumber('note');
         Route::post('/{note}/duplicate', [NoteController::class, 'duplicate'])->name('duplicate')->whereNumber('note');
         Route::post('/{note}/pin', [PinController::class, 'store'])->name('pin')->whereNumber('note');
+        Route::post('/{note}/read-only', [ReadOnlyController::class, 'store'])->name('read-only.store')->whereNumber('note');
+        Route::delete('/{note}/read-only', [ReadOnlyController::class, 'destroy'])->name('read-only.destroy')->whereNumber('note');
         Route::delete('/{note}/pin', [PinController::class, 'destroy'])->name('unpin')->whereNumber('note');
         Route::post('/{note}/archive', [ArchiveController::class, 'store'])->name('archive')->whereNumber('note');
         Route::delete('/{note}/archive', [ArchiveController::class, 'destroy'])->name('unarchive')->whereNumber('note');

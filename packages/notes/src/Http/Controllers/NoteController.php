@@ -50,7 +50,7 @@ class NoteController extends Controller
      */
     public function update(NoteRequest $request, Note $note): RedirectResponse|NoteDetailResource
     {
-        Gate::authorize('update', $note);
+        Gate::authorize('edit', $note);
 
         Notes::note()->update($note, $request->noteData());
 

@@ -130,6 +130,7 @@ const emptyMessage = computed(() => {
                             <template v-else>{{ note.title || 'Empty note' }}</template>
                         </span>
                         <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
+                        <UiIcon v-if="note.read_only" name="i-lucide-lock" class="text-dimmed size-3 shrink-0" aria-label="Read-only" />
                     </span>
                     <ul v-if="note.matches?.lines.length" class="flex flex-col gap-0.5" aria-label="Matching lines">
                         <li

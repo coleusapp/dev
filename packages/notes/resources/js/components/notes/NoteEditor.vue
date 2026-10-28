@@ -1513,9 +1513,21 @@ defineExpose({ paletteCommands });
         </details>
         <UnlinkedMentions v-if="!readonly" ref="unlinkedMentions" :note-id="note.id" />
         <div class="flex items-center justify-between gap-2">
-            <p v-if="readonly" class="text-dimmed flex items-center gap-1 text-xs">
+            <p v-if="readonly && note.trashed" class="text-dimmed flex items-center gap-1 text-xs">
                 <UiIcon name="i-lucide-trash-2" class="size-3" />
                 In the trash. Restore it to edit.
+            </p>
+            <p v-else-if="readonly" class="text-dimmed flex items-center gap-1 text-xs">
+                <UiIcon name="i-lucide-lock" class="size-3" />
+                Read-only.
+                <UiButton
+                    size="xs"
+                    variant="link"
+                    color="neutral"
+                    class="p-0"
+                    @click="router.delete(route('notes.read-only.destroy', { note: note.id }), { preserveScroll: true, preserveState: true })"
+                    >Unlock to edit</UiButton
+                >
             </p>
             <div v-else class="flex items-center gap-1" role="group" aria-label="Editor mode">
                 <UiButton

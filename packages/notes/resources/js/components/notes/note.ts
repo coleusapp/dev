@@ -12,6 +12,7 @@ export type NoteData = {
     body: string;
     snippet: string;
     pinned: boolean;
+    read_only: boolean;
     archived: boolean;
     folder_id: number | null;
     trashed: boolean;

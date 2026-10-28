@@ -63,7 +63,7 @@ class VersionController extends Controller
 
     public function restore(Note $note, NoteVersion $version): RedirectResponse
     {
-        Gate::authorize('update', $note);
+        Gate::authorize('edit', $note);
 
         Notes::note()->update($note, ['body' => $version->body]);
 

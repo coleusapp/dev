@@ -493,6 +493,24 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
 
 const isPinned = computed(() => listedNotes.value.find((listed) => listed.id === props.note?.data.id)?.pinned ?? false);
 
+/**
+ * The read-only lock (B8.7): the note opens in the reading view and can't be changed until unlocked.
+ */
+const setReadOnly = (on: boolean): void => {
+    if (!props.note) {
+        return;
+    }
+
+    const url = route(on ? 'notes.read-only.store' : 'notes.read-only.destroy', { note: props.note.data.id });
+    const options = { preserveScroll: true, preserveState: true };
+
+    if (on) {
+        router.post(url, {}, options);
+    } else {
+        router.delete(url, options);
+    }
+};
+
 const togglePin = (): void => {
     if (!props.note) {
         return;
@@ -573,6 +591,9 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
     return [
         [
             { label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin },
+            props.note?.data.read_only
+                ? { label: 'Unlock editing', icon: 'i-lucide-lock-open', onSelect: () => setReadOnly(false) }
+                : { label: 'Lock editing (read-only)', icon: 'i-lucide-lock', onSelect: () => setReadOnly(true) },
             props.note?.data.archived
                 ? { label: 'Unarchive', icon: 'i-lucide-archive-restore', onSelect: unarchiveNote }
                 : { label: 'Archive', icon: 'i-lucide-archive', onSelect: archiveNote },
@@ -1005,7 +1026,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                             ref="editor"
                             :key="note.data.id"
                             :note="note.data"
-                            :readonly="note.data.trashed"
+                            :readonly="note.data.trashed || note.data.read_only"
                             :default-mode="preferences['editor.default_mode']"
                             :autosave-delay="preferences['editor.autosave_delay']"
                             :first-line-style="preferences['editor.first_line_style']"
@@ -1048,7 +1069,13 @@ const commandGroups = computed<PaletteGroup[]>(() => [
             confirm-label="Delete folder"
             @confirm="deleteFolder"
         />
-        <VersionHistory v-if="note" :key="note.data.id" v-model:open="showingHistory" :note-id="note.data.id" :readonly="note.data.trashed" />
+        <VersionHistory
+            v-if="note"
+            :key="note.data.id"
+            v-model:open="showingHistory"
+            :note-id="note.data.id"
+            :readonly="note.data.trashed || note.data.read_only"
+        />
         <ConfirmModal
             v-model:open="creatingLinked"
             :title="`Create “${linkedTitle ?? ''}”?`"

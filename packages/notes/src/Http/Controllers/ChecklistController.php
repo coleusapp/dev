@@ -19,7 +19,7 @@ class ChecklistController extends Controller
      */
     public function update(ChecklistRequest $request, Note $note, int $line): NoteDetailResource
     {
-        Gate::authorize('update', $note);
+        Gate::authorize('edit', $note);
 
         $body = Checklist::toggle($note->body, $line, $request->boolean('checked'));
 
@@ -40,7 +40,7 @@ class ChecklistController extends Controller
      */
     public function move(ChecklistMoveRequest $request, Note $note): NoteDetailResource
     {
-        Gate::authorize('update', $note);
+        Gate::authorize('edit', $note);
 
         $beforeLine = $request->validated('before_line');
         $body = Checklist::move($note->body, (int) $request->validated('line'), $beforeLine === null ? null : (int) $beforeLine);

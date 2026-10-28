@@ -31,6 +31,16 @@ class NotePolicy
     }
 
     /**
+     * Changing what a note says (typing, ticking a checklist item, restoring
+     * a version): also not while it's locked read-only (B8.7). Filing it
+     * (pin, archive, folder, the lock itself) only needs update.
+     */
+    public function edit(Authenticatable $user, Note $note): bool
+    {
+        return $note->read_only_at === null && $this->update($user, $note);
+    }
+
+    /**
      * Deleting moves a note to the trash.
      */
     public function delete(Authenticatable $user, Note $note): bool
