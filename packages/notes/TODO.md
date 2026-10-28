@@ -26,7 +26,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## O2. Links and graph
 - [x] O2.1 Link aliases: `[[Title|shown text]]`
-- [ ] O2.2 Heading links: `[[Title#Heading]]` scroll to the heading; `[[#Heading]]` within the same note
+- [x] O2.2 Heading links: `[[Title#Heading]]` scroll to the heading; `[[#Heading]]` within the same note
 - [ ] O2.4 Link autocomplete: typing `[[` suggests note titles (fuzzy), then headings after `#` (Apple: "Add Link" on a selection picks a note) 🍎
 - [ ] O2.5 Tag autocomplete when typing `#`
 - [ ] O2.6 Update links on rename: when a note's title changes, rewrite `[[Old]]` → `[[New]]` in other notes (with confirm) 🍎

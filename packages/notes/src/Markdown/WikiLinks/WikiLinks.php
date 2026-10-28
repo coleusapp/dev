@@ -20,18 +20,45 @@ class WikiLinks
     }
 
     /**
-     * The target and the shown text of what's between the brackets:
-     * "Title|shown text" splits at the first "|"; no "|" (or nothing after
-     * it) means the title is shown.
+     * The parts of what's between the brackets:
+     * - "Title|shown text": the shown text is after the first "|" (none, or
+     *   nothing after it, shows the default text);
+     * - "Title#Heading": a heading in that note, "#Heading" one in the same
+     *   note (so a "#" can't be part of a linked title, as in Obsidian).
      *
-     * @return array{title: string, label: string|null}
+     * @return array{title: string, heading: string|null, label: string|null}
      */
     public static function split(string $inner): array
     {
-        [$title, $label] = array_pad(explode('|', $inner, 2), 2, null);
+        [$target, $label] = array_pad(explode('|', $inner, 2), 2, null);
+        [$title, $heading] = array_pad(explode('#', (string) $target, 2), 2, null);
+        $heading = $heading === null ? '' : self::normalizeTitle($heading);
         $label = $label === null ? '' : trim($label);
 
-        return ['title' => self::normalizeTitle($title), 'label' => $label === '' ? null : $label];
+        return [
+            'title' => self::normalizeTitle((string) $title),
+            'heading' => $heading === '' ? null : $heading,
+            'label' => $label === '' ? null : $label,
+        ];
+    }
+
+    /**
+     * The text a link shows when it has no alias: "Title", "Title > Heading",
+     * or "Heading" within the same note.
+     *
+     * @param  array{title: string, heading: string|null, label: string|null}  $link
+     */
+    public static function text(array $link): string
+    {
+        if ($link['label'] !== null) {
+            return $link['label'];
+        }
+
+        if ($link['heading'] === null) {
+            return $link['title'];
+        }
+
+        return $link['title'] === '' ? $link['heading'] : $link['title'].' > '.$link['heading'];
     }
 
     /**
@@ -49,7 +76,7 @@ class WikiLinks
         $titles = [];
 
         foreach (NoteMarkdown::parse($body)->iterator() as $node) {
-            if ($node instanceof WikiLink) {
+            if ($node instanceof WikiLink && $node->title !== '') {
                 $titles[mb_strtolower($node->title)] ??= $node->title;
             }
         }

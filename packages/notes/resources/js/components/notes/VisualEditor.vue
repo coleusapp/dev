@@ -35,7 +35,7 @@ const emit = defineEmits<{
     inTable: [inTable: boolean];
     slash: [state: SlashState | null];
     find: [state: { count: number; current: number }];
-    openWikiLink: [title: string];
+    openWikiLink: [title: string, heading: string | null];
     openTag: [tag: string];
 }>();
 
@@ -69,9 +69,9 @@ const editor = useEditor({
                 const wikiLink = target?.closest<HTMLElement>('[data-wiki-link]');
                 const tag = target?.closest<HTMLElement>('.hashtag');
 
-                if (wikiLink?.dataset.wikiLink) {
+                if (wikiLink && (wikiLink.dataset.wikiLink || wikiLink.dataset.wikiHeading)) {
                     event.preventDefault();
-                    emit('openWikiLink', wikiLink.dataset.wikiLink);
+                    emit('openWikiLink', wikiLink.dataset.wikiLink ?? '', wikiLink.dataset.wikiHeading ?? null);
 
                     return true;
                 }

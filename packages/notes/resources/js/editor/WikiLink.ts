@@ -9,16 +9,31 @@ import { InputRule, mergeAttributes, Node, PasteRule } from '@tiptap/vue-3';
 export const WIKI_LINK = /^\[\[([^[\]\n]{1,255})\]\]/;
 
 /**
- * The target and the shown text of what's between the brackets, as the
- * server splits it (WikiLinks::split): at the first "|", spaces collapsed
- * in the title; an empty alias shows the title.
+ * The parts of what's between the brackets, as the server splits them
+ * (WikiLinks::split / text): "Title#Heading|shown text". The title is ""
+ * for a heading in the same note ([[#Heading]]); without an alias the
+ * label is "Title", "Title > Heading" or "Heading".
  */
-export const splitWikiLink = (inner: string): { title: string; label: string } => {
+export const splitWikiLink = (inner: string): { title: string; heading: string | null; label: string } => {
+    const normalize = (text: string): string => text.replace(/\s+/g, ' ').trim();
     const bar = inner.indexOf('|');
-    const title = (bar === -1 ? inner : inner.slice(0, bar)).replace(/\s+/g, ' ').trim();
+    const target = bar === -1 ? inner : inner.slice(0, bar);
+    const hash = target.indexOf('#');
+    const title = normalize(hash === -1 ? target : target.slice(0, hash));
+    const heading = hash === -1 ? '' : normalize(target.slice(hash + 1));
     const alias = bar === -1 ? '' : inner.slice(bar + 1).trim();
+    const fallback = heading === '' ? title : title === '' ? heading : `${title} > ${heading}`;
 
-    return { title, label: alias || title };
+    return { title, heading: heading || null, label: alias || fallback };
+};
+
+/**
+ * Whether the text between the brackets links anywhere (a note or a heading).
+ */
+const isLink = (inner: string): boolean => {
+    const { title, heading } = splitWikiLink(inner);
+
+    return title !== '' || heading !== null;
 };
 
 export const WikiLink = Node.create({
@@ -42,9 +57,10 @@ export const WikiLink = Node.create({
     },
 
     renderHTML({ node, HTMLAttributes }) {
-        const { title, label } = splitWikiLink(node.attrs.title);
+        const { title, heading, label } = splitWikiLink(node.attrs.title);
+        const target = { 'data-wiki-link': title, ...(heading ? { 'data-wiki-heading': heading } : {}) };
 
-        return ['span', mergeAttributes(HTMLAttributes, { 'data-wiki-link': title, 'data-wiki-raw': node.attrs.title, class: 'wiki-link' }), label];
+        return ['span', mergeAttributes(HTMLAttributes, { ...target, 'data-wiki-raw': node.attrs.title, class: 'wiki-link' }), label];
     },
 
     renderText({ node }) {
@@ -60,7 +76,7 @@ export const WikiLink = Node.create({
             new InputRule({
                 find: /\[\[([^[\]\n]{1,255})\]\]$/,
                 handler: ({ state, range, match }) => {
-                    if (splitWikiLink(match[1]).title !== '') {
+                    if (isLink(match[1])) {
                         state.tr.replaceWith(range.from, range.to, this.type.create({ title: match[1] }));
                     }
                 },
@@ -73,7 +89,7 @@ export const WikiLink = Node.create({
             new PasteRule({
                 find: /\[\[([^[\]\n]{1,255})\]\]/g,
                 handler: ({ state, range, match }) => {
-                    if (splitWikiLink(match[1]).title !== '') {
+                    if (isLink(match[1])) {
                         state.tr.replaceWith(range.from, range.to, this.type.create({ title: match[1] }));
                     }
                 },
@@ -90,7 +106,7 @@ export const WikiLink = Node.create({
         tokenize: (src: string) => {
             const match = WIKI_LINK.exec(src);
 
-            if (!match || splitWikiLink(match[1]).title === '') {
+            if (!match || !isLink(match[1])) {
                 return undefined;
             }
 

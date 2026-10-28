@@ -15,14 +15,14 @@ class WikiLinkParser implements InlineParserInterface
 
     public function parse(InlineParserContext $inlineContext): bool
     {
-        ['title' => $title, 'label' => $label] = WikiLinks::split($inlineContext->getSubMatches()[0] ?? '');
+        ['title' => $title, 'heading' => $heading, 'label' => $label] = WikiLinks::split($inlineContext->getSubMatches()[0] ?? '');
 
-        if ($title === '') {
+        if ($title === '' && $heading === null) {
             return false;
         }
 
         $inlineContext->getCursor()->advanceBy($inlineContext->getFullMatchLength());
-        $inlineContext->getContainer()->appendChild(new WikiLink($title, $label));
+        $inlineContext->getContainer()->appendChild(new WikiLink($title, $label, $heading));
 
         return true;
     }

@@ -11,6 +11,8 @@ use League\CommonMark\Util\Xml;
 /**
  * Renders a wiki link to the note it names, or, when no note has that
  * title, to a "missing" link the page turns into a create-note prompt.
+ * A heading travels as ?heading= (the note scrolls to it on open, like a
+ * heading bookmark) and data-heading; [[#Heading]] scrolls the same note.
  */
 class WikiLinkRenderer implements NodeRendererInterface
 {
@@ -23,14 +25,21 @@ class WikiLinkRenderer implements NodeRendererInterface
     {
         WikiLink::assertInstanceOf($node);
 
+        $text = Xml::escape(WikiLinks::text(['title' => $node->title, 'heading' => $node->heading, 'label' => $node->label]));
+        $heading = $node->heading === null ? [] : ['data-heading' => $node->heading];
+
+        if ($node->title === '') {
+            return new HtmlElement('a', ['href' => '#', 'class' => 'wiki-link', ...$heading], $text);
+        }
+
         $noteId = $this->resolver?->resolve($node->title);
-        $text = Xml::escape($node->label ?? $node->title);
 
         if ($noteId !== null) {
             return new HtmlElement('a', [
-                'href' => route('notes.show', ['note' => $noteId], false),
+                'href' => route('notes.show', ['note' => $noteId, ...($node->heading === null ? [] : ['heading' => $node->heading])], false),
                 'class' => 'wiki-link',
                 'data-note-id' => (string) $noteId,
+                ...$heading,
             ], $text);
         }
 

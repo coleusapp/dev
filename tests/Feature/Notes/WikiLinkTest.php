@@ -87,3 +87,24 @@ it('counts an aliased link as a backlink and reads it as its alias in the list',
             ->where('note.data.backlinks.0.id', $source->id)
             ->where('notes.data', fn ($notes) => collect($notes)->firstWhere('id', $source->id)['snippet'] === 'see the trip soon'));
 });
+
+it('links to a heading in another note or in the same note', function () {
+    $target = Note::factory()->create(['body' => "# Trip to Lisbon\n## Day one"]);
+    $note = Note::factory()->create(['body' => "# Plan\nsee [[Trip to Lisbon#Day  one]], [[Trip to Lisbon#Day one|day 1]], [[#Packing]], [[Nowhere#Top]] and [[#]]\n## Packing"]);
+
+    $this->get(route('notes.show', ['note' => $note]))
+        ->assertInertia(fn (Assert $page) => $page->where('note.data.html', fn (string $html) => str_contains($html, 'href="/notes/'.$target->id.'?heading=Day%20one" class="wiki-link" data-note-id="'.$target->id.'" data-heading="Day one">Trip to Lisbon &gt; Day one</a>')
+            && str_contains($html, 'data-heading="Day one">day 1</a>')
+            && str_contains($html, '<a href="#" class="wiki-link" data-heading="Packing">Packing</a>')
+            && str_contains($html, 'data-wiki-title="Nowhere" title="Create &quot;Nowhere&quot;">Nowhere &gt; Top</a>')
+            && str_contains($html, '[[#]]'))
+            ->where('notes.data', fn ($notes) => str_contains(collect($notes)->firstWhere('id', $note->id)['snippet'], 'see Trip to Lisbon > Day one, day 1, Packing')));
+});
+
+it('counts a heading link as a backlink, but not a same-note heading link', function () {
+    $target = Note::factory()->create(['body' => "# Trip\n## Food"]);
+    $source = Note::factory()->create(['body' => "# Plans\n[[Trip#Food]]"]);
+
+    $this->get(route('notes.show', ['note' => $target]))
+        ->assertInertia(fn (Assert $page) => $page->where('note.data.backlinks', fn ($backlinks) => collect($backlinks)->pluck('id')->all() === [$source->id]));
+});

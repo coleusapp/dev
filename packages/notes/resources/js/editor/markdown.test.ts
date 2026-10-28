@@ -72,6 +72,18 @@ describe('round trip', () => {
         expect(editorMarkdown(editor, '')).toBe('See [[Trip  to Lisbon|the trip]] and \\[\\[|nothing\\]\\]');
     });
 
+    it('links to headings in other notes and in the same note', () => {
+        loadMarkdown(editor, 'See [[Trip#Day  one]], [[#Packing]], [[Trip#Day one|day 1]] and [[#]]');
+        const chips = Array.from(editor.view.dom.querySelectorAll<HTMLElement>('[data-wiki-raw]'));
+
+        expect(chips.map((chip) => [chip.textContent, chip.dataset.wikiLink, chip.dataset.wikiHeading])).toEqual([
+            ['Trip > Day one', 'Trip', 'Day one'],
+            ['Packing', '', 'Packing'],
+            ['day 1', 'Trip', 'Day one'],
+        ]);
+        expect(editorMarkdown(editor, '')).toContain('See [[Trip#Day  one]], [[#Packing]], [[Trip#Day one|day 1]] and');
+    });
+
     it('does not treat [[…]] in code as a wiki link', () => {
         loadMarkdown(editor, '`[[code]]`');
 

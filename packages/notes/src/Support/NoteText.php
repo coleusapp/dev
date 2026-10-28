@@ -138,11 +138,9 @@ class NoteText
      */
     public static function plainLine(string $line): string
     {
-        // [[Title|shown text]] reads as its shown text.
+        // [[Title|shown text]] reads as its shown text, [[Title#Heading]] as "Title > Heading".
         $line = (string) preg_replace_callback('/!?\[\[([^\[\]\n]+)\]\]/u', function (array $match): string {
-            $link = WikiLinks::split($match[1]);
-
-            return $link['label'] ?? $link['title'];
+            return WikiLinks::text(WikiLinks::split($match[1]));
         }, $line);
 
         $text = preg_replace([

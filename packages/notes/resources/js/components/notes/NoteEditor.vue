@@ -76,9 +76,15 @@ const root = useTemplateRef<HTMLElement>('root');
  * nth one (0-based) with that text, among those currently shown.
  */
 const scrollToHeading = (heading: string, occurrence = 0): void => {
-    const target = Array.from(
+    const shown = Array.from(
         root.value?.querySelectorAll<HTMLElement>('.tiptap :is(h1,h2,h3,h4,h5,h6), .note-preview > :is(h1,h2,h3,h4,h5,h6)') ?? [],
-    ).filter((element) => element.offsetParent !== null && element.textContent?.trim() === heading)[occurrence];
+    ).filter((element) => element.offsetParent !== null);
+    const loose = (text: string): string => text.replace(/\s+/g, ' ').trim().toLowerCase();
+
+    // Exact text first (outline, bookmarks); a typed [[Note#heading]] may differ in case or spacing.
+    const target =
+        shown.filter((element) => element.textContent?.trim() === heading)[occurrence] ??
+        shown.find((element) => loose(element.textContent ?? '') === loose(heading));
 
     target?.scrollIntoView({ block: 'start' });
 };
@@ -202,14 +208,7 @@ useChecklistDrag(
 const onPreviewClick = (event: MouseEvent): void => {
     const target = event.target;
     const wikiLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a.wiki-link') : null;
-    const inNoteLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
-
-    if (inNoteLink) {
-        event.preventDefault();
-        scrollToAnchor(decodeURIComponent(inNoteLink.getAttribute('href')?.slice(1) ?? ''));
-
-        return;
-    }
+    const inNoteLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href^="#"]:not(.wiki-link)') : null;
 
     if (wikiLink && !event.metaKey && !event.ctrlKey) {
         event.preventDefault();
@@ -218,7 +217,16 @@ const onPreviewClick = (event: MouseEvent): void => {
             router.visit(wikiLink.href);
         } else if (wikiLink.dataset.wikiTitle) {
             emit('createLinked', wikiLink.dataset.wikiTitle);
+        } else if (wikiLink.dataset.heading) {
+            scrollToHeading(wikiLink.dataset.heading);
         }
+
+        return;
+    }
+
+    if (inNoteLink) {
+        event.preventDefault();
+        scrollToAnchor(decodeURIComponent(inNoteLink.getAttribute('href')?.slice(1) ?? ''));
 
         return;
     }
@@ -289,7 +297,15 @@ const visual = useTemplateRef<InstanceType<typeof VisualEditor>>('visual');
  * [[Wiki links]] in the visual editor resolve on click, with the same rules
  * as the preview: open the note, or offer to create it.
  */
-const openWikiLink = async (title: string): Promise<void> => {
+const openWikiLink = async (title: string, heading: string | null = null): Promise<void> => {
+    if (title === '') {
+        if (heading) {
+            scrollToHeading(heading);
+        }
+
+        return;
+    }
+
     const response = await fetch(route('notes.links.resolve', { title, from: props.note.id }), {
         headers: jsonHeaders(),
         credentials: 'same-origin',
@@ -298,7 +314,7 @@ const openWikiLink = async (title: string): Promise<void> => {
     const id = payload?.data?.id;
 
     if (response.ok && typeof id === 'number') {
-        router.visit(route('notes.show', { note: id }), { preserveState: true });
+        router.visit(route('notes.show', { note: id, ...(heading ? { heading } : {}) }), { preserveState: true });
     } else if (response.ok) {
         emit('createLinked', title);
     }
