@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { OpenLinkPreview } from '@/composables/useLinkPreview';
+import { renderDiagrams } from '@/lib/diagrams';
 import { renderMath } from '@/lib/math';
 import { Link } from '@inertiajs/vue3';
 import { nextTick, onMounted, useTemplateRef, watch } from 'vue';
@@ -9,7 +10,11 @@ const props = defineProps<{
 }>();
 
 const body = useTemplateRef<HTMLElement>('body');
-const typeset = (): void => void nextTick(() => renderMath(body.value));
+const typeset = (): void =>
+    void nextTick(() => {
+        void renderMath(body.value);
+        void renderDiagrams(body.value);
+    });
 
 onMounted(typeset);
 watch(() => props.preview.html, typeset);

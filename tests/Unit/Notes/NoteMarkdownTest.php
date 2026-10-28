@@ -12,6 +12,7 @@ it('renders Markdown', function (string $markdown, string $html) {
     'safe link' => ['[x](https://example.test)', '<a href="https://example.test">x</a>'],
     'table' => ["| a |\n|---|\n| b |", '<td>b</td>'],
     'fenced code' => ["```\n<b>x</b>\n```", '&lt;b&gt;x&lt;/b&gt;'],
+    'mermaid block for the browser to draw' => ["```mermaid\ngraph TD; A-->B\n```", '<pre><code class="language-mermaid">graph TD; A--&gt;B'],
 ]);
 
 it('escapes raw HTML instead of passing it through', function (string $markdown) {

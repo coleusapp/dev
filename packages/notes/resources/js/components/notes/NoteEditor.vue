@@ -36,6 +36,7 @@ import { tagQuery } from '@/editor/tagQuery';
 import { autoPair, deletePair } from '@/lib/autoPair';
 import { textareaCaretPosition } from '@/lib/caret';
 import { dateQuery } from '@/lib/dates';
+import { renderDiagrams } from '@/lib/diagrams';
 import { jsonHeaders } from '@/lib/http';
 import {
     applyEdit,
@@ -235,9 +236,13 @@ const toggleTask = (checkbox: HTMLInputElement): Promise<void> => {
 const preview = useTemplateRef<HTMLElement>('preview');
 
 /**
- * Math in the reading view and split preview is typeset after each render.
+ * Math and diagrams in the reading view and split preview are drawn after each render.
  */
-const typesetPreview = (): void => void nextTick(() => renderMath(preview.value));
+const typesetPreview = (): void =>
+    void nextTick(() => {
+        void renderMath(preview.value);
+        void renderDiagrams(preview.value);
+    });
 
 onMounted(typesetPreview);
 onActivated(typesetPreview);

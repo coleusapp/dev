@@ -40,6 +40,7 @@ describe('round trip', () => {
         ['table of contents placeholder', '# A\n\n[TOC]\n\n## B'],
         ['footnotes', 'Lisbon is hilly[^hills] and old[^1].\n\n[^hills]: Seven of them.\n\n[^1]: Very.'],
         ['callouts', '> [!note] Title\n> body text\n\n> [!warning]-\n> folded\n\n> [!tip]+ Open'],
+        ['mermaid diagram', '```mermaid\ngraph TD\n  A-->B\n```'],
         ['math', 'Area $\\pi r^2$ and $a_1 * b_2$ cost $5 and $10\n\n$$\n\\int_0^1 x\\,dx\n= \\frac12\n$$\n\n$$E=mc^2$$'],
         ['note embeds', '# A\n\n![[Packing]]\n\n![[Trip#Day one]]\n\nsee ![[X]] here'],
     ])('keeps %s', (_, markdown) => {

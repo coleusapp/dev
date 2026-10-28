@@ -239,6 +239,14 @@
     @apply no-underline;
 }
 
+.note-preview .mermaid-diagram {
+    @apply mb-2 flex justify-center overflow-x-auto;
+}
+
+.note-preview .mermaid-error {
+    @apply text-error mb-2 text-xs;
+}
+
 .tiptap .math-source {
     @apply bg-elevated rounded px-1 font-mono text-xs;
 }
