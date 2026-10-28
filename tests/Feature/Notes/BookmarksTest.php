@@ -94,3 +94,19 @@ it('keeps bookmarks private', function () {
     $this->put(route('notes.bookmarks.update', ['bookmark' => $theirs]), ['label' => 'x'])->assertNotFound();
     $this->delete(route('notes.bookmarks.destroy', ['bookmark' => $theirs]))->assertNotFound();
 });
+
+it('saves the current filters as a search', function () use ($sidebar) {
+    $folder = app(Coleus\Notes\Services\FolderService::class)->create('Work', null);
+
+    $this->post(route('notes.searches.store'), ['label' => 'Urgent work', 'tag' => 'Urgent', 'q' => 'plan', 'view' => 'notes', 'folder' => $folder->id])->assertRedirect();
+
+    $bookmark = $sidebar->call($this)[0]['bookmarks'][0];
+    expect($bookmark)->toMatchArray(['type' => 'search', 'title' => 'Urgent work', 'filters' => ['tag' => 'urgent', 'q' => 'plan', 'folder' => $folder->id]]);
+});
+
+it('needs a name and some filter to save a search', function () {
+    $this->post(route('notes.searches.store'), ['q' => 'plan'])->assertSessionHasErrors('label');
+    $this->post(route('notes.searches.store'), ['label' => 'Everything'])->assertSessionHasErrors('label');
+    $this->post(route('notes.searches.store'), ['label' => 'x', 'view' => 'nowhere'])->assertSessionHasErrors('view');
+    expect(Bookmark::query()->count())->toBe(0);
+});

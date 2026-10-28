@@ -26,6 +26,7 @@ import {
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
+import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
@@ -232,6 +233,16 @@ const noteBookmark = computed(() =>
 );
 
 const editingBookmark = ref<BookmarkItem | null>(null);
+const savingSearch = ref(false);
+
+/**
+ * A list can be saved as a search when something narrows it down.
+ */
+const canSaveSearch = computed(() => Boolean(props.filters.q || props.filters.tag || props.filters.folder || props.filters.view !== 'notes'));
+
+const suggestedSearchName = computed(() =>
+    [props.filters.q ? `“${props.filters.q}”` : null, listTitle.value !== 'Notes' ? listTitle.value : null].filter(Boolean).join(' in '),
+);
 const headingsToBookmark = ref<{ noteId: number; headings: string[] } | null>(null);
 
 const toggleBookmark = (): void => {
@@ -567,6 +578,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             </div>
                         </template>
                         <template #right>
+                            <UiButton
+                                v-if="canSaveSearch"
+                                icon="i-lucide-bookmark-plus"
+                                color="neutral"
+                                variant="ghost"
+                                aria-label="Save search"
+                                @click="savingSearch = true"
+                            />
                             <UiDropdownMenu v-if="filters.view !== 'recent'" :items="sortItems">
                                 <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
                             </UiDropdownMenu>
@@ -665,6 +684,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
+        <SaveSearchModal v-model:open="savingSearch" :filters="filters" :suggested-name="suggestedSearchName" />
         <BookmarkModal
             :editing="editingBookmark"
             :headings-of="headingsToBookmark"

@@ -25,6 +25,7 @@ Route::middleware(['web', 'auth'])
         Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy')->whereNumber('folder');
         Route::put('/{note}/folder', [FolderController::class, 'moveNote'])->name('folder.move')->whereNumber('note');
         Route::put('/sort', [SortController::class, 'update'])->name('sort.update');
+        Route::post('/searches', [BookmarkController::class, 'storeSearch'])->name('searches.store');
         Route::put('/bookmarks/{bookmark}', [BookmarkController::class, 'update'])->name('bookmarks.update')->whereNumber('bookmark');
         Route::post('/bookmarks/{bookmark}/move', [BookmarkController::class, 'move'])->name('bookmarks.move')->whereNumber('bookmark');
         Route::delete('/bookmarks/{bookmark}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy')->whereNumber('bookmark');
