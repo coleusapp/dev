@@ -55,6 +55,18 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         label: 'Move checked items to the bottom',
         help: 'When you tick a checklist item in the editor, it moves below the unticked ones.',
     },
+    {
+        key: 'list.sort',
+        label: 'Sort notes by',
+        help: 'The default order of the note list. Folders can have their own (sort menu in the list while in a folder).',
+        optionLabel: (value) => ({ modified: 'Date edited', created: 'Date created', title: 'Title' })[value as string] ?? String(value),
+    },
+    {
+        key: 'list.sort_direction',
+        label: 'Sort direction',
+        help: 'Descending is newest first (or Z to A for titles); ascending is oldest first (or A to Z).',
+        optionLabel: (value) => ({ desc: 'Descending', asc: 'Ascending' })[value as string] ?? String(value),
+    },
     { key: 'list.relative_dates', label: 'Relative dates in the list', help: 'Show "5 minutes ago" instead of the full date and time.' },
     { key: 'list.show_snippets', label: 'Show snippets in the list', help: 'Show a couple of lines of each note under its title.' },
 ];

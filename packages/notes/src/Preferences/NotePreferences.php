@@ -26,6 +26,8 @@ class NotePreferences
         'editor.text_direction' => ['default' => 'auto', 'options' => ['auto', 'ltr', 'rtl']],
         'editor.first_line_style' => ['default' => 'body', 'options' => ['title', 'heading', 'subheading', 'body']],
         'checklists.checked_to_bottom' => ['default' => false, 'type' => 'boolean'],
+        'list.sort' => ['default' => 'modified', 'options' => ['modified', 'created', 'title']],
+        'list.sort_direction' => ['default' => 'desc', 'options' => ['desc', 'asc']],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],
     ];

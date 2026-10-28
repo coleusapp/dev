@@ -38,11 +38,40 @@ export type NoteDetailData = NoteData & {
 export type NoteResource = Resource<NoteDetailData>;
 export type NoteCollection = { data: NoteData[] };
 
+export type SortField = 'modified' | 'created' | 'title';
+
+export type ListSort = {
+    sort: SortField;
+    direction: 'asc' | 'desc';
+    scope: 'folder' | 'default';
+};
+
 /**
- * The server's list order: pinned notes first, then most recently updated.
+ * The server's list order (Enums\NoteSort): pinned notes first, then the
+ * chosen field in the chosen direction (untitled notes last by title),
+ * then id.
  */
-export const compareNotes = (a: NoteData, b: NoteData): number =>
-    Number(b.pinned) - Number(a.pinned) || b.updated_at.localeCompare(a.updated_at) || b.id - a.id;
+export const compareNotes =
+    ({ sort, direction }: Pick<ListSort, 'sort' | 'direction'>) =>
+    (a: NoteData, b: NoteData): number => {
+        const sign = direction === 'asc' ? 1 : -1;
+        const pinned = Number(b.pinned) - Number(a.pinned);
+
+        if (pinned !== 0) {
+            return pinned;
+        }
+
+        if (sort === 'title') {
+            const untitled = Number(a.title === '') - Number(b.title === '');
+            const byTitle = a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+
+            return untitled || sign * byTitle || sign * (a.id - b.id);
+        }
+
+        const field = sort === 'created' ? 'created_at' : 'updated_at';
+
+        return sign * a[field].localeCompare(b[field]) || sign * (a.id - b.id);
+    };
 
 export type TagNode = {
     name: string;
@@ -120,6 +149,8 @@ export type NotePreferences = {
     'editor.text_direction': 'auto' | 'ltr' | 'rtl';
     'editor.first_line_style': 'title' | 'heading' | 'subheading' | 'body';
     'checklists.checked_to_bottom': boolean;
+    'list.sort': SortField;
+    'list.sort_direction': 'asc' | 'desc';
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
 };

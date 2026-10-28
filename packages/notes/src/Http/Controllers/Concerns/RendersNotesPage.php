@@ -6,6 +6,7 @@ use Coleus\Notes\Facades\Notes;
 use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
 use Coleus\Notes\Http\Resources\NoteResource;
+use Coleus\Notes\Models\Folder;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Notes\Search\NoteSearch;
@@ -28,7 +29,10 @@ trait RendersNotesPage
             $notes->collection->each(fn (NoteResource $resource) => $resource->highlight($words));
         }
 
+        $order = Notes::note()->sortFor($request->folderId() === null ? null : Folder::query()->find($request->folderId()));
+
         return Inertia::render('Index', [
+            'sort' => ['sort' => $order['sort']->value, 'direction' => $order['direction'], 'scope' => $order['scope']],
             'notes' => $notes,
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),

@@ -3,8 +3,11 @@
 namespace Coleus\Notes\Services;
 
 use Coleus\Notes\Data\NoteData;
+use Coleus\Notes\Enums\NoteSort;
 use Coleus\Notes\Enums\NoteView;
+use Coleus\Notes\Models\Folder;
 use Coleus\Notes\Models\Note;
+use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Support\Services\Service;
 use Coleus\Users\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,10 +27,26 @@ class NoteService extends Service
      */
     public function defaultQuery(): Builder
     {
-        return Note::query()
-            ->orderByRaw('case when pinned_at is null then 1 else 0 end')
-            ->orderByDesc('updated_at')
-            ->orderByDesc('id');
+        return NoteSort::Modified->apply(Note::query(), 'desc');
+    }
+
+    /**
+     * The order the list uses: the folder's own sort when it has one,
+     * otherwise the user's default (Settings / list menu).
+     *
+     * @return array{sort: NoteSort, direction: string, scope: 'folder'|'default'}
+     */
+    public function sortFor(?Folder $folder): array
+    {
+        if ($folder?->sort !== null && ($sort = NoteSort::tryFrom($folder->sort)) !== null) {
+            return ['sort' => $sort, 'direction' => $folder->sort_direction === 'asc' ? 'asc' : 'desc', 'scope' => 'folder'];
+        }
+
+        return [
+            'sort' => NoteSort::tryFrom((string) NotePreferences::get('list.sort')) ?? NoteSort::Modified,
+            'direction' => NotePreferences::get('list.sort_direction') === 'asc' ? 'asc' : 'desc',
+            'scope' => 'default',
+        ];
     }
 
     /**
@@ -139,7 +158,9 @@ class NoteService extends Service
      */
     public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes, ?int $folderId = null): Collection
     {
-        return $view->scope($this->defaultQuery())
+        $order = $this->sortFor($folderId === null ? null : Folder::query()->find($folderId));
+
+        return $view->scope($order['sort']->apply(Note::query(), $order['direction']))
             ->when($folderId !== null, fn (Builder $query) => $query->where('folder_id', $folderId))
             ->when($tag !== null, fn (Builder $query) => $this->whereTagged($query, (string) $tag))
             ->when($search !== null, fn (Builder $query) => $query->search((string) $search))

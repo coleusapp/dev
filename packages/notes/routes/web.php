@@ -7,6 +7,7 @@ use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
 use Coleus\Notes\Http\Controllers\SettingsController;
+use Coleus\Notes\Http\Controllers\SortController;
 use Coleus\Notes\Http\Controllers\TrashController;
 use Coleus\Notes\Http\Controllers\VersionController;
 use Coleus\Notes\Http\Controllers\WikiLinkController;
@@ -22,6 +23,7 @@ Route::middleware(['web', 'auth'])
         Route::put('/folders/{folder}', [FolderController::class, 'update'])->name('folders.update')->whereNumber('folder');
         Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy')->whereNumber('folder');
         Route::put('/{note}/folder', [FolderController::class, 'moveNote'])->name('folder.move')->whereNumber('note');
+        Route::put('/sort', [SortController::class, 'update'])->name('sort.update');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');

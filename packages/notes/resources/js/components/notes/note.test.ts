@@ -1,4 +1,4 @@
-import { filterQuery } from '@/components/notes/note';
+import { compareNotes, filterQuery } from '@/components/notes/note';
 import { describe, expect, it } from 'vitest';
 
 describe('filterQuery', () => {
@@ -8,5 +8,23 @@ describe('filterQuery', () => {
 
     it('drops the default view and empty values', () => {
         expect(filterQuery({ tag: null, q: null, view: 'notes', folder: null })).toEqual({});
+    });
+});
+
+describe('compareNotes', () => {
+    const note = (id: number, title: string, created: string, updated: string, pinned = false) =>
+        ({ id, title, created_at: created, updated_at: updated, pinned }) as unknown as import('@/components/notes/note').NoteData;
+    const a = note(1, 'apple', '2026-01-03', '2026-01-09');
+    const b = note(2, 'Banana', '2026-01-01', '2026-01-08');
+    const c = note(3, '', '2026-01-02', '2026-01-07');
+    const p = note(4, 'zebra', '2026-01-01', '2026-01-01', true);
+    const ids = (sort: 'modified' | 'created' | 'title', direction: 'asc' | 'desc') =>
+        [c, b, a, p].sort(compareNotes({ sort, direction })).map((n) => n.id);
+
+    it('mirrors the server order', () => {
+        expect(ids('modified', 'desc')).toEqual([4, 1, 2, 3]);
+        expect(ids('created', 'asc')).toEqual([4, 2, 3, 1]);
+        expect(ids('title', 'asc')).toEqual([4, 1, 2, 3]);
+        expect(ids('title', 'desc')).toEqual([4, 2, 1, 3]);
     });
 });

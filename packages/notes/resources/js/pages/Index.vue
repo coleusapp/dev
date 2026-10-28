@@ -8,12 +8,14 @@ import {
     NOTE_DRAG_TYPE,
     type FolderDialog,
     type FolderNode,
+    type ListSort,
     type NoteCollection,
     type NoteData,
     type NoteDetailData,
     type NoteFilters,
     type NotePreferences,
     type NoteResource,
+    type SortField,
     type TagNode,
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
@@ -33,6 +35,7 @@ const props = defineProps<{
     folders: FolderNode[];
     filters: NoteFilters;
     preferences: NotePreferences;
+    sort: ListSort;
 }>();
 
 /**
@@ -110,7 +113,7 @@ watch(
  * reloaded only when the note's hashtags changed.
  */
 const onNoteSaved = (saved: NoteDetailData): void => {
-    listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes);
+    listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes(props.sort));
     title.value = saved.title;
 
     const savedTags = saved.tags.join(' ');
@@ -134,6 +137,54 @@ const createNote = (): void => {
 const flattenFolders = (nodes: FolderNode[]): FolderNode[] => nodes.flatMap((node) => [node, ...flattenFolders(node.children)]);
 
 const currentFolder = computed(() => flattenFolders(props.folders).find((folder) => folder.id === props.filters.folder) ?? null);
+
+/**
+ * The list's sort menu. In a folder the choice becomes that folder's own
+ * order (Apple Notes style); elsewhere it changes the default.
+ */
+const setSort = (sort: SortField | null, direction: 'asc' | 'desc'): void => {
+    const folderId = props.filters.view === 'notes' ? props.filters.folder : null;
+
+    router.put(route('notes.sort.update'), { sort, direction, folder_id: folderId }, { preserveScroll: true, preserveState: true });
+};
+
+const sortItems = computed<DropdownMenuItem[][]>(() => {
+    const fields: [SortField, string][] = [
+        ['modified', 'Date edited'],
+        ['created', 'Date created'],
+        ['title', 'Title'],
+    ];
+    const directions: ['desc' | 'asc', string][] =
+        props.sort.sort === 'title'
+            ? [
+                  ['asc', 'A to Z'],
+                  ['desc', 'Z to A'],
+              ]
+            : [
+                  ['desc', 'Newest first'],
+                  ['asc', 'Oldest first'],
+              ];
+    const inFolder = props.filters.view === 'notes' && props.filters.folder !== null;
+
+    return [
+        [{ type: 'label', label: inFolder ? 'Sort this folder by' : 'Sort by' }],
+        fields.map(([value, label]) => ({
+            label,
+            type: 'checkbox',
+            checked: props.sort.sort === value,
+            onUpdateChecked: () => setSort(value, value === 'title' ? 'asc' : 'desc'),
+        })),
+        directions.map(([value, label]) => ({
+            label,
+            type: 'checkbox',
+            checked: props.sort.direction === value,
+            onUpdateChecked: () => setSort(props.sort.sort, value),
+        })),
+        ...(inFolder && props.sort.scope === 'folder'
+            ? [[{ label: 'Use the default order', icon: 'i-lucide-rotate-ccw', onSelect: () => setSort(null, 'desc') }]]
+            : []),
+    ];
+});
 
 const folderDialog = ref<FolderDialog | null>(null);
 const deletingFolder = ref<FolderNode | null>(null);
@@ -412,6 +463,9 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             </div>
                         </template>
                         <template #right>
+                            <UiDropdownMenu :items="sortItems">
+                                <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
+                            </UiDropdownMenu>
                             <UiDropdownMenu :items="tagFilterItems" class="lg:hidden">
                                 <UiButton icon="i-lucide-hash" color="neutral" variant="ghost" aria-label="Filter by tag" class="lg:hidden" />
                             </UiDropdownMenu>
