@@ -32,6 +32,7 @@ import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import QuickSwitcher from '@/components/notes/QuickSwitcher.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
+import SearchTips from '@/components/notes/SearchTips.vue';
 import ShortcutsModal from '@/components/notes/ShortcutsModal.vue';
 import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
@@ -42,7 +43,7 @@ import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts'
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { useEventListener, watchDebounced } from '@vueuse/core';
-import { computed, ref, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     notes: NoteCollection;
@@ -254,6 +255,18 @@ const searchInput = useTemplateRef<{ inputRef: HTMLInputElement | null }>('searc
 const focusSearch = (): void => {
     searchInput.value?.inputRef?.focus();
     searchInput.value?.inputRef?.select();
+};
+
+/**
+ * Adds a search operator from the tips and puts the caret after it.
+ */
+const insertSearchOperator = (text: string): void => {
+    search.value = `${search.value.trimEnd()} ${text}`.trimStart();
+    void nextTick(() => {
+        const input = searchInput.value?.inputRef;
+        input?.focus();
+        input?.setSelectionRange(search.value.length, search.value.length);
+    });
 };
 
 /**
@@ -850,8 +863,17 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                         size="sm"
                         :ui="{ trailing: 'pe-1' }"
                     >
-                        <template v-if="search" #trailing>
-                            <UiButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Clear search" @click="search = ''" />
+                        <template #trailing>
+                            <UiButton
+                                v-if="search"
+                                icon="i-lucide-x"
+                                color="neutral"
+                                variant="link"
+                                size="xs"
+                                aria-label="Clear search"
+                                @click="search = ''"
+                            />
+                            <SearchTips v-else @insert="insertSearchOperator" />
                         </template>
                     </UiInput>
                     <NoteList

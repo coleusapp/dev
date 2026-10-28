@@ -9,7 +9,7 @@ use Coleus\Notes\Http\Resources\NoteResource;
 use Coleus\Notes\Models\Folder;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Preferences\NotePreferences;
-use Coleus\Notes\Search\NoteSearch;
+use Coleus\Notes\Search\SearchQuery;
 use Coleus\Notes\Services\BookmarkService;
 use Coleus\Notes\Services\FolderService;
 use Inertia\Inertia;
@@ -26,7 +26,7 @@ trait RendersNotesPage
         $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view(), $request->folderId(), $request->smartFolder()?->rules, $request->property()));
 
         if ($search !== null) {
-            $words = NoteSearch::words($search);
+            $words = SearchQuery::parse($search)->highlightTerms();
             $notes->collection->each(fn (NoteResource $resource) => $resource->highlight($words));
         }
 

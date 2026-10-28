@@ -9,6 +9,7 @@ use Coleus\Notes\Models\Folder;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Models\SmartFolder;
 use Coleus\Notes\Preferences\NotePreferences;
+use Coleus\Notes\Search\SearchQuery;
 use Coleus\Notes\Search\SmartFolderRules;
 use Coleus\Support\Services\Service;
 use Coleus\Users\Models\Scopes\UserScope;
@@ -234,7 +235,8 @@ class NoteService extends Service
                 }
             })
             ->when($search !== null, fn (Builder $query) => $query->search((string) $search))
-            ->get();
+            ->get()
+            ->pipe(fn (Collection $notes) => $search === null ? $notes : SearchQuery::parse($search)->filter($notes));
     }
 
     /**

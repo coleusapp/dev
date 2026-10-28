@@ -6,7 +6,8 @@ use Coleus\Notes\Services\NoteService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Full-text search over note titles and bodies.
+ * Full-text search over note titles and bodies. A search box query is
+ * parsed by SearchQuery (operators and "phrases"); the plain words land here.
  *
  * On MariaDB/MySQL words go through the FULLTEXT(title, body) index in
  * boolean mode as required prefix terms ("+word*"). InnoDB skips words
@@ -34,8 +35,15 @@ class NoteSearch
      */
     public static function apply(Builder $query, string $terms): void
     {
-        $words = self::words($terms);
+        SearchQuery::parse($terms)->apply($query);
+    }
 
+    /**
+     * @param  Builder<\Coleus\Notes\Models\Note>  $query
+     * @param  list<string>  $words  from words()
+     */
+    public static function applyWords(Builder $query, array $words): void
+    {
         if ($words === []) {
             return;
         }
