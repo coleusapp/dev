@@ -140,6 +140,15 @@ class NoteService extends Service
     }
 
     /**
+     * Remembers when a note was last opened (for Recents), without
+     * counting as an edit.
+     */
+    public function markOpened(Note $note): void
+    {
+        Note::withoutTimestamps(fn () => $note->forceFill(['opened_at' => now()])->saveQuietly());
+    }
+
+    /**
      * Pinning is not an edit, so it leaves updated_at (and the list order within pinned notes) alone.
      */
     public function pin(Note $note): void

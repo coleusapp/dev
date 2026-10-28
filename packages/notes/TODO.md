@@ -205,7 +205,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] B6.3 Meeting notes: create a note from a Calendar event (title, date, attendees pre-filled; linked both ways)
 
 ## B7. Recents (Box Notes)
-- [ ] B7.4 Recents: notes recently opened by me (view tracking), separate from recently edited
+- [x] B7.4 Recents: notes recently opened by me (view tracking), separate from recently edited
 
 ## B8. Read-only lock (Box Notes)
 - [ ] B8.7 Read-only lock: make a note read-only so it can't be changed by accident; unlock any time

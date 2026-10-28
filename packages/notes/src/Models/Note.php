@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $body
  * @property \Illuminate\Support\Carbon|null $pinned_at
  * @property \Illuminate\Support\Carbon|null $archived_at
+ * @property \Illuminate\Support\Carbon|null $opened_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -67,6 +68,7 @@ class Note extends NotesModelDefaults
         return [
             'pinned_at' => 'datetime',
             'archived_at' => 'datetime',
+            'opened_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
     }

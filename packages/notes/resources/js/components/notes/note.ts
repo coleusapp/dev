@@ -80,7 +80,7 @@ export type TagNode = {
     children: TagNode[];
 };
 
-export type NoteView = 'notes' | 'archive' | 'trash';
+export type NoteView = 'notes' | 'archive' | 'trash' | 'recent';
 
 export type NoteFilters = {
     tag: string | null;

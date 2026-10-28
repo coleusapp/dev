@@ -113,7 +113,11 @@ watch(
  * reloaded only when the note's hashtags changed.
  */
 const onNoteSaved = (saved: NoteDetailData): void => {
-    listedNotes.value = [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes(props.sort));
+    // Recents stay in the order they were opened; other lists re-sort like the server.
+    listedNotes.value =
+        props.filters.view === 'recent'
+            ? listedNotes.value.map((listed) => (listed.id === saved.id ? saved : listed))
+            : [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes(props.sort));
     title.value = saved.title;
 
     const savedTags = saved.tags.join(' ');
@@ -248,7 +252,7 @@ const deleteNote = (): void => {
     }
 };
 
-const viewTitles = { notes: 'Notes', archive: 'Archive', trash: 'Trash' } as const;
+const viewTitles = { notes: 'Notes', archive: 'Archive', trash: 'Trash', recent: 'Recents' } as const;
 
 const listTitle = computed(() => {
     const base = currentFolder.value && props.filters.view === 'notes' ? currentFolder.value.name : viewTitles[props.filters.view];
@@ -260,6 +264,7 @@ const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [no
 
 const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'All notes', icon: 'i-lucide-notebook', to: route('notes.index', filterQuery({ q: props.filters.q })) },
+    { label: 'Recents', icon: 'i-lucide-clock', to: route('notes.index', filterQuery({ view: 'recent' })) },
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
     { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
@@ -434,6 +439,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         <p v-else class="text-dimmed px-2 py-1.5 text-xs">Add #tags to a note to organize it.</p>
                         <UiSeparator class="my-2" />
                         <Link
+                            :href="route('notes.index', filterQuery({ view: 'recent' }))"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+                            :class="{ 'bg-elevated font-medium': filters.view === 'recent' }"
+                        >
+                            <UiIcon name="i-lucide-clock" class="text-dimmed size-4" />
+                            Recents
+                        </Link>
+                        <Link
                             :href="route('notes.index', filterQuery({ view: 'archive', q: filters.q }))"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
                             :class="{ 'bg-elevated font-medium': filters.view === 'archive' }"
@@ -470,7 +483,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             </div>
                         </template>
                         <template #right>
-                            <UiDropdownMenu :items="sortItems">
+                            <UiDropdownMenu v-if="filters.view !== 'recent'" :items="sortItems">
                                 <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
                             </UiDropdownMenu>
                             <UiDropdownMenu :items="tagFilterItems" class="lg:hidden">

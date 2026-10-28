@@ -34,6 +34,10 @@ const emptyMessage = computed(() => {
         return 'The trash is empty.';
     }
 
+    if (props.filters.view === 'recent') {
+        return 'Notes you open show up here.';
+    }
+
     if (props.filters.view === 'archive') {
         return props.filters.tag ? `No archived notes tagged #${props.filters.tag}.` : 'The archive is empty.';
     }

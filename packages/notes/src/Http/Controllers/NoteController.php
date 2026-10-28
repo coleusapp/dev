@@ -24,6 +24,10 @@ class NoteController extends Controller
     {
         Gate::authorize('view', $note);
 
+        if (! $note->trashed()) {
+            Notes::note()->markOpened($note);
+        }
+
         return $this->notesPage($request, $note);
     }
 
