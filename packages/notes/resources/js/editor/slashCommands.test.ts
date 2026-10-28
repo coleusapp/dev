@@ -42,10 +42,21 @@ it('formats today as an ISO date', () => {
 
 describe('attachment commands', () => {
     it('offers files, a photo and a video from the camera', () => {
-        expect(filterSlashCommands('camera').map((command) => command.action)).toEqual([
+        expect(
+            filterSlashCommands('camera')
+                .map((command) => command.action)
+                .filter((action) => action.type === 'attach'),
+        ).toEqual([
             { type: 'attach', capture: 'photo' },
             { type: 'attach', capture: 'video' },
         ]);
         expect(filterSlashCommands('upload')[0].action).toEqual({ type: 'attach' });
+    });
+});
+
+describe('recording commands', () => {
+    it('offers recording the camera and the screen', () => {
+        expect(filterSlashCommands('screen')[0].action).toEqual({ type: 'record', kind: 'screen' });
+        expect(filterSlashCommands('webcam')[0].action).toEqual({ type: 'record', kind: 'camera' });
     });
 });

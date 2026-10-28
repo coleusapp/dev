@@ -12,6 +12,7 @@ import NoteInfo from '@/components/notes/NoteInfo.vue';
 import NoteTitle from '@/components/notes/NoteTitle.vue';
 import OutlinePanel from '@/components/notes/OutlinePanel.vue';
 import PropertiesPanel from '@/components/notes/PropertiesPanel.vue';
+import RecorderModal from '@/components/notes/RecorderModal.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
 import TagMenu from '@/components/notes/TagMenu.vue';
@@ -777,6 +778,8 @@ const chooseSlash = (command: SlashCommand): void => {
 
         if (command.action.type === 'attach') {
             pickFiles(command.action.capture);
+        } else if (command.action.type === 'record') {
+            record(command.action.kind);
         }
 
         return;
@@ -828,6 +831,9 @@ const chooseSlash = (command: SlashCommand): void => {
             break;
         case 'attach':
             pickFiles(action.capture);
+            break;
+        case 'record':
+            record(action.kind);
             break;
     }
 };
@@ -891,6 +897,17 @@ const videoInput = useTemplateRef<HTMLInputElement>('videoInput');
 
 const pickFiles = (capture?: 'photo' | 'video'): void => {
     (capture === 'photo' ? photoInput : capture === 'video' ? videoInput : fileInput).value?.click();
+};
+
+/**
+ * Recording in the browser (O3.1f): the recorder's file is attached like a picked one.
+ */
+const recording = ref<'camera' | 'screen' | 'audio' | null>(null);
+
+const record = (kind: 'camera' | 'screen' | 'audio'): void => {
+    if (!props.readonly) {
+        recording.value = kind;
+    }
 };
 
 const onPicked = (event: Event): void => {
@@ -1434,6 +1451,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
             @table-action="tableAction"
             @insert="insertAtCursor"
             @attach="pickFiles"
+            @record="record"
         />
         <input ref="fileInput" type="file" multiple class="hidden" @change="onPicked" />
         <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="onPicked" />
@@ -1600,6 +1618,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
         <!-- Outside the editing area, so pressing on the card doesn't close it before its link is followed. -->
         <LinkPreviewCard v-if="linkPreview.card.value" :preview="linkPreview.card.value" @enter="linkPreview.keep" @leave="linkPreview.hide" />
         <ImageViewer :image="viewedImage" @close="viewedImage = null" />
+        <RecorderModal :kind="recording" @close="recording = null" @recorded="(file) => attachFiles([file])" />
         <UiSlideover v-if="!isLarge" v-model:open="outlineSheetOpen" title="Outline" description="Jump to a heading in this note.">
             <template #body>
                 <OutlinePanel :headings="outline" @jump="jumpToHeading" />

@@ -20,6 +20,7 @@ const emit = defineEmits<{
     tableAction: [action: TableAction];
     insert: [text: string];
     attach: [capture?: 'photo' | 'video'];
+    record: [kind: 'camera' | 'screen' | 'audio'];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -202,6 +203,8 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
             :items="[
                 { label: 'Take a photo', icon: 'i-lucide-camera', onSelect: () => emit('attach', 'photo') },
                 { label: 'Record a video', icon: 'i-lucide-video', onSelect: () => emit('attach', 'video') },
+                { label: 'Record with the camera here', icon: 'i-lucide-webcam', onSelect: () => emit('record', 'camera') },
+                { label: 'Record the screen', icon: 'i-lucide-monitor', onSelect: () => emit('record', 'screen') },
             ]"
         >
             <UiTooltip text="Camera">

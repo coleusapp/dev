@@ -395,7 +395,8 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
             current.chain().focus().insertContent(todayIso()).run();
             break;
         case 'attach':
-            // The file picker belongs to NoteEditor, which opens it after this.
+        case 'record':
+            // The file picker and the recorder belong to NoteEditor, which opens them after this.
             break;
     }
 };

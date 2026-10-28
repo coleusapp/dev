@@ -18,7 +18,8 @@ export type SlashCommand = {
         | { type: 'callout' }
         | { type: 'wikiLink' }
         | { type: 'date' }
-        | { type: 'attach'; capture?: 'photo' | 'video' };
+        | { type: 'attach'; capture?: 'photo' | 'video' }
+        | { type: 'record'; kind: 'camera' | 'screen' | 'audio' };
 };
 
 export const SLASH_COMMANDS: SlashCommand[] = [
@@ -79,6 +80,20 @@ export const SLASH_COMMANDS: SlashCommand[] = [
         icon: 'i-lucide-video',
         keywords: ['camera', 'film', 'clip'],
         action: { type: 'attach', capture: 'video' },
+    },
+    {
+        id: 'record',
+        label: 'Record with the camera',
+        icon: 'i-lucide-webcam',
+        keywords: ['webcam', 'video'],
+        action: { type: 'record', kind: 'camera' },
+    },
+    {
+        id: 'screen',
+        label: 'Record the screen',
+        icon: 'i-lucide-monitor',
+        keywords: ['screencast', 'capture'],
+        action: { type: 'record', kind: 'screen' },
     },
     { id: 'date', label: "Today's date", icon: 'i-lucide-calendar', keywords: ['today', 'now'], action: { type: 'date' } },
 ];
