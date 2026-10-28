@@ -33,8 +33,9 @@ class AttachmentController extends Controller
     }
 
     /**
-     * The file, or a smaller copy of an image for ?w= (one of the
-     * configured widths; the original when there's no such copy).
+     * The file, a smaller copy of an image for ?w= (one of the configured
+     * widths; the original when there's no such copy), or a video's poster
+     * frame for ?poster=1 (404 until there is one).
      */
     public function show(Request $request, Attachment $attachment): Response
     {
@@ -42,6 +43,6 @@ class AttachmentController extends Controller
 
         $width = $request->integer('w');
 
-        return $this->attachments->response($attachment, $width > 0 ? $width : null);
+        return $this->attachments->response($attachment, $width > 0 ? $width : null, $request->boolean('poster'));
     }
 }

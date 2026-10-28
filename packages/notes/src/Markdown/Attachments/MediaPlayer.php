@@ -27,7 +27,7 @@ class MediaPlayer
         $size = [...($width ? ['width' => (string) $width] : []), ...($height ? ['height' => (string) $height] : [])];
 
         return match (true) {
-            preg_match(self::VIDEO, $path) === 1 => new HtmlElement('video', ['src' => $url, 'controls' => '', 'preload' => 'metadata', 'class' => 'attachment-video', 'title' => $name, ...$size], ''),
+            preg_match(self::VIDEO, $path) === 1 => new HtmlElement('video', ['src' => $url, 'poster' => $path.'?poster=1', 'controls' => '', 'preload' => 'metadata', 'class' => 'attachment-video', 'title' => $name, ...$size], ''),
             preg_match(self::AUDIO, $path) === 1 => new HtmlElement('audio', ['src' => $url, 'controls' => '', 'preload' => 'metadata', 'class' => 'attachment-audio', 'title' => $name], ''),
             preg_match(self::PDF, $path) === 1 => new HtmlElement('iframe', ['src' => $url, 'class' => 'attachment-pdf', 'title' => $name, 'loading' => 'lazy', ...$size], ''),
             default => null,

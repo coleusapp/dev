@@ -28,7 +28,12 @@ export const MediaImage = Image.extend({
         const attributes = mergeAttributes(this.options.HTMLAttributes, HTMLAttributes);
 
         if (kind === 'video') {
-            return ['video', { src: attributes.src, title: attributes.alt, controls: 'true', preload: 'metadata', class: 'attachment-video' }];
+            const poster = `${String(attributes.src).split(/[?#]/)[0]}?poster=1`;
+
+            return [
+                'video',
+                { src: attributes.src, poster, title: attributes.alt, controls: 'true', preload: 'metadata', class: 'attachment-video' },
+            ];
         }
 
         if (kind === 'audio') {

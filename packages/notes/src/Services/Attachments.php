@@ -4,6 +4,7 @@ namespace Coleus\Notes\Services;
 
 use Coleus\Notes\Enums\AttachmentKind;
 use Coleus\Notes\Jobs\ProcessImageAttachment;
+use Coleus\Notes\Jobs\ProcessVideoAttachment;
 use Coleus\Notes\Models\Attachment;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
@@ -63,9 +64,11 @@ class Attachments
             'path' => $path,
         ]);
 
-        if ($kind === AttachmentKind::Image) {
-            ProcessImageAttachment::dispatch($attachment->id);
-        }
+        match ($kind) {
+            AttachmentKind::Image => ProcessImageAttachment::dispatch($attachment->id),
+            AttachmentKind::Video => ProcessVideoAttachment::dispatch($attachment->id),
+            default => null,
+        };
 
         return $attachment;
     }
@@ -75,13 +78,17 @@ class Attachments
      * local disk the response answers Range requests, so audio and video
      * can seek.
      */
-    public function response(Attachment $attachment, ?int $width = null): Response
+    public function response(Attachment $attachment, ?int $width = null, bool $poster = false): Response
     {
-        $variant = $width === null ? null : ($attachment->variants[(string) $width] ?? null);
+        if ($poster && $attachment->poster_path === null) {
+            abort(404);
+        }
+
+        $variant = $poster ? $attachment->poster_path : ($width === null ? null : ($attachment->variants[(string) $width] ?? null));
         $path = $variant ?? $attachment->path;
-        $inline = $attachment->kind->servesInline($attachment->mime);
+        $inline = $poster || $attachment->kind->servesInline($attachment->mime);
         $headers = [
-            'Content-Type' => $variant === null ? $attachment->mime : 'image/webp',
+            'Content-Type' => $poster ? 'image/jpeg' : ($variant === null ? $attachment->mime : 'image/webp'),
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, max-age=31536000, immutable',
             ...($inline ? [] : ['Content-Security-Policy' => 'sandbox']),

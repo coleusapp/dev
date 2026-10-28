@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
  * @property int $size
  * @property int|null $width
  * @property int|null $height
+ * @property int|null $duration_ms
+ * @property string|null $poster_path
  * @property string $path
  * @property array<string, string>|null $variants
  * @property \Illuminate\Support\Carbon|null $processed_at
@@ -51,6 +53,7 @@ class Attachment extends NotesModelDefaults
             'size' => 'integer',
             'width' => 'integer',
             'height' => 'integer',
+            'duration_ms' => 'integer',
             'variants' => 'array',
             'processed_at' => 'datetime',
         ];

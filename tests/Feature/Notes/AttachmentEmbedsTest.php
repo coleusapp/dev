@@ -49,7 +49,7 @@ it('plays attached video and audio and shows PDFs in place', function () {
     $audio = Attachment::query()->create(['uuid' => (string) Str::uuid(), 'name' => 'Memo.m4a', 'mime' => 'audio/mp4', 'kind' => 'audio', 'size' => 10, 'path' => 'x']);
     $pdf = attachment('Report.pdf', 'document');
 
-    expect(NoteMarkdown::toHtml('![[clip.mp4|640]]'))->toContain('<video src="/notes/attachments/'.$video->uuid.'/Clip.mp4" controls="" preload="metadata" class="attachment-video" title="Clip.mp4" width="640"></video>')
+    expect(NoteMarkdown::toHtml('![[clip.mp4|640]]'))->toContain('<video src="/notes/attachments/'.$video->uuid.'/Clip.mp4" poster="/notes/attachments/'.$video->uuid.'/Clip.mp4?poster=1" controls="" preload="metadata" class="attachment-video" title="Clip.mp4" width="640"></video>')
         ->and(NoteMarkdown::toHtml('![[Memo.m4a]]'))->toContain('<audio src="/notes/attachments/'.$audio->uuid.'/Memo.m4a" controls="" preload="metadata" class="attachment-audio"')
         ->and(NoteMarkdown::toHtml('![[Report.pdf]]'))->toContain('<iframe src="/notes/attachments/'.$pdf->uuid.'/Report.pdf" class="attachment-pdf" title="Report.pdf" loading="lazy"></iframe>')
         ->and(NoteMarkdown::toHtml($video->markdown()))->toContain('<video src="/notes/attachments/'.$video->uuid.'/Clip.mp4"')

@@ -77,5 +77,13 @@ return [
          */
         'image_widths' => [320, 960, 1920],
         'max_dimension' => 4096,
+
+        /*
+         * Videos get a poster frame, duration and size after upload
+         * (Jobs\ProcessVideoAttachment). Needs FFmpeg; leave the defaults
+         * when ffmpeg and ffprobe are on the PATH.
+         */
+        'ffmpeg' => env('NOTES_FFMPEG', 'ffmpeg'),
+        'ffprobe' => env('NOTES_FFPROBE', 'ffprobe'),
     ],
 ];

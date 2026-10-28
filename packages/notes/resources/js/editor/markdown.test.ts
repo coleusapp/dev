@@ -65,6 +65,7 @@ describe('round trip', () => {
 
         expect(roundTrip(markdown)).toBe(markdown);
         expect(editor.view.dom.querySelector('video')?.getAttribute('src')).toBe('/notes/attachments/abc/Clip.mp4');
+        expect(editor.view.dom.querySelector('video')?.getAttribute('poster')).toBe('/notes/attachments/abc/Clip.mp4?poster=1');
         expect(editor.view.dom.querySelector('audio')).not.toBeNull();
         expect(editor.view.dom.querySelector('iframe.attachment-pdf')).not.toBeNull();
         expect(editor.view.dom.querySelectorAll('img:not(.ProseMirror-separator)')).toHaveLength(1);
