@@ -1,4 +1,4 @@
-import { renameFirstLine } from '@/lib/title';
+import { renameFirstLine, titleOf } from '@/lib/title';
 import { describe, expect, it } from 'vitest';
 
 describe('renameFirstLine', () => {
@@ -18,5 +18,14 @@ describe('renameFirstLine', () => {
     it('adds a title line to an empty or blank note', () => {
         expect(renameFirstLine('', 'New')).toBe('New');
         expect(renameFirstLine('\n\n', 'New')).toBe('New');
+    });
+});
+
+describe('titleOf', () => {
+    it('reads the first line with text, without Markdown', () => {
+        expect(titleOf('---\ntags: [a]\n---\n\n# **Bank** details\nbody')).toBe('Bank details');
+        expect(titleOf('```\n\n- [ ] [[Call|call]] `mom` [site](https://x.test)')).toBe('call mom site');
+        expect(titleOf('   \n')).toBe('');
+        expect(titleOf('x'.repeat(300))).toHaveLength(255);
     });
 });

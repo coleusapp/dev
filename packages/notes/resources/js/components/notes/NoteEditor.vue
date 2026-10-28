@@ -22,6 +22,7 @@ import { useDateMenu, type OpenDateMenu } from '@/composables/useDateMenu';
 import { useFindReplace } from '@/composables/useFindReplace';
 import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
 import { useLinkPreview } from '@/composables/useLinkPreview';
+import { touchKeys } from '@/composables/useNoteKeys';
 import { usePreviewFolding } from '@/composables/usePreviewFolding';
 import { useRelink } from '@/composables/useRelink';
 import { useTagMenu, type OpenTagMenu } from '@/composables/useTagMenu';
@@ -54,11 +55,12 @@ import {
     type TextEdit,
 } from '@/lib/markdownFormat';
 import { renderMath } from '@/lib/math';
+import { encryptText } from '@/lib/noteCrypto';
 import { noteOutline, type OutlineHeading } from '@/lib/outline';
 import { pasteUrlOverSelection } from '@/lib/paste';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
-import { renameFirstLine } from '@/lib/title';
+import { renameFirstLine, titleOf } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
 import { useLocalStorage, useMediaQuery } from '@vueuse/core';
 import { computed, nextTick, onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
@@ -75,6 +77,12 @@ const props = defineProps<{
     readableWidth?: boolean;
     focusHeading?: string | null;
     tags?: string[];
+    /**
+     * A password-locked note open with its key (O12.5): it saves encrypted,
+     * and only the editors that work in the browser are offered (the
+     * server can't render text it can't read).
+     */
+    encryption?: { keyId: number; key: CryptoKey } | null;
 }>();
 
 const emit = defineEmits<{
@@ -191,7 +199,22 @@ const onServerSave = (note: NoteDetailData): void => {
     emit('saved', note);
 };
 
-const { status, error, flush, adopt, isDirty } = useAutosave(props.note, body, onServerSave, props.autosaveDelay);
+const { status, error, flush, adopt, isDirty } = useAutosave(
+    props.note,
+    body,
+    onServerSave,
+    props.autosaveDelay,
+    props.encryption
+        ? {
+              url: () => route('notes.lock.update', { note: props.note.id }),
+              payload: async (text: string) => {
+                  touchKeys();
+
+                  return { ...(await encryptText(props.encryption!.key, text)), title: titleOf(text) };
+              },
+          }
+        : null,
+);
 
 const togglingTask = ref(false);
 const taskError = ref<string | null>(null);
@@ -323,6 +346,10 @@ const visualAnyway = ref(false);
  * as source.
  */
 const mode = computed<EditorMode>(() => {
+    if (props.encryption && (props.readonly || preferredMode.value === 'split' || preferredMode.value === 'preview')) {
+        return 'edit';
+    }
+
     if (props.readonly) {
         return 'preview';
     }
@@ -345,8 +372,8 @@ watch([html, mode], typesetPreview);
 const modeItems = computed(() => [
     { value: 'edit', icon: 'i-lucide-pencil', label: 'Visual editor' },
     { value: 'source', icon: 'i-lucide-code-xml', label: 'Markdown source' },
-    ...(isWide.value ? [{ value: 'split', icon: 'i-lucide-columns-2', label: 'Source and preview' }] : []),
-    { value: 'preview', icon: 'i-lucide-book-open', label: 'Reading view' },
+    ...(isWide.value && !props.encryption ? [{ value: 'split', icon: 'i-lucide-columns-2', label: 'Source and preview' }] : []),
+    ...(props.encryption ? [] : [{ value: 'preview', icon: 'i-lucide-book-open', label: 'Reading view' }]),
 ]);
 
 const setMode = async (next: EditorMode): Promise<void> => {
@@ -1280,7 +1307,7 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
     ];
 });
 
-defineExpose({ paletteCommands });
+defineExpose({ paletteCommands, flush, currentBody: () => body.value });
 </script>
 
 <template>
@@ -1367,7 +1394,8 @@ defineExpose({ paletteCommands });
             @keydown.passive="linkPreview.close"
         >
             <VisualEditor
-                v-if="!readonly"
+                v-if="!readonly || encryption"
+                :readonly="readonly"
                 v-show="mode === 'edit'"
                 ref="visual"
                 :active="mode === 'edit'"

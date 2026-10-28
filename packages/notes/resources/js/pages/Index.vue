@@ -6,6 +6,7 @@ import { menuCommands, type PaletteGroup } from '@/components/notes/commands';
 import ConfirmModal from '@/components/notes/ConfirmModal.vue';
 import FolderModal from '@/components/notes/FolderModal.vue';
 import FolderTree from '@/components/notes/FolderTree.vue';
+import LockedNote from '@/components/notes/LockedNote.vue';
 import {
     compareNotes,
     describeProperty,
@@ -31,6 +32,7 @@ import {
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
+import PasswordModal from '@/components/notes/PasswordModal.vue';
 import QuickSwitcher from '@/components/notes/QuickSwitcher.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
 import SearchTips from '@/components/notes/SearchTips.vue';
@@ -39,9 +41,13 @@ import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import { useNoteHistory } from '@/composables/useNoteHistory';
+import { cachedKey, currentKeyParams, keyParams, setPassword, unlockWithPassword } from '@/composables/useNoteKeys';
 import { useSearchScope } from '@/composables/useSearchScope';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import { jsonHeaders } from '@/lib/http';
+import { encryptText } from '@/lib/noteCrypto';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
+import { titleOf } from '@/lib/title';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { useEventListener, watchDebounced } from '@vueuse/core';
@@ -591,6 +597,14 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
     return [
         [
             { label: isPinned.value ? 'Unpin note' : 'Pin note', icon: isPinned.value ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: togglePin },
+            props.note?.data.locked
+                ? {
+                      label: lockedEditor.value?.isOpen ? 'Remove password lock' : 'Remove password lock (open it first)',
+                      icon: 'i-lucide-key-round',
+                      disabled: !lockedEditor.value?.isOpen,
+                      onSelect: () => void lockedEditor.value?.removeLock(),
+                  }
+                : { label: 'Lock with password…', icon: 'i-lucide-key-round', onSelect: () => void lockNote() },
             props.note?.data.read_only
                 ? { label: 'Unlock editing', icon: 'i-lucide-lock-open', onSelect: () => setReadOnly(false) }
                 : { label: 'Lock editing (read-only)', icon: 'i-lucide-lock', onSelect: () => setReadOnly(true) },
@@ -628,6 +642,97 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
 });
 
 const editor = useTemplateRef<InstanceType<typeof NoteEditor>>('editor');
+const lockedEditor = useTemplateRef<InstanceType<typeof LockedNote>>('lockedEditor');
+
+/**
+ * The editor settings, shared by plain and locked notes.
+ */
+const editorProps = computed(() => ({
+    readonly: Boolean(props.note?.data.trashed || props.note?.data.read_only),
+    defaultMode: props.preferences['editor.default_mode'],
+    autosaveDelay: props.preferences['editor.autosave_delay'],
+    firstLineStyle: props.preferences['editor.first_line_style'],
+    checkedToBottom: props.preferences['checklists.checked_to_bottom'],
+    spellcheck: props.preferences['editor.spellcheck'],
+    textDirection: props.preferences['editor.text_direction'],
+    readableWidth: props.preferences['editor.readable_width'],
+    focusHeading: focusHeading.value,
+    tags: tagPaths.value,
+}));
+
+/**
+ * Locking a note with the notes password (O12.5): set the password the
+ * first time, or enter it unless it's remembered; then the note's text is
+ * encrypted here and only the result is sent. Kept-alive editors are
+ * dropped afterwards so the readable text doesn't stay in memory.
+ */
+const keepAliveGeneration = ref(0);
+const passwordPrompt = ref<{ mode: 'set' | 'enter'; keyId: number | null; hint: string | null; error: string | null; busy: boolean } | null>(null);
+
+const lockWith = async (keyId: number, key: CryptoKey): Promise<void> => {
+    if (!props.note || !editor.value) {
+        return;
+    }
+
+    await editor.value.flush();
+    const text = editor.value.currentBody();
+    const response = await fetch(route('notes.lock.store', { note: props.note.data.id }), {
+        method: 'POST',
+        headers: jsonHeaders(),
+        credentials: 'same-origin',
+        body: JSON.stringify({ key_id: keyId, ...(await encryptText(key, text)), title: titleOf(text) }),
+    });
+
+    if (response.ok) {
+        passwordPrompt.value = null;
+        keepAliveGeneration.value++;
+        router.reload({ only: ['note', 'notes'] });
+    } else if (passwordPrompt.value) {
+        passwordPrompt.value = { ...passwordPrompt.value, busy: false, error: "Couldn't lock the note." };
+    }
+};
+
+const lockNote = async (): Promise<void> => {
+    const params = await currentKeyParams();
+    const remembered = params ? cachedKey(params.id) : null;
+
+    if (params && remembered) {
+        await lockWith(params.id, remembered);
+    } else {
+        passwordPrompt.value = { mode: params ? 'enter' : 'set', keyId: params?.id ?? null, hint: params?.hint ?? null, error: null, busy: false };
+    }
+};
+
+const onPassword = async ({ password, hint }: { password: string; hint: string | null }): Promise<void> => {
+    const prompt = passwordPrompt.value;
+
+    if (!prompt) {
+        return;
+    }
+
+    passwordPrompt.value = { ...prompt, busy: true, error: null };
+
+    if (prompt.mode === 'set') {
+        const created = await setPassword(password, hint);
+
+        if ('error' in created) {
+            passwordPrompt.value = { ...prompt, busy: false, error: created.error };
+        } else {
+            await lockWith(created.id, created.key);
+        }
+
+        return;
+    }
+
+    const params = prompt.keyId === null ? null : await keyParams(prompt.keyId);
+    const key = params ? await unlockWithPassword(params, password) : null;
+
+    if (key && prompt.keyId !== null) {
+        await lockWith(prompt.keyId, key);
+    } else {
+        passwordPrompt.value = { ...prompt, busy: false, error: 'Wrong password.' };
+    }
+};
 
 const visitList = (filters: Partial<NoteFilters>): void => router.visit(route('notes.index', filterQuery(filters)));
 
@@ -656,7 +761,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         ],
     },
     { id: 'note', label: 'Note', commands: props.note ? menuCommands('note', noteMenuItems.value) : [] },
-    { id: 'editor', label: 'Editor', commands: props.note ? (editor.value?.paletteCommands ?? []) : [] },
+    { id: 'editor', label: 'Editor', commands: props.note ? ((editor.value ?? lockedEditor.value)?.paletteCommands ?? []) : [] },
     {
         id: 'go',
         label: 'Go to',
@@ -1020,26 +1125,27 @@ const commandGroups = computed<PaletteGroup[]>(() => [
 
                 <template #body>
                     <!-- Recently opened notes stay alive so each keeps its undo history while you switch between them. -->
-                    <KeepAlive :max="10">
+                    <KeepAlive :key="keepAliveGeneration" :max="10">
                         <NoteEditor
-                            v-if="note"
+                            v-if="note && !note.data.locked"
                             ref="editor"
                             :key="note.data.id"
                             :note="note.data"
-                            :readonly="note.data.trashed || note.data.read_only"
-                            :default-mode="preferences['editor.default_mode']"
-                            :autosave-delay="preferences['editor.autosave_delay']"
-                            :first-line-style="preferences['editor.first_line_style']"
-                            :checked-to-bottom="preferences['checklists.checked_to_bottom']"
-                            :spellcheck="preferences['editor.spellcheck']"
-                            :text-direction="preferences['editor.text_direction']"
-                            :readable-width="preferences['editor.readable_width']"
-                            :focus-heading="focusHeading"
-                            :tags="tagPaths"
+                            v-bind="editorProps"
                             @saved="onNoteSaved"
                             @create-linked="(title) => (linkedTitle = title)"
                         />
                     </KeepAlive>
+                    <!-- Locked notes are never kept alive: their text leaves memory when another note opens. -->
+                    <LockedNote
+                        v-if="note && note.data.locked"
+                        ref="lockedEditor"
+                        :key="note.data.id"
+                        :note="note.data"
+                        v-bind="editorProps"
+                        @saved="onNoteSaved"
+                        @create-linked="(title) => (linkedTitle = title)"
+                    />
                     <div v-if="!note" class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.
                     </div>
@@ -1051,6 +1157,21 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         <QuickSwitcher v-model:open="switching" :filters="filters" />
         <CommandPalette v-model:open="showingCommands" :groups="commandGroups" />
         <ShortcutsModal v-model:open="showingShortcuts" />
+        <PasswordModal
+            :open="passwordPrompt !== null"
+            :mode="passwordPrompt?.mode ?? 'enter'"
+            :title="passwordPrompt?.mode === 'set' ? 'Set a notes password' : 'Lock with password'"
+            :description="
+                passwordPrompt?.mode === 'set'
+                    ? 'Locked notes are encrypted in this browser with this password before they are saved.'
+                    : 'Enter your notes password to lock this note.'
+            "
+            :hint="passwordPrompt?.hint"
+            :error="passwordPrompt?.error"
+            :busy="passwordPrompt?.busy"
+            @update:open="(open) => !open && (passwordPrompt = null)"
+            @submit="onPassword"
+        />
         <SaveSearchModal v-model:open="savingSearch" :filters="filters" :suggested-name="suggestedSearchName" />
         <BookmarkModal
             :editing="editingBookmark"

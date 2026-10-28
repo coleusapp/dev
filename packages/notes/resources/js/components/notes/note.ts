@@ -13,6 +13,7 @@ export type NoteData = {
     snippet: string;
     pinned: boolean;
     read_only: boolean;
+    locked: boolean;
     archived: boolean;
     folder_id: number | null;
     trashed: boolean;
@@ -50,6 +51,10 @@ export type NoteDetailData = NoteData & {
     tags: string[];
     backlinks: Backlink[];
     outgoing: OutgoingLink[];
+    /**
+     * A password-locked note's encrypted text (O12.5); body is empty then.
+     */
+    lock: { key_id: number; iv: string; ciphertext: string } | null;
 };
 
 export type NoteResource = Resource<NoteDetailData>;
