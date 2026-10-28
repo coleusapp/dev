@@ -3,7 +3,7 @@ import HighlightedText from '@/components/notes/HighlightedText.vue';
 import { describeProperty, describeTags, filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { groupNotesByDate } from '@/lib/dateGroups';
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, nextTick, useTemplateRef, watch } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -31,6 +31,17 @@ const query = computed(() => filterQuery(props.filters));
  * Date sections when grouping is on, otherwise one unlabeled section.
  */
 const groups = computed(() => (props.groupBy ? groupNotesByDate(props.notes, props.groupBy) : [{ label: '', notes: props.notes }]));
+
+const list = useTemplateRef<HTMLElement>('list');
+
+/**
+ * Keeps the open note's row in view when it changes from elsewhere (the
+ * next / previous note shortcuts, the quick switcher).
+ */
+watch(
+    () => props.selectedId,
+    (id) => void nextTick(() => list.value?.querySelector(`[data-note-id="${id}"]`)?.scrollIntoView({ block: 'nearest' })),
+);
 
 const emptyMessage = computed(() => {
     if (props.filters.q) {
@@ -65,12 +76,13 @@ const emptyMessage = computed(() => {
             filters.tag ? 'New note with this tag' : 'Create your first note'
         }}</UiButton>
     </div>
-    <nav v-else class="flex flex-col">
+    <nav v-else ref="list" class="flex flex-col">
         <section v-for="group in groups" :key="group.label" class="divide-default flex flex-col divide-y" :aria-label="group.label || undefined">
             <h3 v-if="group.label" class="bg-default text-dimmed sticky top-0 z-10 px-3 pt-3 pb-1 text-xs font-semibold">{{ group.label }}</h3>
             <Link
                 v-for="note in group.notes"
                 :key="note.id"
+                :data-note-id="note.id"
                 :href="route('notes.show', { note: note.id, ...query })"
                 preserve-state
                 preserve-scroll

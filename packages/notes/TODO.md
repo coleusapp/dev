@@ -88,7 +88,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O7.6 Saved searches (ties to bookmarks)
 - [ ] O7.8 Outline panel: heading tree of the current note, click to jump
 - [ ] O7.9 Navigation history: back/forward between notes
-- [ ] O7.10 Keyboard shortcuts, a fixed well-chosen set (new note, search, cycle notes) (Bear 8.2) (Apple: Cmd+N new note, Cmd+Shift+N new folder, Cmd+L checklist, Cmd+Shift+T/H/J title/heading/subheading, Cmd+U underline) 🍎
+- [x] O7.10 Keyboard shortcuts, a fixed well-chosen set (new note, search, cycle notes) (Bear 8.2) (Apple: Cmd+N new note, Cmd+Shift+N new folder, Cmd+L checklist, Cmd+Shift+T/H/J title/heading/subheading, Cmd+U underline) 🍎
 
 ## O9. Daily notes, templates, productivity
 - [ ] O9.1 Daily notes: "today's note" command, configurable title format and template, folder

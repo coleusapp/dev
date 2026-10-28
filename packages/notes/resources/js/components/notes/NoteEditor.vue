@@ -35,6 +35,7 @@ import {
     type TextEdit,
 } from '@/lib/markdownFormat';
 import { pasteUrlOverSelection } from '@/lib/paste';
+import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { renameFirstLine } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
@@ -761,25 +762,60 @@ const onKeydown = (event: KeyboardEvent): void => {
 };
 
 const formatCommands: { command: FormatCommand; label: string; icon: string; kbds?: string[] }[] = [
-    { command: 'bold', label: 'Bold', icon: 'i-lucide-bold', kbds: ['meta', 'B'] },
-    { command: 'italic', label: 'Italic', icon: 'i-lucide-italic', kbds: ['meta', 'I'] },
-    { command: 'underline', label: 'Underline', icon: 'i-lucide-underline', kbds: ['meta', 'U'] },
-    { command: 'strike', label: 'Strikethrough', icon: 'i-lucide-strikethrough', kbds: ['meta', 'shift', 'X'] },
+    { command: 'bold', label: 'Bold', icon: 'i-lucide-bold', kbds: shortcutKeys('bold') },
+    { command: 'italic', label: 'Italic', icon: 'i-lucide-italic', kbds: shortcutKeys('italic') },
+    { command: 'underline', label: 'Underline', icon: 'i-lucide-underline', kbds: shortcutKeys('underline') },
+    { command: 'strike', label: 'Strikethrough', icon: 'i-lucide-strikethrough', kbds: shortcutKeys('strike') },
     { command: 'code', label: 'Code', icon: 'i-lucide-code' },
-    { command: 'link', label: 'Link', icon: 'i-lucide-link', kbds: ['meta', 'K'] },
+    { command: 'link', label: 'Link', icon: 'i-lucide-link', kbds: shortcutKeys('link') },
     { command: 'list', label: 'Bulleted list', icon: 'i-lucide-list' },
     { command: 'numbered', label: 'Numbered list', icon: 'i-lucide-list-ordered' },
-    { command: 'checklist', label: 'Checklist', icon: 'i-lucide-list-checks' },
+    { command: 'checklist', label: 'Checklist', icon: 'i-lucide-list-checks', kbds: shortcutKeys('checklist') },
     { command: 'quote', label: 'Block quote', icon: 'i-lucide-text-quote' },
 ];
 
-const styleCommands: { style: ParagraphStyle; label: string }[] = [
-    { style: 'title', label: 'Title' },
-    { style: 'heading', label: 'Heading' },
-    { style: 'subheading', label: 'Subheading' },
-    { style: 'body', label: 'Body' },
+const styleCommands: { style: ParagraphStyle; label: string; kbds?: string[] }[] = [
+    { style: 'title', label: 'Title', kbds: shortcutKeys('title') },
+    { style: 'heading', label: 'Heading', kbds: shortcutKeys('heading') },
+    { style: 'subheading', label: 'Subheading', kbds: shortcutKeys('subheading') },
+    { style: 'body', label: 'Body', kbds: shortcutKeys('body') },
     { style: 'monostyled', label: 'Monostyled' },
 ];
+
+const styleShortcuts: [ShortcutId, ParagraphStyle][] = [
+    ['title', 'title'],
+    ['heading', 'heading'],
+    ['subheading', 'subheading'],
+    ['body', 'body'],
+    ['heading-apple', 'heading'],
+    ['subheading-apple', 'subheading'],
+];
+
+/**
+ * The checklist and paragraph-style shortcuts (lib/shortcuts.ts), caught
+ * on the way down so the visual editor never sees them: both modes then
+ * behave alike, and Tiptap's own Mod-Alt-1… doesn't toggle a second time.
+ */
+const onShortcutKeydown = (event: KeyboardEvent): void => {
+    if (mode.value === 'preview' || event.isComposing) {
+        return;
+    }
+
+    const style = styleShortcuts.find(([id]) => matchesShortcut(event, id));
+
+    if (!style && !matchesShortcut(event, 'checklist')) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (style) {
+        setStyle(style[1]);
+    } else {
+        format('checklist');
+    }
+};
 
 /**
  * This editor's actions for the command palette (O7.2): modes always,
@@ -805,13 +841,14 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
 
     return [
         ...modes,
-        { id: 'find', label: 'Find in note', icon: 'i-lucide-search', kbds: ['meta', 'F'], run: () => finder.show(false) },
-        { id: 'replace', label: 'Find and replace', icon: 'i-lucide-replace', kbds: ['meta', 'alt', 'F'], run: () => finder.show(true) },
+        { id: 'find', label: 'Find in note', icon: 'i-lucide-search', kbds: shortcutKeys('find'), run: () => finder.show(false) },
+        { id: 'replace', label: 'Find and replace', icon: 'i-lucide-replace', kbds: shortcutKeys('replace'), run: () => finder.show(true) },
         ...formatCommands.map(({ command, label, icon, kbds }) => ({ id: `format.${command}`, label, icon, kbds, run: () => format(command) })),
-        ...styleCommands.map(({ style, label }) => ({
+        ...styleCommands.map(({ style, label, kbds }) => ({
             id: `style.${style}`,
             label: `Style: ${label}`,
             icon: 'i-lucide-heading',
+            kbds,
             run: () => setStyle(style),
         })),
         { id: 'highlight', label: 'Highlight', icon: 'i-lucide-highlighter', run: () => highlight(null) },
@@ -903,7 +940,12 @@ defineExpose({ paletteCommands });
             <span class="text-muted flex-1">This note uses Markdown the visual editor can't keep exactly, so it opened as source.</span>
             <UiButton size="xs" color="neutral" variant="link" @click="visualAnyway = true">Edit visually anyway</UiButton>
         </div>
-        <div class="flex min-h-0 flex-1 gap-4" :class="{ 'readable-width': readableWidth !== false && mode !== 'split' }" @keydown="onKeydown">
+        <div
+            class="flex min-h-0 flex-1 gap-4"
+            :class="{ 'readable-width': readableWidth !== false && mode !== 'split' }"
+            @keydown.capture="onShortcutKeydown"
+            @keydown="onKeydown"
+        >
             <VisualEditor
                 v-if="!readonly"
                 v-show="mode === 'edit'"

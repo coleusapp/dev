@@ -32,10 +32,12 @@ import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import QuickSwitcher from '@/components/notes/QuickSwitcher.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
+import ShortcutsModal from '@/components/notes/ShortcutsModal.vue';
 import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { useEventListener, watchDebounced } from '@vueuse/core';
@@ -245,23 +247,54 @@ const currentSmartFolder = computed(() => props.smartFolders.find((smart) => sma
 const savingSearch = ref(false);
 const switching = ref(false);
 const showingCommands = ref(false);
+const showingShortcuts = ref(false);
+const searchInput = useTemplateRef<{ inputRef: HTMLInputElement | null }>('searchInput');
+
+const focusSearch = (): void => {
+    searchInput.value?.inputRef?.focus();
+    searchInput.value?.inputRef?.select();
+};
 
 /**
- * Cmd/Ctrl+O opens the quick switcher and Cmd/Ctrl+P the command palette,
- * from anywhere on the page including the editor (the browser's "Open
- * file" and "Print" aren't useful here).
+ * Opens the next or previous note in the list as it's shown (the first or
+ * last one when none is open).
  */
+const stepNote = (step: 1 | -1): void => {
+    const notes = listedNotes.value;
+    const index = notes.findIndex((listed) => listed.id === props.note?.data.id);
+    const target = index === -1 ? notes[step === 1 ? 0 : notes.length - 1] : notes[index + step];
+
+    if (target) {
+        router.visit(route('notes.show', { note: target.id, ...filterQuery(props.filters) }), { preserveState: true, preserveScroll: true });
+    }
+};
+
+/**
+ * The page-wide part of the shortcut set (lib/shortcuts.ts); the editor
+ * handles its own. These work from anywhere, including the editor: the
+ * browser's "Open file" (Cmd+O) and "Print" (Cmd+P) aren't useful here.
+ */
+const pageShortcuts: [ShortcutId, () => void][] = [
+    ['open-note', () => ((showingCommands.value = false), (switching.value = true))],
+    ['commands', () => ((switching.value = false), (showingCommands.value = true))],
+    ['new-note', () => createNote()],
+    ['new-folder', () => (folderDialog.value = { type: 'create', parent: currentFolder.value })],
+    ['search', focusSearch],
+    ['next-note', () => stepNote(1)],
+    ['previous-note', () => stepNote(-1)],
+    ['shortcuts', () => (showingShortcuts.value = true)],
+];
+
 useEventListener(window, 'keydown', (event: KeyboardEvent) => {
-    if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) {
+    if (event.defaultPrevented || event.isComposing) {
         return;
     }
 
-    const key = event.key.toLowerCase();
+    const shortcut = pageShortcuts.find(([id]) => matchesShortcut(event, id));
 
-    if (key === 'o' || key === 'p') {
+    if (shortcut) {
         event.preventDefault();
-        showingCommands.value = key === 'p';
-        switching.value = key === 'o';
+        shortcut[1]();
     }
 });
 
@@ -530,11 +563,12 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         id: 'create',
         label: 'Create',
         commands: [
-            { id: 'note.new', label: 'New note', icon: 'i-lucide-file-plus', run: createNote },
+            { id: 'note.new', label: 'New note', icon: 'i-lucide-file-plus', kbds: shortcutKeys('new-note'), run: createNote },
             {
                 id: 'folder.new',
                 label: 'New folder',
                 icon: 'i-lucide-folder-plus',
+                kbds: shortcutKeys('new-folder'),
                 run: () => (folderDialog.value = { type: 'create', parent: currentFolder.value }),
             },
             { id: 'smart.new', label: 'New smart folder', icon: 'i-lucide-folder-search', run: () => (editingSmartFolder.value = 'new') },
@@ -549,13 +583,39 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         id: 'go',
         label: 'Go to',
         commands: [
-            { id: 'go.open', label: 'Open note…', icon: 'i-lucide-search', kbds: ['meta', 'O'], run: () => (switching.value = true) },
+            { id: 'go.open', label: 'Open note…', icon: 'i-lucide-search', kbds: shortcutKeys('open-note'), run: () => (switching.value = true) },
+            { id: 'go.search', label: 'Search notes', icon: 'i-lucide-text-search', kbds: shortcutKeys('search'), run: focusSearch },
+            ...(listedNotes.value.length
+                ? [
+                      {
+                          id: 'go.next',
+                          label: 'Next note in the list',
+                          icon: 'i-lucide-arrow-down',
+                          kbds: shortcutKeys('next-note'),
+                          run: () => stepNote(1),
+                      },
+                      {
+                          id: 'go.previous',
+                          label: 'Previous note in the list',
+                          icon: 'i-lucide-arrow-up',
+                          kbds: shortcutKeys('previous-note'),
+                          run: () => stepNote(-1),
+                      },
+                  ]
+                : []),
             { id: 'go.notes', label: 'All notes', icon: 'i-lucide-notebook', run: () => visitList({}) },
             { id: 'go.recent', label: 'Recents', icon: 'i-lucide-clock', run: () => visitList({ view: 'recent' }) },
             { id: 'go.archive', label: 'Archive', icon: 'i-lucide-archive', run: () => visitList({ view: 'archive' }) },
             { id: 'go.trash', label: 'Trash', icon: 'i-lucide-trash-2', run: () => visitList({ view: 'trash' }) },
             { id: 'go.properties', label: 'Properties', icon: 'i-lucide-list-tree', run: () => router.visit(route('notes.properties.index')) },
             { id: 'go.settings', label: 'Settings', icon: 'i-lucide-settings', run: () => router.visit(route('notes.settings.edit')) },
+            {
+                id: 'go.shortcuts',
+                label: 'Keyboard shortcuts',
+                icon: 'i-lucide-keyboard',
+                kbds: shortcutKeys('shortcuts'),
+                run: () => (showingShortcuts.value = true),
+            },
             ...props.smartFolders.map((smart) => ({
                 id: `go.smart.${smart.id}`,
                 label: `Smart folder: ${smart.name}`,
@@ -744,7 +804,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                             <UiDropdownMenu v-if="filters.view !== 'recent'" :items="sortItems">
                                 <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
                             </UiDropdownMenu>
-                            <UiTooltip text="Open note" :kbds="['meta', 'O']">
+                            <UiTooltip text="Open note" :kbds="shortcutKeys('open-note')">
                                 <UiButton icon="i-lucide-search" color="neutral" variant="ghost" aria-label="Open note" @click="switching = true" />
                             </UiTooltip>
                             <UiDropdownMenu :items="tagFilterItems" class="lg:hidden">
@@ -766,6 +826,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
 
                 <template #body>
                     <UiInput
+                        ref="searchInput"
                         v-model="search"
                         icon="i-lucide-search"
                         type="search"
@@ -846,6 +907,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         <SmartFolderModal :editing="editingSmartFolder" :folders="folders" @close="editingSmartFolder = null" />
         <QuickSwitcher v-model:open="switching" :filters="filters" />
         <CommandPalette v-model:open="showingCommands" :groups="commandGroups" />
+        <ShortcutsModal v-model:open="showingShortcuts" />
         <SaveSearchModal v-model:open="savingSearch" :filters="filters" :suggested-name="suggestedSearchName" />
         <BookmarkModal
             :editing="editingBookmark"
