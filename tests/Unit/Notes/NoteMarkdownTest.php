@@ -103,3 +103,17 @@ it('renders footnotes, linked both ways', function () {
         ->toContain('<li class="footnote" id="fn:hills" role="doc-endnote"><p>Seven of them.&nbsp;<a class="footnote-backref" rev="footnote" href="#fnref:hills" role="doc-backlink">↩</a></p></li>')
         ->and(NoteMarkdown::toHtml('no definition[^x]'))->toContain('[^x]');
 });
+
+it('allows a few plain formatting tags and escapes everything else', function (string $markdown, string $html) {
+    expect(NoteMarkdown::toHtml($markdown))->toContain($html);
+})->with([
+    'kbd' => ['Press <kbd>Cmd</kbd>+<kbd>K</kbd>', 'Press <kbd>Cmd</kbd>+<kbd>K</kbd>'],
+    'upper case stays text' => ['a <KBD>K</KBD>', 'a &lt;KBD&gt;K&lt;/KBD&gt;'],
+    'sup and sub' => ['x<sup>2</sup> H<sub>2</sub>O', 'x<sup>2</sup> H<sub>2</sub>O'],
+    'line break' => ['a<br/>b', 'a<br>b'],
+    'details block' => ["<details open>\n<summary>More</summary>\n\nHidden **text**\n\n</details>", "<details open>\n<summary>More</summary>"],
+    'attributes are not allowed' => ['<kbd class="x">K</kbd>', '&lt;kbd class=&quot;x&quot;&gt;K</kbd>'],
+    'other tags stay text' => ['<span style="color:red">x</span>', '&lt;span style=&quot;color:red&quot;&gt;x&lt;/span&gt;'],
+    'code keeps tags as text' => ['`<kbd>K</kbd>`', '<code>&lt;kbd&gt;K&lt;/kbd&gt;</code>'],
+    'event handlers on allowed tags' => ['<details ontoggle="alert(1)">x</details>', '&lt;details ontoggle=&quot;alert(1)&quot;&gt;'],
+]);

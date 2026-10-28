@@ -7,6 +7,8 @@ use Coleus\Notes\Markdown\Underline\UnderlineExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
 use Coleus\Notes\Preferences\NotePreferences;
+use League\CommonMark\Extension\CommonMark\Node\Block\HtmlBlock;
+use League\CommonMark\Extension\CommonMark\Node\Inline\HtmlInline;
 use League\CommonMark\Extension\Footnote\FootnoteExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\Highlight\HighlightExtension;
@@ -18,7 +20,8 @@ use League\CommonMark\Parser\MarkdownParser;
 /**
  * Renders a note body to HTML on the server.
  *
- * Raw HTML in a note is escaped, never passed through, and javascript:,
+ * Raw HTML in a note is escaped (bar a few attribute-free formatting
+ * tags, see SafeHtmlRenderer), never passed through, and javascript:,
  * vbscript:, file: and data: (non-image) links are dropped, so a note can't
  * inject script into the page that previews it.
  *
@@ -41,7 +44,7 @@ class NoteMarkdown
      * @var array<string, mixed>
      */
     public const array OPTIONS = [
-        'html_input' => 'escape',
+        'html_input' => 'allow',
         'allow_unsafe_links' => false,
         'max_nesting_level' => 50,
         'heading_permalink' => [
@@ -103,6 +106,9 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new TableOfContentsExtension);
         $converter->getEnvironment()->addExtension(new CalloutExtension);
         $converter->getEnvironment()->addExtension(new FootnoteExtension);
+        // Above GFM's DisallowedRawHtml renderers (priority 50), which would otherwise pass most HTML through.
+        $converter->getEnvironment()->addRenderer(HtmlBlock::class, new SafeHtmlRenderer, 100);
+        $converter->getEnvironment()->addRenderer(HtmlInline::class, new SafeHtmlRenderer, 100);
 
         return $converter;
     }

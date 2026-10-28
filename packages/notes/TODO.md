@@ -71,7 +71,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O5.5 Mermaid diagrams in ```mermaid blocks ⚠️ dep (mermaid)
 - [x] O5.6 Heading anchors / IDs in preview, plus a table of contents 📦
 - [x] O5.7 Strict vs soft line-break setting
-- [ ] O5.8 Safe-subset HTML: allow a vetted allow-list (e.g. `<details>`, `<kbd>`, `<sup>`) while still blocking scripts
+- [x] O5.8 Safe-subset HTML: allow a vetted allow-list (e.g. `<details>`, `<kbd>`, `<sup>`) while still blocking scripts
 
 ## O6. Properties (front matter)
 - [x] O6.1 YAML front matter parsed and hidden from preview/title/snippet

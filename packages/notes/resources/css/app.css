@@ -234,6 +234,18 @@
     @apply bg-elevated text-primary rounded px-1.5 py-0.5 text-xs font-semibold;
 }
 
+.note-preview kbd {
+    @apply border-default bg-elevated rounded border px-1 font-mono text-xs;
+}
+
+.note-preview details:not(.callout) {
+    @apply mb-2;
+}
+
+.note-preview details:not(.callout) > summary {
+    @apply cursor-pointer font-medium;
+}
+
 .note-preview a.wiki-link-missing {
     @apply text-muted decoration-dashed;
 }
