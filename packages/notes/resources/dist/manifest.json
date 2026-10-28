@@ -1,21 +1,21 @@
 {
-  "_FormField-BDx7kOkE.js": {
-    "file": "assets/FormField-BDx7kOkE.js",
+  "_FormField-CakToCEQ.js": {
+    "file": "assets/FormField-CakToCEQ.js",
     "name": "FormField",
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ri67JHu6.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ku83ApzO.js",
       "resources/js/app.ts"
     ]
   },
-  "_NotesLayout.vue_vue_type_script_setup_true_lang-Ri67JHu6.js": {
-    "file": "assets/NotesLayout.vue_vue_type_script_setup_true_lang-Ri67JHu6.js",
+  "_NotesLayout.vue_vue_type_script_setup_true_lang-Ku83ApzO.js": {
+    "file": "assets/NotesLayout.vue_vue_type_script_setup_true_lang-Ku83ApzO.js",
     "name": "NotesLayout.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-CTSiIYWU.js",
+    "file": "assets/app-Dkyu19L8.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -29,34 +29,34 @@
     ]
   },
   "resources/js/pages/Index.vue": {
-    "file": "assets/Index-D8WnKIvG.js",
+    "file": "assets/Index-rzzsK7LH.js",
     "name": "Index",
     "src": "resources/js/pages/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ri67JHu6.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ku83ApzO.js",
       "resources/js/app.ts",
-      "_FormField-BDx7kOkE.js"
+      "_FormField-CakToCEQ.js"
     ]
   },
   "resources/js/pages/Properties.vue": {
-    "file": "assets/Properties-CErtQ8KU.js",
+    "file": "assets/Properties-BJ7qP34_.js",
     "name": "Properties",
     "src": "resources/js/pages/Properties.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ri67JHu6.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ku83ApzO.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/Settings.vue": {
-    "file": "assets/Settings-HrVEOClP.js",
+    "file": "assets/Settings-D7ehRY-_.js",
     "name": "Settings",
     "src": "resources/js/pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ri67JHu6.js",
-      "_FormField-BDx7kOkE.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-Ku83ApzO.js",
+      "_FormField-CakToCEQ.js",
       "resources/js/app.ts"
     ]
   }
