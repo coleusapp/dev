@@ -1,41 +1,62 @@
 {
-  "_NotesLayout.vue_vue_type_script_setup_true_lang-BMmlNoKn.js": {
-    "file": "assets/NotesLayout.vue_vue_type_script_setup_true_lang-BMmlNoKn.js",
+  "_FormField-DwTfI_zT.js": {
+    "file": "assets/FormField-DwTfI_zT.js",
+    "name": "FormField",
+    "imports": [
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-DudboGcp.js",
+      "resources/js/app.ts"
+    ]
+  },
+  "_NotesLayout.vue_vue_type_script_setup_true_lang-DudboGcp.js": {
+    "file": "assets/NotesLayout.vue_vue_type_script_setup_true_lang-DudboGcp.js",
     "name": "NotesLayout.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-S4OOgY48.js",
+    "file": "assets/app-CKbW9JMc.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/pages/Index.vue",
+      "resources/js/pages/Properties.vue",
       "resources/js/pages/Settings.vue"
     ],
     "css": [
-      "assets/app-BM3odeW_.css"
+      "assets/app-Ck7TNtdg.css"
     ]
   },
   "resources/js/pages/Index.vue": {
-    "file": "assets/Index-Bx0JloXJ.js",
+    "file": "assets/Index-DZMw2hI3.js",
     "name": "Index",
     "src": "resources/js/pages/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-BMmlNoKn.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-DudboGcp.js",
+      "resources/js/app.ts",
+      "_FormField-DwTfI_zT.js"
+    ]
+  },
+  "resources/js/pages/Properties.vue": {
+    "file": "assets/Properties-DDbAeb6g.js",
+    "name": "Properties",
+    "src": "resources/js/pages/Properties.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-DudboGcp.js",
       "resources/js/app.ts"
     ]
   },
   "resources/js/pages/Settings.vue": {
-    "file": "assets/Settings-9rjIsWmL.js",
+    "file": "assets/Settings-BJzc6Ctc.js",
     "name": "Settings",
     "src": "resources/js/pages/Settings.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_NotesLayout.vue_vue_type_script_setup_true_lang-BMmlNoKn.js",
+      "_NotesLayout.vue_vue_type_script_setup_true_lang-DudboGcp.js",
+      "_FormField-DwTfI_zT.js",
       "resources/js/app.ts"
     ]
   }
