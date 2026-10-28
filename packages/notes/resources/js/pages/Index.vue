@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import BookmarkList from '@/components/notes/BookmarkList.vue';
 import BookmarkModal from '@/components/notes/BookmarkModal.vue';
+import CommandPalette from '@/components/notes/CommandPalette.vue';
+import { menuCommands, type PaletteGroup } from '@/components/notes/commands';
 import ConfirmModal from '@/components/notes/ConfirmModal.vue';
 import FolderModal from '@/components/notes/FolderModal.vue';
 import FolderTree from '@/components/notes/FolderTree.vue';
@@ -37,7 +39,7 @@ import NotesLayout from '@/layouts/NotesLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
 import { useEventListener, watchDebounced } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     notes: NoteCollection;
@@ -242,15 +244,24 @@ const editingSmartFolder = ref<SmartFolder | 'new' | null>(null);
 const currentSmartFolder = computed(() => props.smartFolders.find((smart) => smart.id === props.filters.smart) ?? null);
 const savingSearch = ref(false);
 const switching = ref(false);
+const showingCommands = ref(false);
 
 /**
- * Cmd/Ctrl+O opens the quick switcher from anywhere on the page, including
- * the editor (the browser's "Open file" isn't useful here).
+ * Cmd/Ctrl+O opens the quick switcher and Cmd/Ctrl+P the command palette,
+ * from anywhere on the page including the editor (the browser's "Open
+ * file" and "Print" aren't useful here).
  */
 useEventListener(window, 'keydown', (event: KeyboardEvent) => {
-    if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'o') {
+    if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) {
+        return;
+    }
+
+    const key = event.key.toLowerCase();
+
+    if (key === 'o' || key === 'p') {
         event.preventDefault();
-        switching.value = true;
+        showingCommands.value = key === 'p';
+        switching.value = key === 'o';
     }
 });
 
@@ -504,6 +515,72 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
         [{ label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
     ];
 });
+
+const editor = useTemplateRef<InstanceType<typeof NoteEditor>>('editor');
+
+const visitList = (filters: Partial<NoteFilters>): void => router.visit(route('notes.index', filterQuery(filters)));
+
+/**
+ * Everything the command palette (Cmd/Ctrl+P) offers: the note's menu, the
+ * open editor's actions, going places, creating things and sorting. The
+ * note and sort groups come from the same menus the page shows.
+ */
+const commandGroups = computed<PaletteGroup[]>(() => [
+    {
+        id: 'create',
+        label: 'Create',
+        commands: [
+            { id: 'note.new', label: 'New note', icon: 'i-lucide-file-plus', run: createNote },
+            {
+                id: 'folder.new',
+                label: 'New folder',
+                icon: 'i-lucide-folder-plus',
+                run: () => (folderDialog.value = { type: 'create', parent: currentFolder.value }),
+            },
+            { id: 'smart.new', label: 'New smart folder', icon: 'i-lucide-folder-search', run: () => (editingSmartFolder.value = 'new') },
+            ...(canSaveSearch.value
+                ? [{ id: 'search.save', label: 'Save this list as a search', icon: 'i-lucide-bookmark-plus', run: () => (savingSearch.value = true) }]
+                : []),
+        ],
+    },
+    { id: 'note', label: 'Note', commands: props.note ? menuCommands('note', noteMenuItems.value) : [] },
+    { id: 'editor', label: 'Editor', commands: props.note ? (editor.value?.paletteCommands ?? []) : [] },
+    {
+        id: 'go',
+        label: 'Go to',
+        commands: [
+            { id: 'go.open', label: 'Open note…', icon: 'i-lucide-search', kbds: ['meta', 'O'], run: () => (switching.value = true) },
+            { id: 'go.notes', label: 'All notes', icon: 'i-lucide-notebook', run: () => visitList({}) },
+            { id: 'go.recent', label: 'Recents', icon: 'i-lucide-clock', run: () => visitList({ view: 'recent' }) },
+            { id: 'go.archive', label: 'Archive', icon: 'i-lucide-archive', run: () => visitList({ view: 'archive' }) },
+            { id: 'go.trash', label: 'Trash', icon: 'i-lucide-trash-2', run: () => visitList({ view: 'trash' }) },
+            { id: 'go.properties', label: 'Properties', icon: 'i-lucide-list-tree', run: () => router.visit(route('notes.properties.index')) },
+            { id: 'go.settings', label: 'Settings', icon: 'i-lucide-settings', run: () => router.visit(route('notes.settings.edit')) },
+            ...props.smartFolders.map((smart) => ({
+                id: `go.smart.${smart.id}`,
+                label: `Smart folder: ${smart.name}`,
+                icon: 'i-lucide-folder-search',
+                run: () => visitList({ smart: smart.id }),
+            })),
+            ...flattenFolders(props.folders).map((folder) => ({
+                id: `go.folder.${folder.id}`,
+                label: `Folder: ${folder.name}`,
+                icon: 'i-lucide-folder',
+                run: () => visitList({ folder: folder.id }),
+            })),
+        ],
+    },
+    {
+        id: 'list',
+        label: 'List',
+        commands: [
+            ...(props.filters.view === 'recent' ? [] : menuCommands('sort', sortItems.value, 'Sort: ')),
+            ...(props.filters.view === 'trash'
+                ? [{ id: 'trash.empty', label: 'Empty trash', icon: 'i-lucide-trash', run: () => (confirmingEmptyTrash.value = true) }]
+                : []),
+        ],
+    },
+]);
 </script>
 
 <template>
@@ -743,6 +820,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                     <KeepAlive :max="10">
                         <NoteEditor
                             v-if="note"
+                            ref="editor"
                             :key="note.data.id"
                             :note="note.data"
                             :readonly="note.data.trashed"
@@ -767,6 +845,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
 
         <SmartFolderModal :editing="editingSmartFolder" :folders="folders" @close="editingSmartFolder = null" />
         <QuickSwitcher v-model:open="switching" :filters="filters" />
+        <CommandPalette v-model:open="showingCommands" :groups="commandGroups" />
         <SaveSearchModal v-model:open="savingSearch" :filters="filters" :suggested-name="suggestedSearchName" />
         <BookmarkModal
             :editing="editingBookmark"

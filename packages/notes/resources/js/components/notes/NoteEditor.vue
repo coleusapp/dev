@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PaletteCommand } from '@/components/notes/commands';
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
@@ -758,6 +759,96 @@ const onKeydown = (event: KeyboardEvent): void => {
         format(shortcuts[key]);
     }
 };
+
+const formatCommands: { command: FormatCommand; label: string; icon: string; kbds?: string[] }[] = [
+    { command: 'bold', label: 'Bold', icon: 'i-lucide-bold', kbds: ['meta', 'B'] },
+    { command: 'italic', label: 'Italic', icon: 'i-lucide-italic', kbds: ['meta', 'I'] },
+    { command: 'underline', label: 'Underline', icon: 'i-lucide-underline', kbds: ['meta', 'U'] },
+    { command: 'strike', label: 'Strikethrough', icon: 'i-lucide-strikethrough', kbds: ['meta', 'shift', 'X'] },
+    { command: 'code', label: 'Code', icon: 'i-lucide-code' },
+    { command: 'link', label: 'Link', icon: 'i-lucide-link', kbds: ['meta', 'K'] },
+    { command: 'list', label: 'Bulleted list', icon: 'i-lucide-list' },
+    { command: 'numbered', label: 'Numbered list', icon: 'i-lucide-list-ordered' },
+    { command: 'checklist', label: 'Checklist', icon: 'i-lucide-list-checks' },
+    { command: 'quote', label: 'Block quote', icon: 'i-lucide-text-quote' },
+];
+
+const styleCommands: { style: ParagraphStyle; label: string }[] = [
+    { style: 'title', label: 'Title' },
+    { style: 'heading', label: 'Heading' },
+    { style: 'subheading', label: 'Subheading' },
+    { style: 'body', label: 'Body' },
+    { style: 'monostyled', label: 'Monostyled' },
+];
+
+/**
+ * This editor's actions for the command palette (O7.2): modes always,
+ * editing commands only when the note can be edited in the current mode.
+ */
+const paletteCommands = computed<PaletteCommand[]>(() => {
+    if (props.readonly) {
+        return [];
+    }
+
+    const modes: PaletteCommand[] = modeItems.value
+        .filter((item) => item.value !== mode.value)
+        .map((item) => ({
+            id: `mode.${item.value}`,
+            label: `Switch to ${item.label.toLowerCase()}`,
+            icon: item.icon,
+            run: () => void setMode(item.value as EditorMode),
+        }));
+
+    if (mode.value === 'preview') {
+        return modes;
+    }
+
+    return [
+        ...modes,
+        { id: 'find', label: 'Find in note', icon: 'i-lucide-search', kbds: ['meta', 'F'], run: () => finder.show(false) },
+        { id: 'replace', label: 'Find and replace', icon: 'i-lucide-replace', kbds: ['meta', 'alt', 'F'], run: () => finder.show(true) },
+        ...formatCommands.map(({ command, label, icon, kbds }) => ({ id: `format.${command}`, label, icon, kbds, run: () => format(command) })),
+        ...styleCommands.map(({ style, label }) => ({
+            id: `style.${style}`,
+            label: `Style: ${label}`,
+            icon: 'i-lucide-heading',
+            run: () => setStyle(style),
+        })),
+        { id: 'highlight', label: 'Highlight', icon: 'i-lucide-highlighter', run: () => highlight(null) },
+        { id: 'table', label: 'Insert table', icon: 'i-lucide-table', run: () => tableAction('insert') },
+        ...(mode.value === 'edit' && visualInTable.value
+            ? [
+                  { id: 'table.row', label: 'Table: add row below', icon: 'i-lucide-table', run: () => tableAction('row-below') },
+                  { id: 'table.column', label: 'Table: add column right', icon: 'i-lucide-table', run: () => tableAction('column-right') },
+                  { id: 'table.delete', label: 'Table: delete table', icon: 'i-lucide-table', run: () => tableAction('delete-table') },
+              ]
+            : []),
+        ...(mode.value === 'source' || mode.value === 'split'
+            ? [{ id: 'table.format', label: 'Table: line up columns', icon: 'i-lucide-table', run: () => tableAction('format') }]
+            : []),
+        ...(canRewriteVisually.value
+            ? [
+                  { id: 'checklist.check-all', label: 'Checklist: check all', icon: 'i-lucide-list-checks', run: () => checklistAction('check-all') },
+                  { id: 'checklist.uncheck-all', label: 'Checklist: uncheck all', icon: 'i-lucide-list', run: () => checklistAction('uncheck-all') },
+                  {
+                      id: 'checklist.checked-to-bottom',
+                      label: 'Checklist: move checked items to bottom',
+                      icon: 'i-lucide-arrow-down-to-line',
+                      run: () => checklistAction('checked-to-bottom'),
+                  },
+                  {
+                      id: 'checklist.delete-checked',
+                      label: 'Checklist: delete checked items',
+                      icon: 'i-lucide-trash-2',
+                      run: () => checklistAction('delete-checked'),
+                  },
+              ]
+            : []),
+        { id: 'property', label: 'Add property', icon: 'i-lucide-list-plus', run: () => propertiesPanel.value?.startAdding() },
+    ];
+});
+
+defineExpose({ paletteCommands });
 </script>
 
 <template>

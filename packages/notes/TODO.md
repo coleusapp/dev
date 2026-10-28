@@ -82,7 +82,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## O7. Search and navigation
 - [x] O7.1 Quick switcher: Cmd/Ctrl+O fuzzy jump to a note by title/alias, create if missing
-- [ ] O7.2 Command palette: Cmd/Ctrl+P fuzzy list of every action
+- [x] O7.2 Command palette: Cmd/Ctrl+P fuzzy list of every action
 - [ ] O7.3 Search operators: `tag:`, `folder:`, `task:`, `"exact phrase"`
 - [ ] O7.5 Search results with matching lines in context (expandable), sort options, result count
 - [x] O7.6 Saved searches (ties to bookmarks)
