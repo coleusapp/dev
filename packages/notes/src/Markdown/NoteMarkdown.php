@@ -4,6 +4,7 @@ namespace Coleus\Notes\Markdown;
 
 use Coleus\Notes\Markdown\Callouts\CalloutExtension;
 use Coleus\Notes\Markdown\Dates\DateChipExtension;
+use Coleus\Notes\Markdown\Math\MathExtension;
 use Coleus\Notes\Markdown\Underline\UnderlineExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
@@ -108,6 +109,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new CalloutExtension);
         $converter->getEnvironment()->addExtension(new FootnoteExtension);
         $converter->getEnvironment()->addExtension(new DateChipExtension);
+        $converter->getEnvironment()->addExtension(new MathExtension);
         // Above GFM's DisallowedRawHtml renderers (priority 50), which would otherwise pass most HTML through.
         $converter->getEnvironment()->addRenderer(HtmlBlock::class, new SafeHtmlRenderer, 100);
         $converter->getEnvironment()->addRenderer(HtmlInline::class, new SafeHtmlRenderer, 100);

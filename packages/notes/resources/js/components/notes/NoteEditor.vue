@@ -52,6 +52,7 @@ import {
     type Selection,
     type TextEdit,
 } from '@/lib/markdownFormat';
+import { renderMath } from '@/lib/math';
 import { noteOutline, type OutlineHeading } from '@/lib/outline';
 import { pasteUrlOverSelection } from '@/lib/paste';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
@@ -59,7 +60,7 @@ import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { renameFirstLine } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
 import { useLocalStorage, useMediaQuery } from '@vueuse/core';
-import { computed, onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     note: NoteDetailData;
@@ -234,6 +235,14 @@ const toggleTask = (checkbox: HTMLInputElement): Promise<void> => {
 const preview = useTemplateRef<HTMLElement>('preview');
 
 /**
+ * Math in the reading view and split preview is typeset after each render.
+ */
+const typesetPreview = (): void => void nextTick(() => renderMath(preview.value));
+
+onMounted(typesetPreview);
+onActivated(typesetPreview);
+
+/**
  * In-note links ("#heading-day-one" from the table of contents or a
  * heading's anchor, or a hand-written "#day-one") scroll the reading view
  * instead of changing the page URL.
@@ -325,6 +334,8 @@ const mode = computed<EditorMode>(() => {
 });
 
 const showsSource = computed(() => mode.value === 'source' || mode.value === 'split');
+
+watch([html, mode], typesetPreview);
 
 const modeItems = computed(() => [
     { value: 'edit', icon: 'i-lucide-pencil', label: 'Visual editor' },

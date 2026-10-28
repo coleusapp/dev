@@ -8,6 +8,7 @@ import { FootnoteDefinition, FootnoteMarker } from '@/editor/FootnoteMarker';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
 import { LineCommands } from '@/editor/LineCommands';
+import { MathBlock, MathInline } from '@/editor/Math';
 import { TableOfContents } from '@/editor/TableOfContents';
 import { WikiLink } from '@/editor/WikiLink';
 import Link from '@tiptap/extension-link';
@@ -54,6 +55,8 @@ export const editorExtensions = ({
     CalloutMarker,
     FootnoteMarker,
     FootnoteDefinition,
+    MathInline,
+    MathBlock,
     Hashtags,
     DateChips,
     Placeholder.configure({ placeholder }),

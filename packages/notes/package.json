@@ -38,6 +38,7 @@
         "class-variance-authority": "catalog:dep",
         "clsx": "catalog:dep",
         "concurrently": "catalog:dep",
+        "katex": "0.19.0",
         "laravel-vite-plugin": "catalog:dep",
         "lodash": "catalog:dep",
         "lucide": "catalog:dep",

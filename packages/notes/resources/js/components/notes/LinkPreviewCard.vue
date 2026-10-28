@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import type { OpenLinkPreview } from '@/composables/useLinkPreview';
+import { renderMath } from '@/lib/math';
 import { Link } from '@inertiajs/vue3';
+import { nextTick, onMounted, useTemplateRef, watch } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     preview: OpenLinkPreview;
 }>();
+
+const body = useTemplateRef<HTMLElement>('body');
+const typeset = (): void => void nextTick(() => renderMath(body.value));
+
+onMounted(typeset);
+watch(() => props.preview.html, typeset);
 
 defineEmits<{
     enter: [];
@@ -29,6 +37,6 @@ defineEmits<{
             >{{ preview.title || 'Untitled note' }}</Link
         >
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="note-preview pointer-events-none overflow-y-auto px-3 py-2" v-html="preview.html" />
+        <div ref="body" class="note-preview pointer-events-none overflow-y-auto px-3 py-2" v-html="preview.html" />
     </div>
 </template>

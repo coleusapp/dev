@@ -239,6 +239,18 @@
     @apply no-underline;
 }
 
+.tiptap .math-source {
+    @apply bg-elevated rounded px-1 font-mono text-xs;
+}
+
+.tiptap pre.math-source-block {
+    @apply mb-2 block p-3 text-center whitespace-pre-wrap;
+}
+
+.note-preview .math-block {
+    @apply mb-2 overflow-x-auto;
+}
+
 .tiptap .callout-marker {
     @apply bg-elevated text-primary rounded px-1.5 py-0.5 text-xs font-semibold;
 }

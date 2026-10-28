@@ -67,7 +67,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O5.1 Callouts: `> [!note]`, `[!warning]`, foldable `[!tip]-`, custom titles
 - [x] O5.2 Footnotes: `[^1]` references and definitions; footnotes view
 - [x] O5.3 Comments: `%%hidden%%` stripped from preview
-- [ ] O5.4 Math: inline `$…$` and block `$$…$$` (LaTeX) ⚠️ dep (KaTeX/MathJax)
+- [x] O5.4 Math: inline `$…$` and block `$$…$$` (LaTeX) ⚠️ dep (KaTeX/MathJax)
 - [ ] O5.5 Mermaid diagrams in ```mermaid blocks ⚠️ dep (mermaid)
 - [x] O5.6 Heading anchors / IDs in preview, plus a table of contents 📦
 - [x] O5.7 Strict vs soft line-break setting
