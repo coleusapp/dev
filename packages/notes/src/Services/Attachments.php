@@ -3,6 +3,7 @@
 namespace Coleus\Notes\Services;
 
 use Coleus\Notes\Enums\AttachmentKind;
+use Coleus\Notes\Jobs\ProcessImageAttachment;
 use Coleus\Notes\Models\Attachment;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
@@ -20,7 +21,9 @@ use Symfony\Component\HttpFoundation\Response;
  * pages, scripts or programs are refused outright. Files are stored
  * without their extension under a random name, and served only through
  * the notes route with nosniff, as downloads unless they're images,
- * video, audio or PDF, and sandboxed when downloaded.
+ * video, audio or PDF, and sandboxed when downloaded. Images are cleaned
+ * up afterwards in the queue (Jobs\ProcessImageAttachment), and smaller
+ * copies are served for ?w=.
  */
 class Attachments
 {
@@ -51,7 +54,7 @@ class Attachments
             throw ValidationException::withMessages(['file' => "The file couldn't be stored."]);
         }
 
-        return Attachment::query()->create([
+        $attachment = Attachment::query()->create([
             'uuid' => $uuid,
             'name' => $name,
             'mime' => $mime,
@@ -59,6 +62,12 @@ class Attachments
             'size' => (int) $file->getSize(),
             'path' => $path,
         ]);
+
+        if ($kind === AttachmentKind::Image) {
+            ProcessImageAttachment::dispatch($attachment->id);
+        }
+
+        return $attachment;
     }
 
     /**
@@ -66,11 +75,13 @@ class Attachments
      * local disk the response answers Range requests, so audio and video
      * can seek.
      */
-    public function response(Attachment $attachment): Response
+    public function response(Attachment $attachment, ?int $width = null): Response
     {
+        $variant = $width === null ? null : ($attachment->variants[(string) $width] ?? null);
+        $path = $variant ?? $attachment->path;
         $inline = $attachment->kind->servesInline($attachment->mime);
         $headers = [
-            'Content-Type' => $attachment->mime,
+            'Content-Type' => $variant === null ? $attachment->mime : 'image/webp',
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, max-age=31536000, immutable',
             ...($inline ? [] : ['Content-Security-Policy' => 'sandbox']),
@@ -79,10 +90,10 @@ class Attachments
         $disk = $this->disk();
 
         if (method_exists($disk, 'path') && config('filesystems.disks.'.config('notes.attachments.disk').'.driver') === 'local') {
-            return response()->file($disk->path($attachment->path), $headers)->setContentDisposition($disposition, $attachment->name, Str::ascii($attachment->name));
+            return response()->file($disk->path($path), $headers)->setContentDisposition($disposition, $attachment->name, Str::ascii($attachment->name));
         }
 
-        return $disk->response($attachment->path, $attachment->name, $headers, $disposition);
+        return $disk->response($path, $attachment->name, $headers, $disposition);
     }
 
     /**

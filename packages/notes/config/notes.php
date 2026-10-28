@@ -68,5 +68,14 @@ return [
             'audio' => 100 * 1024,
             'document' => 50 * 1024,
         ],
+
+        /*
+         * Images are cleaned after upload (Jobs\ProcessImageAttachment, needs
+         * the gd and exif PHP extensions): turned upright, metadata (GPS
+         * included) removed, shrunk to max_dimension, and copied as WebP at
+         * these widths for smaller screens.
+         */
+        'image_widths' => [320, 960, 1920],
+        'max_dimension' => 4096,
     ],
 ];

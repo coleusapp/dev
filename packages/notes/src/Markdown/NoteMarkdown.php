@@ -11,6 +11,7 @@ use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
 use Coleus\Notes\Preferences\NotePreferences;
 use League\CommonMark\Extension\CommonMark\Node\Block\HtmlBlock;
 use League\CommonMark\Extension\CommonMark\Node\Inline\HtmlInline;
+use League\CommonMark\Extension\CommonMark\Node\Inline\Image;
 use League\CommonMark\Extension\Footnote\FootnoteExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\Highlight\HighlightExtension;
@@ -110,6 +111,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new FootnoteExtension);
         $converter->getEnvironment()->addExtension(new DateChipExtension);
         $converter->getEnvironment()->addExtension(new MathExtension);
+        $converter->getEnvironment()->addRenderer(Image::class, new AttachmentImageRenderer, 10);
         // Above GFM's DisallowedRawHtml renderers (priority 50), which would otherwise pass most HTML through.
         $converter->getEnvironment()->addRenderer(HtmlBlock::class, new SafeHtmlRenderer, 100);
         $converter->getEnvironment()->addRenderer(HtmlInline::class, new SafeHtmlRenderer, 100);

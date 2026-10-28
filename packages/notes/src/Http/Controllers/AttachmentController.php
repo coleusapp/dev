@@ -8,6 +8,7 @@ use Coleus\Notes\Models\Attachment;
 use Coleus\Notes\Models\Note;
 use Coleus\Notes\Services\Attachments;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -31,10 +32,16 @@ class AttachmentController extends Controller
         return response()->json(['data' => $attachment->toClient()], 201);
     }
 
-    public function show(Attachment $attachment): Response
+    /**
+     * The file, or a smaller copy of an image for ?w= (one of the
+     * configured widths; the original when there's no such copy).
+     */
+    public function show(Request $request, Attachment $attachment): Response
     {
         Gate::authorize('viewAny', Note::class);
 
-        return $this->attachments->response($attachment);
+        $width = $request->integer('w');
+
+        return $this->attachments->response($attachment, $width > 0 ? $width : null);
     }
 }

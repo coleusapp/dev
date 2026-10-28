@@ -19,7 +19,11 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
  * @property string $mime
  * @property AttachmentKind $kind
  * @property int $size
+ * @property int|null $width
+ * @property int|null $height
  * @property string $path
+ * @property array<string, string>|null $variants
+ * @property \Illuminate\Support\Carbon|null $processed_at
  * @property \Illuminate\Support\Carbon|null $created_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Attachment query()
@@ -45,6 +49,10 @@ class Attachment extends NotesModelDefaults
         return [
             'kind' => AttachmentKind::class,
             'size' => 'integer',
+            'width' => 'integer',
+            'height' => 'integer',
+            'variants' => 'array',
+            'processed_at' => 'datetime',
         ];
     }
 
