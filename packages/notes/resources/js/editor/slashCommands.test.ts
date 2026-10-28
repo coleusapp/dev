@@ -39,3 +39,13 @@ describe('filterSlashCommands', () => {
 it('formats today as an ISO date', () => {
     expect(todayIso(new Date(2026, 0, 5))).toBe('2026-01-05');
 });
+
+describe('attachment commands', () => {
+    it('offers files, a photo and a video from the camera', () => {
+        expect(filterSlashCommands('camera').map((command) => command.action)).toEqual([
+            { type: 'attach', capture: 'photo' },
+            { type: 'attach', capture: 'video' },
+        ]);
+        expect(filterSlashCommands('upload')[0].action).toEqual({ type: 'attach' });
+    });
+});

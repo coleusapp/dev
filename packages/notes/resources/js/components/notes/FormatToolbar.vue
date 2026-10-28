@@ -19,7 +19,7 @@ const emit = defineEmits<{
     checklistAction: [action: ChecklistAction];
     tableAction: [action: TableAction];
     insert: [text: string];
-    attach: [];
+    attach: [capture?: 'photo' | 'video'];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -198,6 +198,16 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                 @click="emit('attach')"
             />
         </UiTooltip>
+        <UiDropdownMenu
+            :items="[
+                { label: 'Take a photo', icon: 'i-lucide-camera', onSelect: () => emit('attach', 'photo') },
+                { label: 'Record a video', icon: 'i-lucide-video', onSelect: () => emit('attach', 'video') },
+            ]"
+        >
+            <UiTooltip text="Camera">
+                <UiButton icon="i-lucide-camera" aria-label="Camera" color="neutral" variant="ghost" size="xs" @mousedown.prevent />
+            </UiTooltip>
+        </UiDropdownMenu>
         <UiTooltip text="Highlight">
             <UiButton
                 icon="i-lucide-highlighter"

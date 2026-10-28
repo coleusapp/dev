@@ -776,7 +776,7 @@ const chooseSlash = (command: SlashCommand): void => {
         visual.value?.runSlash(command, open.range);
 
         if (command.action.type === 'attach') {
-            pickFiles();
+            pickFiles(command.action.capture);
         }
 
         return;
@@ -827,7 +827,7 @@ const chooseSlash = (command: SlashCommand): void => {
             editSource(insertText(todayIso()));
             break;
         case 'attach':
-            pickFiles();
+            pickFiles(action.capture);
             break;
     }
 };
@@ -881,7 +881,23 @@ const attachFiles = (files: File[]): void => {
     void uploads.upload(files);
 };
 
-const pickFiles = (): void => fileInput.value?.click();
+/**
+ * Opens the file picker, or the camera for a photo or a video (O3.1e): on
+ * phones and tablets `capture` goes straight to the camera; desktop
+ * browsers show the picker limited to images or videos.
+ */
+const photoInput = useTemplateRef<HTMLInputElement>('photoInput');
+const videoInput = useTemplateRef<HTMLInputElement>('videoInput');
+
+const pickFiles = (capture?: 'photo' | 'video'): void => {
+    (capture === 'photo' ? photoInput : capture === 'video' ? videoInput : fileInput).value?.click();
+};
+
+const onPicked = (event: Event): void => {
+    const input = event.target as HTMLInputElement;
+    attachFiles(Array.from(input.files ?? []));
+    input.value = '';
+};
 
 const percent = (pending: PendingUpload): number => Math.round((pending.loaded / Math.max(pending.total, 1)) * 100);
 
@@ -1419,15 +1435,9 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
             @insert="insertAtCursor"
             @attach="pickFiles"
         />
-        <input
-            ref="fileInput"
-            type="file"
-            multiple
-            class="hidden"
-            @change="
-                (event) => (attachFiles(Array.from((event.target as HTMLInputElement).files ?? [])), ((event.target as HTMLInputElement).value = ''))
-            "
-        />
+        <input ref="fileInput" type="file" multiple class="hidden" @change="onPicked" />
+        <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="onPicked" />
+        <input ref="videoInput" type="file" accept="video/*" capture="environment" class="hidden" @change="onPicked" />
         <div
             v-if="uploads.uploading.value || uploads.errors.value.length"
             class="bg-elevated flex flex-col gap-1.5 rounded-md px-3 py-2 text-xs"

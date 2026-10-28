@@ -40,7 +40,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
   - [x] O3.1a Upload rules: allowed types per kind (image / video / audio / document), size limit per kind, MIME sniffed on the server (not trusted from the browser), dangerous types (SVG, HTML, executables) blocked or served as downloads only
   - [x] O3.1c Image processing: thumbnails and responsive sizes, compression, EXIF/GPS metadata stripped, orientation fixed (queued job)
   - [x] O3.1d Video processing: poster frame, duration and dimensions, HTTP range requests so playback can seek (queued job) ⚠️ dep (FFmpeg) for poster frames
-  - [ ] O3.1e Mobile camera capture: take a photo or record a video straight into the note (`capture` on file inputs)
+  - [x] O3.1e Mobile camera capture: take a photo or record a video straight into the note (`capture` on file inputs)
   - [ ] O3.1f In-browser video recording (camera / screen) into the note, alongside the voice memo in O3.6
   - [x] O3.1g Upload progress bar and cancel
 - [x] O3.2 Image embeds `![[image.png]]` with size syntax `![[image.png|300]]` (Apple: small/large size toggle, full-screen viewer) 🍎 📦
