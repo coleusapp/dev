@@ -200,7 +200,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] B5.4 Date chips: insert a date (`@today`, date picker) rendered as a chip, clickable to the Calendar app
 
 ## B6. Embeds and integrations (Box Notes)
-- [ ] B6.1 Smart embeds via an oEmbed allow-list: YouTube, Vimeo, Loom, Figma, Miro, Google Maps, rendered in sandboxed iframes 🧩
+- [x] B6.1 Smart embeds via an oEmbed allow-list: YouTube, Vimeo, Loom, Figma, Miro, Google Maps, rendered in sandboxed iframes 🧩
 - [ ] B6.2 Embed other Coleus items: calendar events, files, health entries, as live cards
 - [ ] B6.3 Meeting notes: create a note from a Calendar event (title, date, attendees pre-filled; linked both ways)
 

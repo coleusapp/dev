@@ -116,6 +116,16 @@
     @apply border-default mb-2 h-[36rem] w-full rounded-md border;
 }
 
+.note-preview .smart-embed {
+    @apply border-default mb-2 aspect-video w-full max-w-2xl rounded-md border;
+}
+
+.note-preview .smart-embed-figma,
+.note-preview .smart-embed-miro,
+.note-preview .smart-embed-maps {
+    @apply aspect-[4/3];
+}
+
 .note-preview a.link-card {
     @apply border-default hover:bg-elevated mb-2 flex max-w-xl overflow-hidden rounded-md border no-underline;
 }

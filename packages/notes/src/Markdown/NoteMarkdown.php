@@ -114,6 +114,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new MathExtension);
         $converter->getEnvironment()->addExtension(new AttachmentEmbedExtension);
         $converter->getEnvironment()->addExtension(new LinkPreviewMarker);
+        $converter->getEnvironment()->addExtension(new SmartEmbeds);
         $converter->getEnvironment()->addRenderer(Image::class, new AttachmentImageRenderer, 10);
         // Above GFM's DisallowedRawHtml renderers (priority 50), which would otherwise pass most HTML through.
         $converter->getEnvironment()->addRenderer(HtmlBlock::class, new SafeHtmlRenderer, 100);
