@@ -3,6 +3,11 @@
 namespace Coleus\Notes\Markdown\WikiLinks;
 
 use Coleus\Notes\Markdown\NoteMarkdown;
+use League\CommonMark\Extension\CommonMark\Node\Block\Heading;
+use League\CommonMark\Node\Node;
+use League\CommonMark\Node\NodeIterator;
+use League\CommonMark\Node\RawMarkupContainerInterface;
+use League\CommonMark\Node\StringContainerInterface;
 
 /**
  * [[Note title]] syntax shared by the parser, the resolver and backlinks.
@@ -59,6 +64,50 @@ class WikiLinks
         }
 
         return $link['title'] === '' ? $link['heading'] : $link['title'].' > '.$link['heading'];
+    }
+
+    /**
+     * A note's headings as their rendered text (what [[Note#Heading]] and
+     * the heading scroll match), in order, without repeats.
+     *
+     * @return list<string>
+     */
+    public static function headings(string $body): array
+    {
+        $headings = [];
+
+        foreach (NoteMarkdown::parse($body)->iterator(NodeIterator::FLAG_BLOCKS_ONLY) as $node) {
+            if ($node instanceof Heading) {
+                $text = self::normalizeTitle(self::plainText($node));
+
+                if ($text !== '') {
+                    $headings[$text] = true;
+                }
+            }
+        }
+
+        return array_keys($headings);
+    }
+
+    /**
+     * A node's text as the reader sees it: literal text and code, wiki links
+     * by their shown text, raw HTML left out (it renders escaped, not as text
+     * worth matching).
+     */
+    private static function plainText(Node $node): string
+    {
+        $text = '';
+
+        foreach ($node->children() as $child) {
+            $text .= match (true) {
+                $child instanceof WikiLink => self::text(['title' => $child->title, 'heading' => $child->heading, 'label' => $child->label]),
+                $child instanceof RawMarkupContainerInterface => '',
+                $child instanceof StringContainerInterface => $child->getLiteral(),
+                default => self::plainText($child),
+            };
+        }
+
+        return $text;
     }
 
     /**

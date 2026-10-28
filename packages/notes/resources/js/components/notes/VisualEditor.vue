@@ -5,6 +5,7 @@ import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/
 import { editorExtensions } from '@/editor/extensions';
 import { findState, replaceCurrent, replaceEvery, setFind, stepFind } from '@/editor/Find';
 import { splitFrontMatter } from '@/editor/frontMatter';
+import { LinkMenu, type LinkMenuState } from '@/editor/LinkMenu';
 import { editorMarkdown, loadMarkdown } from '@/editor/markdown';
 import { todayIso, type SlashCommand } from '@/editor/slashCommands';
 import { SlashMenu, type SlashState } from '@/editor/SlashMenu';
@@ -24,6 +25,7 @@ const props = defineProps<{
     firstLineStyle?: 'title' | 'heading' | 'subheading' | 'body';
     checkedToBottom?: boolean;
     onSlashKey?: (key: string) => boolean;
+    onLinkKey?: (key: string) => boolean;
     spellcheck?: boolean;
     textDirection?: 'auto' | 'ltr' | 'rtl';
 }>();
@@ -34,6 +36,7 @@ const emit = defineEmits<{
     style: [style: ParagraphStyle | null];
     inTable: [inTable: boolean];
     slash: [state: SlashState | null];
+    link: [state: LinkMenuState | null];
     find: [state: { count: number; current: number }];
     openWikiLink: [title: string, heading: string | null];
     openTag: [tag: string];
@@ -58,6 +61,7 @@ const editor = useEditor({
     extensions: [
         ...editorExtensions({ checkedToBottom: () => props.checkedToBottom ?? false }),
         SlashMenu.configure({ onState: (state) => emit('slash', state), onKey: (key) => props.onSlashKey?.(key) ?? false }),
+        LinkMenu.configure({ onState: (state) => emit('link', state), onKey: (key) => props.onLinkKey?.(key) ?? false }),
     ],
     editable: !props.readonly,
     textDirection: props.textDirection ?? 'auto',
@@ -337,6 +341,18 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
     }
 };
 
+/**
+ * Replaces a typed "[[…" or ">>…" with a wiki link to the chosen note.
+ */
+const insertWikiLink = (range: { from: number; to: number }, link: string): void => {
+    editor.value
+        ?.chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({ type: 'wikiLink', attrs: { title: link } })
+        .run();
+};
+
 const insertText = (text: string): void => {
     editor.value?.chain().focus().insertContent(text).run();
 };
@@ -373,7 +389,21 @@ const find = {
     },
 };
 
-defineExpose({ run, setStyle, highlight, checklistAction, tableAction, runSlash, insertText, find, setLink, unsetLink, isLinkActive, focus });
+defineExpose({
+    run,
+    setStyle,
+    highlight,
+    checklistAction,
+    tableAction,
+    runSlash,
+    insertWikiLink,
+    insertText,
+    find,
+    setLink,
+    unsetLink,
+    isLinkActive,
+    focus,
+});
 </script>
 
 <template>

@@ -38,3 +38,19 @@ it('validates the title', function (array $query) {
     'brackets' => [['title' => 'a]]b']],
     'too long' => [['title' => str_repeat('a', 256)]],
 ]);
+
+it('lists a note headings as rendered text, without repeats', function () {
+    $note = Note::factory()->create(['body' => "---\ntitle: x\n---\n# Trip\n\n## **Day** one\n\n```\n# not a heading\n```\n\n## Day one\n### [[Food|Eating]] ==out=="]);
+
+    $this->getJson(route('notes.headings', $note))
+        ->assertOk()
+        ->assertExactJson(['data' => ['Trip', 'Day one', 'Eating out']]);
+});
+
+it('does not list headings of another users note', function () {
+    $this->actingAs(User::factory()->create());
+    $theirs = Note::factory()->create(['body' => '# Secret']);
+    $this->actingAs($this->user);
+
+    $this->getJson(route('notes.headings', $theirs))->assertNotFound();
+});

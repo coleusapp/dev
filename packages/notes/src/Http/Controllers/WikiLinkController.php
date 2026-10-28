@@ -28,4 +28,14 @@ class WikiLinkController extends Controller
             'data' => ['id' => WikiLinkResolver::forBody("[[{$title}]]", $from)->resolve($title)],
         ]);
     }
+
+    /**
+     * A note's headings, for suggesting [[Note#Heading]] while typing a link.
+     */
+    public function headings(Note $note): JsonResponse
+    {
+        Gate::authorize('view', $note);
+
+        return response()->json(['data' => WikiLinks::headings($note->body)]);
+    }
 }

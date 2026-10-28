@@ -27,7 +27,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 ## O2. Links and graph
 - [x] O2.1 Link aliases: `[[Title|shown text]]`
 - [x] O2.2 Heading links: `[[Title#Heading]]` scroll to the heading; `[[#Heading]]` within the same note
-- [ ] O2.4 Link autocomplete: typing `[[` suggests note titles (fuzzy), then headings after `#` (Apple: "Add Link" on a selection picks a note) 🍎
+- [x] O2.4 Link autocomplete: typing `[[` suggests note titles (fuzzy), then headings after `#` (Apple: "Add Link" on a selection picks a note) 🍎
 - [ ] O2.5 Tag autocomplete when typing `#`
 - [ ] O2.6 Update links on rename: when a note's title changes, rewrite `[[Old]]` → `[[New]]` in other notes (with confirm) 🍎
 - [ ] O2.7 Backlinks with context: show the surrounding line/paragraph for each backlink, not just the title
@@ -164,7 +164,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A4.9 Audio/transcript summary (AI) 🧩 ⚠️ dep
 
 ## A6. Links between notes (Apple Notes)
-- [ ] A6.1 `>>` shortcut: typing `>>` opens a note picker and inserts a link to that note (creates `[[Title]]`)
+- [x] A6.1 `>>` shortcut: typing `>>` opens a note picker and inserts a link to that note (creates `[[Title]]`)
 
 ## A7. Security (Apple Notes)
 - [ ] A7.1 Notes password management: set, change, reset (reset only affects future locks), password hint

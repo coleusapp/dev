@@ -41,6 +41,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
         Route::get('/switcher', SwitcherController::class)->name('switcher');
+        Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::get('/{note}', [NoteController::class, 'show'])->name('show')->whereNumber('note')->withTrashed();
         Route::put('/{note}', [NoteController::class, 'update'])->name('update')->whereNumber('note');

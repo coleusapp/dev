@@ -2,6 +2,7 @@
 import type { PaletteCommand } from '@/components/notes/commands';
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
+import LinkMenu from '@/components/notes/LinkMenu.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import NoteInfo from '@/components/notes/NoteInfo.vue';
 import NoteTitle from '@/components/notes/NoteTitle.vue';
@@ -13,8 +14,11 @@ import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useFindReplace } from '@/composables/useFindReplace';
+import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
 import { usePreviewFolding } from '@/composables/usePreviewFolding';
 import { htmlToMarkdown } from '@/editor/htmlToMarkdown';
+import type { LinkMenuState } from '@/editor/LinkMenu';
+import { linkQuery } from '@/editor/linkQuery';
 import { filterSlashCommands, slashQuery, todayIso, type SlashCommand } from '@/editor/slashCommands';
 import type { SlashState } from '@/editor/SlashMenu';
 import { autoPair, deletePair } from '@/lib/autoPair';
@@ -448,6 +452,78 @@ const closeSourceSlash = (): void => {
 };
 
 /**
+ * Link autocomplete: "[[…" or ">>…" opens a note picker in either editor
+ * (composables/useLinkMenu.ts); choosing writes [[Note]] or [[Note#Heading]].
+ */
+const linkMenu = useLinkMenu({
+    currentNoteId: () => props.note.id,
+    currentHeadings: () => [...new Set(outline.value.map((heading) => heading.text))],
+    insert: (open: OpenLinkMenu, link: string) => {
+        const text = `[[${link}]]`;
+
+        if (!open.source) {
+            visual.value?.insertWikiLink(open.range, link);
+
+            return;
+        }
+
+        editSource(() => ({
+            from: open.range.from,
+            to: open.range.to,
+            insert: text,
+            selectionStart: open.range.from + text.length,
+            selectionEnd: open.range.from + text.length,
+        }));
+    },
+});
+let sourceLinkDismissedAt: number | null = null;
+
+const onVisualLink = (state: LinkMenuState | null): void => {
+    linkMenu.show(state ? { source: false, ...state } : null);
+};
+
+const detectSourceLink = (): void => {
+    const area = textarea.value;
+
+    if (!area || area.selectionStart !== area.selectionEnd) {
+        linkMenu.show(null);
+        return;
+    }
+
+    const cursor = area.selectionStart;
+    const lineStart = area.value.lastIndexOf('\n', cursor - 1) + 1;
+    const found = linkQuery(area.value.slice(lineStart, cursor), area.value.slice(cursor, cursor + 2));
+    const from = found ? cursor - found.before : null;
+
+    if (!found || from === null || from === sourceLinkDismissedAt) {
+        sourceLinkDismissedAt = found ? sourceLinkDismissedAt : null;
+        linkMenu.show(null);
+        return;
+    }
+
+    linkMenu.show({
+        source: true,
+        trigger: found.trigger,
+        query: found.query,
+        range: { from, to: cursor + found.after },
+        position: textareaCaretPosition(area, from),
+    });
+};
+
+const detectSourceMenus = (): void => {
+    detectSourceSlash();
+    detectSourceLink();
+};
+
+const closeSourceMenus = (): void => {
+    closeSourceSlash();
+
+    if (linkMenu.open.value?.source) {
+        linkMenu.show(null);
+    }
+};
+
+/**
  * Arrow keys pick, Enter/Tab run, Escape closes (until the "/" is retyped).
  */
 const handleSlashKey = (key: string): boolean => {
@@ -796,6 +872,18 @@ const onKeydown = (event: KeyboardEvent): void => {
         return;
     }
 
+    if (linkMenu.open.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
+        if (event.key === 'Escape') {
+            sourceLinkDismissedAt = linkMenu.open.value.range.from;
+        }
+
+        if (linkMenu.handleKey(event.key)) {
+            event.preventDefault();
+        }
+
+        return;
+    }
+
     if (slash.value?.source && event.target === textarea.value && ['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) {
         if (handleSlashKey(event.key)) {
             event.preventDefault();
@@ -1080,12 +1168,21 @@ defineExpose({ paletteCommands });
                 @style="(value) => (visualStyle = value)"
                 @in-table="(value) => (visualInTable = value)"
                 @slash="onVisualSlash"
+                @link="onVisualLink"
+                :on-link-key="linkMenu.handleKey"
                 @find="(state) => (finder.visualState.value = state)"
                 :on-slash-key="handleSlashKey"
                 @open-wiki-link="openWikiLink"
                 @open-tag="openTag"
             />
             <SlashMenu v-if="slash" :commands="slashCommands" :selected="slashSelected" :position="slash.position" @choose="chooseSlash" />
+            <LinkMenu
+                v-if="linkMenu.open.value"
+                :choices="linkMenu.choices.value"
+                :selected="linkMenu.selected.value"
+                :position="linkMenu.open.value.position"
+                @choose="linkMenu.choose"
+            />
             <textarea
                 v-if="showsSource"
                 ref="textarea"
@@ -1098,9 +1195,9 @@ defineExpose({ paletteCommands });
                 @paste="onSourcePaste"
                 :spellcheck="spellcheck ?? true"
                 :dir="textDirection ?? 'auto'"
-                @input="detectSourceSlash"
-                @click="detectSourceSlash"
-                @blur="closeSourceSlash"
+                @input="detectSourceMenus"
+                @click="detectSourceMenus"
+                @blur="closeSourceMenus"
             />
             <!-- The HTML is rendered on the server with raw HTML escaped and unsafe links removed (NoteMarkdown). -->
             <!-- eslint-disable-next-line vue/no-v-html -->
