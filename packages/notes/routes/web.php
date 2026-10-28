@@ -21,6 +21,7 @@ use Coleus\Notes\Http\Controllers\SettingsController;
 use Coleus\Notes\Http\Controllers\SmartFolderController;
 use Coleus\Notes\Http\Controllers\SortController;
 use Coleus\Notes\Http\Controllers\SwitcherController;
+use Coleus\Notes\Http\Controllers\TaskController;
 use Coleus\Notes\Http\Controllers\TemplateController;
 use Coleus\Notes\Http\Controllers\TrashController;
 use Coleus\Notes\Http\Controllers\VersionController;
@@ -65,6 +66,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/link-preview', [LinkPreviewController::class, 'show'])->name('link-preview')->middleware('throttle:60,1');
         Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
+        Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
         Route::post('/daily', [DailyNoteController::class, 'store'])->name('daily.store');
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');

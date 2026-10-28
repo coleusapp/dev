@@ -1,0 +1,1 @@
+const n=()=>{const t=document.cookie.split("; ").find(e=>e.startsWith("XSRF-TOKEN="));return t?decodeURIComponent(t.slice(11)):""},o=()=>({Accept:"application/json","Content-Type":"application/json","X-Requested-With":"XMLHttpRequest","X-XSRF-TOKEN":n()});export{o as j,n as x};
