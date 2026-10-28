@@ -11,6 +11,7 @@ use Coleus\Notes\Http\Controllers\PropertyController;
 use Coleus\Notes\Http\Controllers\SettingsController;
 use Coleus\Notes\Http\Controllers\SmartFolderController;
 use Coleus\Notes\Http\Controllers\SortController;
+use Coleus\Notes\Http\Controllers\SwitcherController;
 use Coleus\Notes\Http\Controllers\TrashController;
 use Coleus\Notes\Http\Controllers\VersionController;
 use Coleus\Notes\Http\Controllers\WikiLinkController;
@@ -39,6 +40,7 @@ Route::middleware(['web', 'auth'])
         Route::post('/{note}/bookmark', [BookmarkController::class, 'store'])->name('bookmarks.store')->whereNumber('note');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::get('/links/resolve', [WikiLinkController::class, 'resolve'])->name('links.resolve');
+        Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
         Route::get('/{note}', [NoteController::class, 'show'])->name('show')->whereNumber('note')->withTrashed();
         Route::put('/{note}', [NoteController::class, 'update'])->name('update')->whereNumber('note');

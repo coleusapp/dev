@@ -28,6 +28,7 @@ import {
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
+import QuickSwitcher from '@/components/notes/QuickSwitcher.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
 import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
@@ -35,7 +36,7 @@ import VersionHistory from '@/components/notes/VersionHistory.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
-import { watchDebounced } from '@vueuse/core';
+import { useEventListener, watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -240,6 +241,18 @@ const editingBookmark = ref<BookmarkItem | null>(null);
 const editingSmartFolder = ref<SmartFolder | 'new' | null>(null);
 const currentSmartFolder = computed(() => props.smartFolders.find((smart) => smart.id === props.filters.smart) ?? null);
 const savingSearch = ref(false);
+const switching = ref(false);
+
+/**
+ * Cmd/Ctrl+O opens the quick switcher from anywhere on the page, including
+ * the editor (the browser's "Open file" isn't useful here).
+ */
+useEventListener(window, 'keydown', (event: KeyboardEvent) => {
+    if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'o') {
+        event.preventDefault();
+        switching.value = true;
+    }
+});
 
 /**
  * A list can be saved as a search when something narrows it down.
@@ -654,6 +667,9 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             <UiDropdownMenu v-if="filters.view !== 'recent'" :items="sortItems">
                                 <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
                             </UiDropdownMenu>
+                            <UiTooltip text="Open note" :kbds="['meta', 'O']">
+                                <UiButton icon="i-lucide-search" color="neutral" variant="ghost" aria-label="Open note" @click="switching = true" />
+                            </UiTooltip>
                             <UiDropdownMenu :items="tagFilterItems" class="lg:hidden">
                                 <UiButton icon="i-lucide-hash" color="neutral" variant="ghost" aria-label="Filter by tag" class="lg:hidden" />
                             </UiDropdownMenu>
@@ -750,6 +766,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
         </template>
 
         <SmartFolderModal :editing="editingSmartFolder" :folders="folders" @close="editingSmartFolder = null" />
+        <QuickSwitcher v-model:open="switching" :filters="filters" />
         <SaveSearchModal v-model:open="savingSearch" :filters="filters" :suggested-name="suggestedSearchName" />
         <BookmarkModal
             :editing="editingBookmark"
