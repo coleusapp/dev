@@ -78,6 +78,7 @@ const body = ref(props.note.body);
 const html = ref(props.note.html);
 const tags = ref(props.note.tags);
 const backlinks = ref(props.note.backlinks);
+const outgoing = ref(props.note.outgoing);
 
 const updatedAt = ref(props.note.updated_at);
 
@@ -148,12 +149,17 @@ const relink = useRelink({ noteId: () => props.note.id, title: () => savedTitle.
 const unlinkedMentions = useTemplateRef<InstanceType<typeof UnlinkedMentions>>('unlinkedMentions');
 
 /**
- * Backlinks change when another note gains a link here (e.g. linking an
- * unlinked mention reloads the note), not only when this one is saved.
+ * Links change when other notes change (one starts linking here, or a
+ * linked note is created or renamed) and the note is reloaded, not only
+ * when this one is saved.
  */
 watch(
     () => props.note.backlinks,
     (next) => (backlinks.value = next),
+);
+watch(
+    () => props.note.outgoing,
+    (next) => (outgoing.value = next),
 );
 
 const onServerSave = (note: NoteDetailData): void => {
@@ -167,6 +173,7 @@ const onServerSave = (note: NoteDetailData): void => {
     html.value = note.html;
     tags.value = note.tags;
     backlinks.value = note.backlinks;
+    outgoing.value = note.outgoing;
     emit('saved', note);
 };
 
@@ -1338,6 +1345,34 @@ defineExpose({ paletteCommands });
                 <UiBadge color="neutral" variant="soft" size="sm" icon="i-lucide-hash">{{ tag }}</UiBadge>
             </li>
         </ul>
+        <details v-if="outgoing.length" class="border-default border-t pt-2 text-sm">
+            <summary class="text-muted cursor-pointer text-xs">Links to {{ outgoing.length }} note{{ outgoing.length === 1 ? '' : 's' }}</summary>
+            <ul class="mt-1 flex flex-col gap-1">
+                <li v-for="link in outgoing" :key="link.title.toLowerCase()">
+                    <Link
+                        v-if="link.note"
+                        :href="route('notes.show', { note: link.note.id })"
+                        preserve-state
+                        class="hover:bg-elevated flex items-center justify-between gap-2 rounded px-2 py-1"
+                    >
+                        <span class="truncate">{{ link.note.title || 'Untitled note' }}</span>
+                        <span v-if="link.title.toLowerCase() !== link.note.title.toLowerCase()" class="text-dimmed shrink-0 truncate text-xs"
+                            >as “{{ link.title }}”</span
+                        >
+                    </Link>
+                    <button
+                        v-else
+                        type="button"
+                        class="hover:bg-elevated text-muted flex w-full items-center justify-between gap-2 rounded px-2 py-1 text-start"
+                        :title="`Create “${link.title}”`"
+                        @click="emit('createLinked', link.title)"
+                    >
+                        <span class="truncate underline decoration-dashed underline-offset-2">{{ link.title }}</span>
+                        <span class="text-dimmed shrink-0 text-xs">No note yet</span>
+                    </button>
+                </li>
+            </ul>
+        </details>
         <details v-if="backlinks.length" class="border-default border-t pt-2 text-sm">
             <summary class="text-muted cursor-pointer text-xs">
                 Linked from {{ backlinks.length }} note{{ backlinks.length === 1 ? '' : 's' }}

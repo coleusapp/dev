@@ -6,6 +6,7 @@ use Coleus\Notes\Markdown\FrontMatter;
 use Coleus\Notes\Markdown\NoteMarkdown;
 use Coleus\Notes\Markdown\WikiLinks\Backlinks;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
+use Coleus\Notes\Markdown\WikiLinks\WikiLinks;
 use Coleus\Notes\Models\Note;
 use Illuminate\Http\Request;
 
@@ -19,13 +20,36 @@ class NoteDetailResource extends NoteResource
 {
     public function toArray(Request $request): array
     {
+        $resolver = WikiLinkResolver::forBody($this->body, $this->id);
+
         return [
             ...parent::toArray($request),
-            'html' => NoteMarkdown::toHtml($this->body, WikiLinkResolver::forBody($this->body, $this->id)),
+            'html' => NoteMarkdown::toHtml($this->body, $resolver),
             'tags' => $this->tags()->orderBy('name')->pluck('name')->all(),
             'properties' => FrontMatter::parse($this->body),
             'backlinks' => $this->backlinks(),
+            'outgoing' => $this->outgoing($resolver),
         ];
+    }
+
+    /**
+     * The notes this one links to (O2.9), in order of first link: each
+     * link's title as written and the note it leads to, or null when no
+     * note has that name yet.
+     *
+     * @return list<array{title: string, note: array{id: int, title: string}|null}>
+     */
+    private function outgoing(WikiLinkResolver $resolver): array
+    {
+        $titles = WikiLinks::titles($this->body);
+        $ids = array_values(array_filter(array_map(fn (string $title) => $resolver->resolve($title), $titles)));
+        $notes = $ids === [] ? collect() : Note::query()->whereKey($ids)->pluck('title', 'id');
+
+        return array_map(function (string $title) use ($resolver, $notes): array {
+            $id = $resolver->resolve($title);
+
+            return ['title' => $title, 'note' => $id === null ? null : ['id' => $id, 'title' => (string) $notes->get($id, $title)]];
+        }, $titles);
     }
 
     /**

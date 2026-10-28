@@ -38,10 +38,17 @@ export type Backlink = {
     context: HighlightPart[][];
 };
 
+/**
+ * A [[link]] in the open note: its title as written and the note it leads
+ * to, or null when no note has that name yet.
+ */
+export type OutgoingLink = { title: string; note: { id: number; title: string } | null };
+
 export type NoteDetailData = NoteData & {
     html: string;
     tags: string[];
     backlinks: Backlink[];
+    outgoing: OutgoingLink[];
 };
 
 export type NoteResource = Resource<NoteDetailData>;

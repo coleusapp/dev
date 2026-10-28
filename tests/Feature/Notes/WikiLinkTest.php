@@ -108,3 +108,15 @@ it('counts a heading link as a backlink, but not a same-note heading link', func
     $this->get(route('notes.show', ['note' => $target]))
         ->assertInertia(fn (Assert $page) => $page->where('note.data.backlinks', fn ($backlinks) => collect($backlinks)->pluck('id')->all() === [$source->id]));
 });
+
+it('lists outgoing links, resolved and not, in order of first link', function () {
+    $trip = Note::factory()->create(['body' => "---\naliases: [Lisbon]\n---\n# Trip to Lisbon"]);
+    $ideas = Note::factory()->create(['body' => '# Ideas']);
+    $note = Note::factory()->create(['body' => "# Plan\n[[ideas]], [[Someday]], [[Lisbon#Food|food]], [[#Own heading]], [[Ideas]]\n`[[In code]]`"]);
+
+    $this->get(route('notes.show', $note))->assertInertia(fn (Assert $page) => $page->where('note.data.outgoing', [
+        ['title' => 'ideas', 'note' => ['id' => $ideas->id, 'title' => 'Ideas']],
+        ['title' => 'Someday', 'note' => null],
+        ['title' => 'Lisbon', 'note' => ['id' => $trip->id, 'title' => 'Trip to Lisbon']],
+    ]));
+});
