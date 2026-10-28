@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * The notes whose [[wiki links]] point at a given note.
  *
- * Uses the same rules as WikiLinkResolver so a backlink shows up exactly
- * where the forward link goes: matching is by title, case-insensitive,
- * within the user's live notes; when several notes share the title the
- * link goes to the most recently updated one other than the linking note.
+ * Uses WikiLinkResolver itself, so a backlink shows up exactly where the
+ * forward link goes: by title or alias, case-insensitive, within the user's
+ * live notes, a title beating an alias and the most recently updated note
+ * winning between equals.
  */
 class Backlinks
 {
@@ -23,32 +23,51 @@ class Backlinks
      */
     public static function for(Note $note): Collection
     {
-        $title = mb_strtolower($note->title);
-
-        if ($title === '' || $note->trashed()) {
+        if ($note->trashed()) {
             return new Collection;
         }
 
-        $sameTitle = Note::query()
-            ->whereRaw('lower(title) = ?', [$title])
-            ->orderByDesc('updated_at')
-            ->orderByDesc('id')
-            ->pluck('id');
+        $names = collect([$note->title, ...$note->aliases()->pluck('alias')->all()])
+            ->map(fn (string $name) => mb_strtolower($name))
+            ->filter(fn (string $name) => $name !== '')
+            ->unique()
+            ->values();
+
+        if ($names->isEmpty()) {
+            return new Collection;
+        }
 
         return Note::query()
             ->whereKeyNot($note->id)
-            ->whereRaw("lower(body) like ? escape '!'", ['%[[%'.NoteService::escapeLike($title).'%]]%'])
+            ->where(function ($query) use ($names) {
+                foreach ($names as $name) {
+                    $query->orWhereRaw("lower(body) like ? escape '!'", ['%[[%'.NoteService::escapeLike($name).'%]]%']);
+                }
+            })
             ->orderByDesc('updated_at')
             ->limit(self::LIMIT * 2)
             ->get()
-            ->filter(fn (Note $candidate) => self::linksTo($candidate, $title)
-                && $sameTitle->first(fn (int $id) => $id !== $candidate->id) === $note->id)
+            ->filter(fn (Note $candidate) => self::linksTo($candidate, $note, $names->all()))
             ->take(self::LIMIT)
             ->values();
     }
 
-    private static function linksTo(Note $candidate, string $title): bool
+    /**
+     * Whether one of the candidate's [[links]] uses a name of the note and,
+     * by the resolver's rules, really leads to it.
+     *
+     * @param  list<string>  $names
+     */
+    private static function linksTo(Note $candidate, Note $note, array $names): bool
     {
-        return in_array($title, array_map(mb_strtolower(...), WikiLinks::titles($candidate->body)), true);
+        $linked = array_values(array_filter(WikiLinks::titles($candidate->body), fn (string $title) => in_array(mb_strtolower($title), $names, true)));
+
+        if ($linked === []) {
+            return false;
+        }
+
+        $resolver = WikiLinkResolver::forBody($candidate->body, $candidate->id);
+
+        return collect($linked)->contains(fn (string $title) => $resolver->resolve($title) === $note->id);
     }
 }

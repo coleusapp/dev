@@ -59,6 +59,26 @@ class Hashtags
     }
 
     /**
+     * Tags from the "tags" (or "tag") property, a list or a comma/space
+     * separated string, normalized like hashtags ("#Work" → "work").
+     *
+     * @return list<string>
+     */
+    public static function fromFrontMatter(string $body): array
+    {
+        $properties = FrontMatter::parse($body) ?? [];
+        $value = $properties['tags'] ?? $properties['tag'] ?? null;
+        $raw = is_array($value) ? $value : (is_string($value) ? preg_split('/[\s,]+/', $value) : []);
+
+        return collect($raw ?: [])
+            ->map(fn (mixed $tag) => self::normalize(ltrim((string) $tag, '#')))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Every ancestor path of a tag, outermost first: "a/b/c" gives ["a", "a/b"].
      *
      * @return list<string>

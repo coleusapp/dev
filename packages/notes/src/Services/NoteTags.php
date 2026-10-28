@@ -15,7 +15,7 @@ class NoteTags
 {
     public static function sync(Note $note): void
     {
-        $names = Hashtags::parse($note->body);
+        $names = array_values(array_unique([...Hashtags::parse($note->body), ...Hashtags::fromFrontMatter($note->body)]));
 
         $existing = Tag::query()->whereIn('name', $names)->get()->keyBy('name');
 
