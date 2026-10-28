@@ -23,6 +23,7 @@
         "@nuxt/ui": "catalog:dep",
         "@tailwindcss/vite": "catalog:dep",
         "@tiptap/extension-highlight": "catalog:dep",
+        "@tiptap/extension-image": "3.30.1",
         "@tiptap/extension-link": "3.30.1",
         "@tiptap/extension-list": "3.30.1",
         "@tiptap/extension-placeholder": "catalog:dep",

@@ -17,7 +17,8 @@ export type SlashCommand = {
         | { type: 'tableOfContents' }
         | { type: 'callout' }
         | { type: 'wikiLink' }
-        | { type: 'date' };
+        | { type: 'date' }
+        | { type: 'attach' };
 };
 
 export const SLASH_COMMANDS: SlashCommand[] = [
@@ -64,6 +65,13 @@ export const SLASH_COMMANDS: SlashCommand[] = [
         action: { type: 'tableOfContents' },
     },
     { id: 'link', label: 'Link to note', icon: 'i-lucide-link-2', keywords: ['wiki', '[['], action: { type: 'wikiLink' } },
+    {
+        id: 'file',
+        label: 'File or image…',
+        icon: 'i-lucide-paperclip',
+        keywords: ['attach', 'upload', 'image', 'photo', 'pdf'],
+        action: { type: 'attach' },
+    },
     { id: 'date', label: "Today's date", icon: 'i-lucide-calendar', keywords: ['today', 'now'], action: { type: 'date' } },
 ];
 

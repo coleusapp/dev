@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ChecklistAction, TableAction } from '@/components/notes/note';
+import type { UploadedAttachment } from '@/composables/useAttachmentUpload';
 import { checkedToBottomTransaction, deleteCheckedTransaction, setAllCheckedTransaction } from '@/editor/checklists';
 import { applyParagraphStyle, currentParagraphStyle, prepareFirstLine } from '@/editor/commands';
 import { DateMenu, type DateMenuState } from '@/editor/DateChips';
@@ -12,7 +13,7 @@ import { todayIso, type SlashCommand } from '@/editor/slashCommands';
 import { SlashMenu, type SlashState } from '@/editor/SlashMenu';
 import { TagMenu, type TagMenuState } from '@/editor/TagMenu';
 import type { FormatCommand, ParagraphStyle } from '@/lib/markdownFormat';
-import type { EditorState, Transaction } from '@tiptap/pm/state';
+import { TextSelection, type EditorState, type Transaction } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { watch } from 'vue';
 
@@ -46,6 +47,7 @@ const emit = defineEmits<{
     find: [state: { count: number; current: number }];
     openWikiLink: [title: string, heading: string | null];
     openTag: [tag: string];
+    files: [files: File[]];
 }>();
 
 let frontMatter = '';
@@ -75,6 +77,34 @@ const editor = useEditor({
     textDirection: props.textDirection ?? 'auto',
     editorProps: {
         attributes: { class: 'note-preview tiptap h-full focus:outline-none', 'aria-label': 'Note', spellcheck: String(props.spellcheck ?? true) },
+        handlePaste: (_view, event) => {
+            const files = Array.from(event.clipboardData?.files ?? []);
+
+            if (!files.length) {
+                return false;
+            }
+
+            emit('files', files);
+
+            return true;
+        },
+        handleDrop: (view, event, _slice, moved) => {
+            const files = Array.from(event.dataTransfer?.files ?? []);
+
+            if (moved || !files.length) {
+                return false;
+            }
+
+            const at = view.posAtCoords({ left: event.clientX, top: event.clientY });
+
+            if (at) {
+                view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, at.pos)));
+            }
+
+            emit('files', files);
+
+            return true;
+        },
         handleDOMEvents: {
             click: (_view, event) => {
                 const target = event.target instanceof Element ? event.target : null;
@@ -364,6 +394,9 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
         case 'date':
             current.chain().focus().insertContent(todayIso()).run();
             break;
+        case 'attach':
+            // The file picker belongs to NoteEditor, which opens it after this.
+            break;
     }
 };
 
@@ -376,6 +409,22 @@ const insertWikiLink = (range: { from: number; to: number }, link: string): void
         .focus()
         .deleteRange(range)
         .insertContent({ type: 'wikiLink', attrs: { title: link } })
+        .run();
+};
+
+/**
+ * Puts an uploaded file in at the cursor: an image shows, anything else is a link.
+ */
+const insertAttachment = (attachment: UploadedAttachment): void => {
+    const node =
+        attachment.kind === 'image'
+            ? { type: 'image', attrs: { src: attachment.url, alt: attachment.name } }
+            : { type: 'text', text: attachment.name, marks: [{ type: 'link', attrs: { href: attachment.url } }] };
+
+    editor.value
+        ?.chain()
+        .focus()
+        .insertContent([node, { type: 'text', text: ' ' }])
         .run();
 };
 
@@ -430,6 +479,7 @@ defineExpose({
     tableAction,
     runSlash,
     insertWikiLink,
+    insertAttachment,
     replaceRange,
     insertText,
     find,

@@ -36,8 +36,8 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O2.10 Hover preview: hovering a wiki link shows a popover with the target note's rendered content
 
 ## O3. Embeds and attachments
-- [ ] O3.1 Media upload: images, videos, audio and other files (paste, drag-and-drop, button), stored per user, served through a policy-checked route 🧩 (Box: embed files from storage with inline preview) 🍎 📦
-  - [ ] O3.1a Upload rules: allowed types per kind (image / video / audio / document), size limit per kind, MIME sniffed on the server (not trusted from the browser), dangerous types (SVG, HTML, executables) blocked or served as downloads only
+- [x] O3.1 Media upload: images, videos, audio and other files (paste, drag-and-drop, button), stored per user, served through a policy-checked route 🧩 (Box: embed files from storage with inline preview) 🍎 📦
+  - [x] O3.1a Upload rules: allowed types per kind (image / video / audio / document), size limit per kind, MIME sniffed on the server (not trusted from the browser), dangerous types (SVG, HTML, executables) blocked or served as downloads only
   - [ ] O3.1c Image processing: thumbnails and responsive sizes, compression, EXIF/GPS metadata stripped, orientation fixed (queued job)
   - [ ] O3.1d Video processing: poster frame, duration and dimensions, HTTP range requests so playback can seek (queued job) ⚠️ dep (FFmpeg) for poster frames
   - [ ] O3.1e Mobile camera capture: take a photo or record a video straight into the note (`capture` on file inputs)

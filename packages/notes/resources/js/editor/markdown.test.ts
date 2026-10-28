@@ -42,6 +42,10 @@ describe('round trip', () => {
         ['callouts', '> [!note] Title\n> body text\n\n> [!warning]-\n> folded\n\n> [!tip]+ Open'],
         ['mermaid diagram', '```mermaid\ngraph TD\n  A-->B\n```'],
         ['math', 'Area $\\pi r^2$ and $a_1 * b_2$ cost $5 and $10\n\n$$\n\\int_0^1 x\\,dx\n= \\frac12\n$$\n\n$$E=mc^2$$'],
+        [
+            'images and file links',
+            '# A\n\n![Lisbon day 1.png](/notes/attachments/abc/Lisbon%20day%201.png)\n\nsee [doc.pdf](/notes/attachments/x/doc.pdf) and ![](https://x.test/a.png)',
+        ],
         ['note embeds', '# A\n\n![[Packing]]\n\n![[Trip#Day one]]\n\nsee ![[X]] here'],
     ])('keeps %s', (_, markdown) => {
         expect(normalizeMarkdown(roundTrip(markdown))).toBe(normalizeMarkdown(markdown));

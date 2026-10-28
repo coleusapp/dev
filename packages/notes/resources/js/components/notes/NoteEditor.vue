@@ -16,6 +16,7 @@ import SlashMenu from '@/components/notes/SlashMenu.vue';
 import TagMenu from '@/components/notes/TagMenu.vue';
 import UnlinkedMentions from '@/components/notes/UnlinkedMentions.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
+import { useAttachmentUpload } from '@/composables/useAttachmentUpload';
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useDateMenu, type OpenDateMenu } from '@/composables/useDateMenu';
@@ -759,6 +760,11 @@ const chooseSlash = (command: SlashCommand): void => {
 
     if (!open.source) {
         visual.value?.runSlash(command, open.range);
+
+        if (command.action.type === 'attach') {
+            pickFiles();
+        }
+
         return;
     }
 
@@ -806,6 +812,9 @@ const chooseSlash = (command: SlashCommand): void => {
         case 'date':
             editSource(insertText(todayIso()));
             break;
+        case 'attach':
+            pickFiles();
+            break;
     }
 };
 
@@ -827,6 +836,43 @@ const insertAtCursor = (text: string): void => {
             selectionStart: start + text.length,
             selectionEnd: start + text.length,
         }));
+    }
+};
+
+/**
+ * Attachments (O3.1): pasted, dropped or picked files are uploaded and
+ * put in at the cursor, an image as ![](…), anything else as a link.
+ * Locked notes don't take attachments: the files would be stored readable.
+ */
+const fileInput = useTemplateRef<HTMLInputElement>('fileInput');
+const uploads = useAttachmentUpload((attachment) => {
+    if (mode.value === 'edit') {
+        visual.value?.insertAttachment(attachment);
+    } else {
+        insertAtCursor(`${attachment.markdown} `);
+    }
+});
+
+const attachFiles = (files: File[]): void => {
+    if (props.readonly) {
+        return;
+    }
+
+    if (props.encryption) {
+        uploads.errors.value = ["Locked notes can't have attachments: the files would be stored unencrypted."];
+
+        return;
+    }
+
+    void uploads.upload(files);
+};
+
+const pickFiles = (): void => fileInput.value?.click();
+
+const onSourceDrop = (event: DragEvent): void => {
+    if (event.dataTransfer?.files.length) {
+        event.preventDefault();
+        attachFiles(Array.from(event.dataTransfer.files));
     }
 };
 
@@ -995,6 +1041,13 @@ const editSource = (build: (selection: Selection) => TextEdit | null): boolean =
  * losing its formatting. Plain-text pastes are untouched.
  */
 const onSourcePaste = (event: ClipboardEvent): void => {
+    if (event.clipboardData?.files.length) {
+        event.preventDefault();
+        attachFiles(Array.from(event.clipboardData.files));
+
+        return;
+    }
+
     const plain = event.clipboardData?.getData('text/plain') ?? '';
     const html = event.clipboardData?.getData('text/html') ?? '';
 
@@ -1348,7 +1401,43 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
             @checklist-action="checklistAction"
             @table-action="tableAction"
             @insert="insertAtCursor"
+            @attach="pickFiles"
         />
+        <input
+            ref="fileInput"
+            type="file"
+            multiple
+            class="hidden"
+            @change="
+                (event) => (attachFiles(Array.from((event.target as HTMLInputElement).files ?? [])), ((event.target as HTMLInputElement).value = ''))
+            "
+        />
+        <div
+            v-if="uploads.uploading.value || uploads.errors.value.length"
+            class="bg-elevated flex items-start gap-2 rounded-md px-3 py-2 text-xs"
+            role="status"
+        >
+            <UiIcon
+                :name="uploads.uploading.value ? 'i-lucide-loader-circle' : 'i-lucide-circle-alert'"
+                class="size-4 shrink-0"
+                :class="uploads.uploading.value ? 'text-dimmed animate-spin' : 'text-error'"
+            />
+            <div class="flex-1">
+                <p v-if="uploads.uploading.value" class="text-muted">
+                    Uploading {{ uploads.uploading.value }} file{{ uploads.uploading.value === 1 ? '' : 's' }}…
+                </p>
+                <p v-for="message in uploads.errors.value" :key="message" class="text-error">{{ message }}</p>
+            </div>
+            <UiButton
+                v-if="uploads.errors.value.length"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-x"
+                aria-label="Dismiss"
+                @click="uploads.dismiss"
+            />
+        </div>
         <FindBar
             v-if="finder.open.value && mode !== 'preview'"
             v-model:query="finder.query.value"
@@ -1417,6 +1506,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
                 @find="(state) => (finder.visualState.value = state)"
                 :on-slash-key="handleSlashKey"
                 @open-wiki-link="openWikiLink"
+                @files="attachFiles"
                 @open-tag="openTag"
             />
             <SlashMenu v-if="slash" :commands="slashCommands" :selected="slashSelected" :position="slash.position" @choose="chooseSlash" />
@@ -1451,6 +1541,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
                 :readonly="togglingTask"
                 autofocus
                 @paste="onSourcePaste"
+                @drop="onSourceDrop"
                 :spellcheck="spellcheck ?? true"
                 :dir="textDirection ?? 'auto'"
                 @input="detectSourceMenus"

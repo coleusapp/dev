@@ -1,6 +1,7 @@
 <?php
 
 use Coleus\Notes\Http\Controllers\ArchiveController;
+use Coleus\Notes\Http\Controllers\AttachmentController;
 use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\FolderController;
@@ -47,6 +48,8 @@ Route::middleware(['web', 'auth'])
         Route::get('/lock-keys/current', [LockKeyController::class, 'current'])->name('lock-keys.current');
         Route::get('/lock-keys/{lockKey}', [LockKeyController::class, 'show'])->name('lock-keys.show')->whereNumber('lockKey');
         Route::post('/lock-keys', [LockKeyController::class, 'store'])->name('lock-keys.store');
+        Route::post('/attachments', [AttachmentController::class, 'store'])->name('attachments.store');
+        Route::get('/attachments/{attachment}/{name?}', [AttachmentController::class, 'show'])->name('attachments.show')->where('name', '.*');
         Route::get('/lock-keys/{lockKey}/notes', [LockKeyController::class, 'notes'])->name('lock-keys.notes')->whereNumber('lockKey');
         Route::put('/lock-keys/{lockKey}', [LockKeyController::class, 'update'])->name('lock-keys.update')->whereNumber('lockKey');
         Route::patch('/lock-keys/{lockKey}/hint', [LockKeyController::class, 'hint'])->name('lock-keys.hint')->whereNumber('lockKey');

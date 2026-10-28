@@ -19,6 +19,7 @@ const emit = defineEmits<{
     checklistAction: [action: ChecklistAction];
     tableAction: [action: TableAction];
     insert: [text: string];
+    attach: [];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -186,6 +187,17 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
             </UiTooltip>
         </UiDropdownMenu>
         <EmojiPicker @pick="(emoji) => emit('insert', emoji)" />
+        <UiTooltip text="Attach files">
+            <UiButton
+                icon="i-lucide-paperclip"
+                aria-label="Attach files"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                @mousedown.prevent
+                @click="emit('attach')"
+            />
+        </UiTooltip>
         <UiTooltip text="Highlight">
             <UiButton
                 icon="i-lucide-highlighter"

@@ -50,4 +50,23 @@ return [
      * Default: null
      */
     'calendar_url' => env('NOTES_CALENDAR_URL'),
+
+    /*
+     * Attachments (images, video, audio, documents in notes). Files go on
+     * this disk under notes/attachments and are only served through the
+     * notes routes, to their owner. Sizes are per kind, in kilobytes; PHP's
+     * upload_max_filesize / post_max_size must allow the biggest.
+     *
+     * Default: the private local disk; 20 MB images, 500 MB video,
+     * 100 MB audio, 50 MB documents
+     */
+    'attachments' => [
+        'disk' => env('NOTES_ATTACHMENTS_DISK', 'local'),
+        'max_kb' => [
+            'image' => 20 * 1024,
+            'video' => 500 * 1024,
+            'audio' => 100 * 1024,
+            'document' => 50 * 1024,
+        ],
+    ],
 ];
