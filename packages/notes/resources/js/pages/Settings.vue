@@ -67,6 +67,11 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         help: 'Descending is newest first (or Z to A for titles); ascending is oldest first (or A to Z).',
         optionLabel: (value) => ({ desc: 'Descending', asc: 'Ascending' })[value as string] ?? String(value),
     },
+    {
+        key: 'list.group_by_date',
+        label: 'Group notes by date',
+        help: 'Show the list in sections: Pinned, Today, Yesterday, Previous 7 Days… (when sorted by date).',
+    },
     { key: 'list.relative_dates', label: 'Relative dates in the list', help: 'Show "5 minutes ago" instead of the full date and time.' },
     { key: 'list.show_snippets', label: 'Show snippets in the list', help: 'Show a couple of lines of each note under its title.' },
 ];

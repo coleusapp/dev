@@ -23,6 +23,6 @@ class SettingsController extends Controller
     {
         NotePreferences::save($request->preferences());
 
-        return to_route('notes.settings.edit');
+        return back();
     }
 }

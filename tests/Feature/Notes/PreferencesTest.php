@@ -28,7 +28,7 @@ it('renders the settings page', function () {
 });
 
 it('saves preferences for the current user only', function () use ($defaults) {
-    $this->put(route('notes.settings.update'), [
+    $this->from(route('notes.settings.edit'))->put(route('notes.settings.update'), [
         'editor_default_mode' => 'split',
         'editor_autosave_delay' => '1500',
         'list_relative_dates' => false,
@@ -44,6 +44,7 @@ it('saves preferences for the current user only', function () use ($defaults) {
         'checklists.checked_to_bottom' => false,
         'list.sort' => 'modified',
         'list.sort_direction' => 'desc',
+        'list.group_by_date' => false,
         'list.relative_dates' => false,
         'list.show_snippets' => true,
     ]);

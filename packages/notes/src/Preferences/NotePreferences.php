@@ -28,6 +28,7 @@ class NotePreferences
         'checklists.checked_to_bottom' => ['default' => false, 'type' => 'boolean'],
         'list.sort' => ['default' => 'modified', 'options' => ['modified', 'created', 'title']],
         'list.sort_direction' => ['default' => 'desc', 'options' => ['desc', 'asc']],
+        'list.group_by_date' => ['default' => false, 'type' => 'boolean'],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],
     ];

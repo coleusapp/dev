@@ -151,6 +151,7 @@ export type NotePreferences = {
     'checklists.checked_to_bottom': boolean;
     'list.sort': SortField;
     'list.sort_direction': 'asc' | 'desc';
+    'list.group_by_date': boolean;
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
 };

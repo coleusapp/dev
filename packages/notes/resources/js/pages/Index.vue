@@ -152,6 +152,21 @@ const setSort = (sort: SortField | null, direction: 'asc' | 'desc'): void => {
     router.put(route('notes.sort.update'), { sort, direction, folder_id: folderId }, { preserveScroll: true, preserveState: true });
 };
 
+/**
+ * Date sections need a date sort; Recents has its own order.
+ */
+const groupBy = computed(() =>
+    props.preferences['list.group_by_date'] && props.sort.sort !== 'title' && props.filters.view !== 'recent'
+        ? props.sort.sort === 'created'
+            ? 'created_at'
+            : 'updated_at'
+        : null,
+);
+
+const toggleGroupByDate = (on: boolean): void => {
+    router.put(route('notes.settings.update'), { list_group_by_date: on }, { preserveScroll: true, preserveState: true });
+};
+
 const sortItems = computed<DropdownMenuItem[][]>(() => {
     const fields: [SortField, string][] = [
         ['modified', 'Date edited'],
@@ -184,6 +199,15 @@ const sortItems = computed<DropdownMenuItem[][]>(() => {
             checked: props.sort.direction === value,
             onUpdateChecked: () => setSort(props.sort.sort, value),
         })),
+        [
+            {
+                label: 'Group by date',
+                type: 'checkbox',
+                checked: props.preferences['list.group_by_date'],
+                disabled: props.sort.sort === 'title',
+                onUpdateChecked: (checked: boolean) => toggleGroupByDate(checked),
+            },
+        ],
         ...(inFolder && props.sort.scope === 'folder'
             ? [[{ label: 'Use the default order', icon: 'i-lucide-rotate-ccw', onSelect: () => setSort(null, 'desc') }]]
             : []),
@@ -524,6 +548,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         :filters="filters"
                         :relative-dates="preferences['list.relative_dates']"
                         :show-snippets="preferences['list.show_snippets']"
+                        :group-by="groupBy"
                         @create="createNote"
                     />
                 </template>
