@@ -29,6 +29,7 @@ class NoteDetailResource extends NoteResource
             'properties' => FrontMatter::parse($this->body),
             'backlinks' => $this->backlinks(),
             'outgoing' => $this->outgoing($resolver),
+            'lock' => $this->lock_key_id === null ? null : ['key_id' => $this->lock_key_id, 'iv' => $this->locked_iv, 'ciphertext' => $this->locked_body],
         ];
     }
 

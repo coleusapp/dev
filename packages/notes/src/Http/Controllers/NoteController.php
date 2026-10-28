@@ -51,6 +51,7 @@ class NoteController extends Controller
     public function update(NoteRequest $request, Note $note): RedirectResponse|NoteDetailResource
     {
         Gate::authorize('edit', $note);
+        abort_if($note->isLocked(), 409, 'This note is locked; unlock it to change it.');
 
         Notes::note()->update($note, $request->noteData());
 

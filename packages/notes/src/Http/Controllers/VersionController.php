@@ -64,6 +64,7 @@ class VersionController extends Controller
     public function restore(Note $note, NoteVersion $version): RedirectResponse
     {
         Gate::authorize('edit', $note);
+        abort_if($note->isLocked(), 409, 'This note is locked; unlock it to change it.');
 
         Notes::note()->update($note, ['body' => $version->body]);
 

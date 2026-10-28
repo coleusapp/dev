@@ -135,6 +135,10 @@ class NoteService extends Service
     {
         $copy = $this->store(['body' => $note->body]);
 
+        if ($note->isLocked()) {
+            $copy->forceFill(['lock_key_id' => $note->lock_key_id, 'locked_iv' => $note->locked_iv, 'locked_body' => $note->locked_body, 'title' => $note->title])->save();
+        }
+
         if ($note->folder_id !== null) {
             Note::withoutTimestamps(fn () => $copy->forceFill(['folder_id' => $note->folder_id])->save());
         }

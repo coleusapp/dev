@@ -20,6 +20,7 @@ class ChecklistController extends Controller
     public function update(ChecklistRequest $request, Note $note, int $line): NoteDetailResource
     {
         Gate::authorize('edit', $note);
+        abort_if($note->isLocked(), 409, 'This note is locked; unlock it to change it.');
 
         $body = Checklist::toggle($note->body, $line, $request->boolean('checked'));
 
@@ -41,6 +42,7 @@ class ChecklistController extends Controller
     public function move(ChecklistMoveRequest $request, Note $note): NoteDetailResource
     {
         Gate::authorize('edit', $note);
+        abort_if($note->isLocked(), 409, 'This note is locked; unlock it to change it.');
 
         $beforeLine = $request->validated('before_line');
         $body = Checklist::move($note->body, (int) $request->validated('line'), $beforeLine === null ? null : (int) $beforeLine);

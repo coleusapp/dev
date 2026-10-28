@@ -63,6 +63,7 @@ class NoteResource extends JsonResource
             'matches' => $this->highlightWords === [] ? null : $this->matches(),
             'pinned' => $this->pinned_at !== null,
             'read_only' => $this->read_only_at !== null,
+            'locked' => $this->lock_key_id !== null,
             'archived' => $this->archived_at !== null,
             'trashed' => $this->deleted_at !== null,
             'created_at' => $this->created_at?->toIso8601String(),

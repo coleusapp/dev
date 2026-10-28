@@ -29,6 +29,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $body
  * @property \Illuminate\Support\Carbon|null $pinned_at
  * @property \Illuminate\Support\Carbon|null $read_only_at
+ * @property int|null $lock_key_id
+ * @property string|null $locked_iv
+ * @property string|null $locked_body
  * @property \Illuminate\Support\Carbon|null $archived_at
  * @property \Illuminate\Support\Carbon|null $opened_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -79,8 +82,11 @@ class Note extends NotesModelDefaults
 
     protected static function booted(): void
     {
+        // A locked note's title comes from the browser with its encrypted text (Services\NoteLocks).
         static::saving(function (Note $note) {
-            $note->title = NoteText::title($note->body);
+            if (! $note->isLocked()) {
+                $note->title = NoteText::title($note->body);
+            }
         });
 
         static::saved(function (Note $note) {
@@ -88,7 +94,10 @@ class Note extends NotesModelDefaults
                 NoteTags::sync($note);
                 NoteAliases::sync($note);
                 NoteProperties::sync($note);
-                NoteVersions::record($note);
+
+                if (! $note->isLocked()) {
+                    NoteVersions::record($note);
+                }
             }
         });
     }
@@ -142,6 +151,14 @@ class Note extends NotesModelDefaults
     protected function search(Builder $query, string $terms): void
     {
         NoteSearch::apply($query, $terms);
+    }
+
+    /**
+     * Password-locked: its text is encrypted in locked_body (Services\NoteLocks).
+     */
+    public function isLocked(): bool
+    {
+        return $this->lock_key_id !== null;
     }
 
     public function isOwnedBy(int $userId): bool
