@@ -7,7 +7,9 @@ use Coleus\Notes\Enums\NoteSort;
 use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Models\Folder;
 use Coleus\Notes\Models\Note;
+use Coleus\Notes\Models\SmartFolder;
 use Coleus\Notes\Preferences\NotePreferences;
+use Coleus\Notes\Search\SmartFolderRules;
 use Coleus\Support\Services\Service;
 use Coleus\Users\Models\Scopes\UserScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -154,6 +156,25 @@ class NoteService extends Service
     }
 
     /**
+     * The user's Smart Folders with how many notes (in the main list) match each.
+     *
+     * @return list<array{id: int, name: string, rules: array<string, mixed>, count: int}>
+     */
+    public function smartFolders(): array
+    {
+        return SmartFolder::query()
+            ->orderBy('name')
+            ->get()
+            ->map(fn (SmartFolder $smart) => [
+                'id' => $smart->id,
+                'name' => $smart->name,
+                'rules' => SmartFolderRules::normalize($smart->rules),
+                'count' => SmartFolderRules::apply(NoteView::Notes->scope(Note::query()), $smart->rules)->count(),
+            ])
+            ->all();
+    }
+
+    /**
      * Remembers when a note was last opened (for Recents), without
      * counting as an edit.
      */
@@ -195,12 +216,16 @@ class NoteService extends Service
     /**
      * @return Collection<int, Note>
      */
-    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes, ?int $folderId = null): Collection
+    /**
+     * @param  array<string, mixed>|null  $smartRules  a Smart Folder's rules (Search\SmartFolderRules)
+     */
+    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes, ?int $folderId = null, ?array $smartRules = null): Collection
     {
         $order = $this->sortFor($folderId === null ? null : Folder::query()->find($folderId));
 
         return $view->scope($order['sort']->apply(Note::query(), $order['direction']))
             ->when($folderId !== null, fn (Builder $query) => $query->where('folder_id', $folderId))
+            ->when($smartRules !== null, fn (Builder $query) => SmartFolderRules::apply($query, (array) $smartRules))
             ->when($tag !== null, function (Builder $query) use ($tag) {
                 foreach (explode(',', (string) $tag) as $each) {
                     $this->whereTagged($query, $each);

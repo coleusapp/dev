@@ -88,7 +88,7 @@ class NoteController extends Controller
      */
     private function listQuery(Request $request): array
     {
-        return collect(['tag', 'q', 'view', 'folder'])
+        return collect(['tag', 'q', 'view', 'folder', 'smart'])
             ->mapWithKeys(fn (string $key) => [$key => $request->query($key)])
             ->filter(fn (mixed $value, string $key) => is_string($value) && $value !== '' && ! ($key === 'view' && $value === NoteView::Notes->value))
             ->all();

@@ -130,7 +130,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O16.1 Mobile layout polish: swipe between sidebar/list/editor, mobile toolbar above the keyboard
 
 ## A1. Folders and organization (Apple Notes)
-- [ ] A1.1 Smart Folders: saved rule sets (tags with any/all, created/edited date ranges, has checklists, has attachments, has drawings/scans, locked, folder) shown in the sidebar with counts
+- [x] A1.1 Smart Folders: saved rule sets (tags with any/all, created/edited date ranges, has checklists, has attachments, has drawings/scans, locked, folder) shown in the sidebar with counts
 - [x] A1.2 Tag browser with multi-select: pick several tags to filter by all of them (AND)
 - [x] A1.3 Group list by date: Pinned, Today, Yesterday, Previous 7 Days, Previous 30 Days, then month/year sections
 - [ ] A1.4 Gallery view: grid of note cards with thumbnails (first image, sketch or text preview), toggle list/gallery per folder

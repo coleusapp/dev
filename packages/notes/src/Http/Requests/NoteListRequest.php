@@ -6,6 +6,7 @@ use Closure;
 use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Markdown\Hashtags;
 use Coleus\Notes\Models\Folder;
+use Coleus\Notes\Models\SmartFolder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -45,6 +46,15 @@ class NoteListRequest extends FormRequest
             ],
             'q' => ['nullable', 'string', 'max:'.self::MAX_SEARCH_LENGTH],
             'view' => ['nullable', Rule::enum(NoteView::class)],
+            'smart' => [
+                'nullable',
+                'integer',
+                function (string $attribute, mixed $value, Closure $fail) {
+                    if ($value !== null && ! SmartFolder::query()->whereKey($value)->exists()) {
+                        $fail('That smart folder does not exist.');
+                    }
+                },
+            ],
             'folder' => [
                 'nullable',
                 'integer',
@@ -104,6 +114,13 @@ class NoteListRequest extends FormRequest
         return NoteView::tryFrom((string) $this->validated('view')) ?? NoteView::Notes;
     }
 
+    public function smartFolder(): ?SmartFolder
+    {
+        $smart = $this->validated('smart');
+
+        return $smart === null ? null : SmartFolder::query()->find((int) $smart);
+    }
+
     public function folderId(): ?int
     {
         $folder = $this->validated('folder');
@@ -112,10 +129,10 @@ class NoteListRequest extends FormRequest
     }
 
     /**
-     * @return array{tag: string|null, q: string|null, view: string, folder: int|null}
+     * @return array{tag: string|null, q: string|null, view: string, folder: int|null, smart: int|null}
      */
     public function filters(): array
     {
-        return ['tag' => $this->tag(), 'q' => $this->search(), 'view' => $this->view()->value, 'folder' => $this->folderId()];
+        return ['tag' => $this->tag(), 'q' => $this->search(), 'view' => $this->view()->value, 'folder' => $this->folderId(), 'smart' => $this->smartFolder()?->id];
     }
 }

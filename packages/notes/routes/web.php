@@ -8,6 +8,7 @@ use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\PinController;
 use Coleus\Notes\Http\Controllers\SettingsController;
+use Coleus\Notes\Http\Controllers\SmartFolderController;
 use Coleus\Notes\Http\Controllers\SortController;
 use Coleus\Notes\Http\Controllers\TrashController;
 use Coleus\Notes\Http\Controllers\VersionController;
@@ -25,6 +26,9 @@ Route::middleware(['web', 'auth'])
         Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy')->whereNumber('folder');
         Route::put('/{note}/folder', [FolderController::class, 'moveNote'])->name('folder.move')->whereNumber('note');
         Route::put('/sort', [SortController::class, 'update'])->name('sort.update');
+        Route::post('/smart-folders', [SmartFolderController::class, 'store'])->name('smart-folders.store');
+        Route::put('/smart-folders/{smartFolder}', [SmartFolderController::class, 'update'])->name('smart-folders.update')->whereNumber('smartFolder');
+        Route::delete('/smart-folders/{smartFolder}', [SmartFolderController::class, 'destroy'])->name('smart-folders.destroy')->whereNumber('smartFolder');
         Route::post('/searches', [BookmarkController::class, 'storeSearch'])->name('searches.store');
         Route::put('/bookmarks/{bookmark}', [BookmarkController::class, 'update'])->name('bookmarks.update')->whereNumber('bookmark');
         Route::post('/bookmarks/{bookmark}/move', [BookmarkController::class, 'move'])->name('bookmarks.move')->whereNumber('bookmark');

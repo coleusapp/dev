@@ -87,7 +87,25 @@ export type NoteFilters = {
     q: string | null;
     view: NoteView;
     folder: number | null;
+    smart: number | null;
 };
+
+export type SmartRules = {
+    tags: string[];
+    tags_match: 'all' | 'any';
+    folder_id: number | null;
+    edited_within_days: number | null;
+    created_within_days: number | null;
+    edited_from: string | null;
+    edited_to: string | null;
+    created_from: string | null;
+    created_to: string | null;
+    pinned: boolean;
+    has_checklist: boolean;
+    has_open_tasks: boolean;
+};
+
+export type SmartFolder = { id: number; name: string; rules: SmartRules; count: number };
 
 /**
  * The tags in a "?tag=" filter ("work,urgent" means notes with both).
@@ -140,7 +158,9 @@ export const NOTE_DRAG_TYPE = 'application/x-coleus-note';
 export const filterQuery = (filters: Partial<NoteFilters>): Record<string, string> =>
     Object.fromEntries(
         Object.entries(filters)
-            .filter(([key, value]) => (typeof value === 'string' && value !== '') || (key === 'folder' && typeof value === 'number'))
+            .filter(
+                ([key, value]) => (typeof value === 'string' && value !== '') || ((key === 'folder' || key === 'smart') && typeof value === 'number'),
+            )
             .filter(([key, value]) => !(key === 'view' && value === 'notes'))
             .map(([key, value]) => [key, String(value)]),
     );

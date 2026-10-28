@@ -23,7 +23,7 @@ trait RendersNotesPage
     protected function notesPage(NoteListRequest $request, ?Note $note): Response
     {
         $search = $request->search();
-        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view(), $request->folderId()));
+        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view(), $request->folderId(), $request->smartFolder()?->rules));
 
         if ($search !== null) {
             $words = NoteSearch::words($search);
@@ -39,6 +39,7 @@ trait RendersNotesPage
             'tags' => Notes::note()->tagTree(),
             'folders' => app(FolderService::class)->tree(),
             'counts' => Notes::note()->counts(),
+            'smartFolders' => Notes::note()->smartFolders(),
             'bookmarks' => app(BookmarkService::class)->grouped(),
             'filters' => $request->filters(),
             'preferences' => NotePreferences::all(),

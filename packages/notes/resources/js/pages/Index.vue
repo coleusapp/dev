@@ -21,12 +21,14 @@ import {
     type NoteFilters,
     type NotePreferences,
     type NoteResource,
+    type SmartFolder,
     type SortField,
     type TagNode,
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
+import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
@@ -42,6 +44,7 @@ const props = defineProps<{
     folders: FolderNode[];
     counts: { notes: number; archive: number; trash: number };
     bookmarks: BookmarkGroup[];
+    smartFolders: SmartFolder[];
     filters: NoteFilters;
     preferences: NotePreferences;
     sort: ListSort;
@@ -233,6 +236,8 @@ const noteBookmark = computed(() =>
 );
 
 const editingBookmark = ref<BookmarkItem | null>(null);
+const editingSmartFolder = ref<SmartFolder | 'new' | null>(null);
+const currentSmartFolder = computed(() => props.smartFolders.find((smart) => smart.id === props.filters.smart) ?? null);
 const savingSearch = ref(false);
 
 /**
@@ -329,7 +334,12 @@ const deleteNote = (): void => {
 const viewTitles = { notes: 'Notes', archive: 'Archive', trash: 'Trash', recent: 'Recents' } as const;
 
 const listTitle = computed(() => {
-    const base = currentFolder.value && props.filters.view === 'notes' ? currentFolder.value.name : viewTitles[props.filters.view];
+    const base =
+        currentSmartFolder.value && props.filters.view === 'notes'
+            ? currentSmartFolder.value.name
+            : currentFolder.value && props.filters.view === 'notes'
+              ? currentFolder.value.name
+              : viewTitles[props.filters.view];
 
     return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}${describeTags(props.filters.tag)}` : base;
 });
@@ -342,6 +352,11 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'Archive', icon: 'i-lucide-archive', to: route('notes.index', filterQuery({ view: 'archive', q: props.filters.q })) },
     { label: 'Trash', icon: 'i-lucide-trash-2', to: route('notes.index', filterQuery({ view: 'trash', q: props.filters.q })) },
     { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
+    ...props.smartFolders.map((smart) => ({
+        label: `${smart.name} (${smart.count})`,
+        icon: 'i-lucide-folder-search',
+        to: route('notes.index', { smart: smart.id }),
+    })),
     ...flattenFolders(props.folders).map((folder) => ({
         label: `${folder.name} (${folder.count})`,
         icon: 'i-lucide-folder',
@@ -489,7 +504,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         <Link
                             :href="route('notes.index', filters.q ? { q: filters.q } : {})"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
-                            :class="{ 'bg-elevated font-medium': !filters.tag && !filters.folder && filters.view === 'notes' }"
+                            :class="{ 'bg-elevated font-medium': !filters.tag && !filters.folder && !filters.smart && filters.view === 'notes' }"
                             @dragover="acceptNoteDrag"
                             @drop="onAllNotesDrop"
                         >
@@ -501,6 +516,38 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                             <div class="text-dimmed mt-2 px-2 text-xs font-medium">Bookmarks</div>
                             <BookmarkList :groups="bookmarks" @edit="(bookmark) => (editingBookmark = bookmark)" />
                         </template>
+                        <div class="text-dimmed mt-2 flex items-center justify-between px-2 text-xs font-medium">
+                            Smart folders
+                            <UiButton
+                                icon="i-lucide-folder-search"
+                                color="neutral"
+                                variant="ghost"
+                                size="xs"
+                                aria-label="New smart folder"
+                                @click="editingSmartFolder = 'new'"
+                            />
+                        </div>
+                        <div
+                            v-for="smart in smartFolders"
+                            :key="smart.id"
+                            class="group hover:bg-elevated flex items-center gap-1 rounded-md pe-1 text-sm"
+                            :class="{ 'bg-elevated font-medium': filters.smart === smart.id }"
+                        >
+                            <Link :href="route('notes.index', { smart: smart.id })" class="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5">
+                                <UiIcon name="i-lucide-folder-search" class="text-dimmed size-3.5 shrink-0" />
+                                <span class="truncate">{{ smart.name }}</span>
+                                <span class="text-dimmed ms-auto text-xs">{{ smart.count }}</span>
+                            </Link>
+                            <UiButton
+                                icon="i-lucide-settings-2"
+                                :aria-label="`Edit ${smart.name}`"
+                                color="neutral"
+                                variant="ghost"
+                                size="xs"
+                                class="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                                @click="editingSmartFolder = smart"
+                            />
+                        </div>
                         <div class="text-dimmed mt-2 flex items-center justify-between px-2 text-xs font-medium">
                             Folders
                             <UiButton
@@ -684,6 +731,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             </UiDashboardPanel>
         </template>
 
+        <SmartFolderModal :editing="editingSmartFolder" :folders="folders" @close="editingSmartFolder = null" />
         <SaveSearchModal v-model:open="savingSearch" :filters="filters" :suggested-name="suggestedSearchName" />
         <BookmarkModal
             :editing="editingBookmark"
