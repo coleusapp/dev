@@ -45,6 +45,8 @@ import { useNoteHistory } from '@/composables/useNoteHistory';
 import { cachedKey, currentKeyParams, keyParams, setPassword, unlockWithPassword } from '@/composables/useNoteKeys';
 import { useSearchScope } from '@/composables/useSearchScope';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import { dailyBody, dailyTemplate } from '@/lib/daily';
+import { isoDate } from '@/lib/dates';
 import { jsonHeaders } from '@/lib/http';
 import { encryptText } from '@/lib/noteCrypto';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
@@ -172,6 +174,19 @@ const createNote = (): void => {
         body: tag ? `\n\n${describeTags(tag).replace(/ \+ /g, ' ')}` : '',
         folder_id: folder,
     });
+};
+
+/**
+ * Today's note (O9.1): opened if it exists, otherwise made from the
+ * "Daily note" template with a title in the chosen format. "Today" is
+ * this device's day.
+ */
+const openDailyNote = async (date: Date = new Date()): Promise<void> => {
+    const response = await fetch(route('notes.templates.index'), { headers: jsonHeaders(), credentials: 'same-origin' });
+    const templates = response.ok ? ((await response.json())?.data ?? []) : [];
+    const body = dailyBody(date, props.preferences['daily.title_format'], dailyTemplate(templates));
+
+    router.post(route('notes.daily.store'), { date: isoDate(date), body });
 };
 
 /**
@@ -357,6 +372,7 @@ const pageShortcuts: [ShortcutId, () => void][] = [
     ['search', focusSearch],
     ['next-note', () => stepNote(1)],
     ['previous-note', () => stepNote(-1)],
+    ['today', () => void openDailyNote()],
     ['back', noteHistory.back],
     ['forward', noteHistory.forward],
     ['shortcuts', () => (showingShortcuts.value = true)],
@@ -773,6 +789,13 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         label: 'Create',
         commands: [
             { id: 'note.new', label: 'New note', icon: 'i-lucide-file-plus', kbds: shortcutKeys('new-note'), run: createNote },
+            {
+                id: 'note.today',
+                label: "Open today's note",
+                icon: 'i-lucide-calendar-days',
+                kbds: shortcutKeys('today'),
+                run: () => void openDailyNote(),
+            },
             { id: 'note.template', label: 'New note from template…', icon: 'i-lucide-file-text', run: () => (choosingTemplate.value = true) },
             {
                 id: 'folder.new',
@@ -899,6 +922,14 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                             All notes
                             <span class="text-dimmed ms-auto text-xs">{{ counts.notes }}</span>
                         </Link>
+                        <button
+                            type="button"
+                            class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm"
+                            @click="openDailyNote()"
+                        >
+                            <UiIcon name="i-lucide-calendar-days" class="text-dimmed size-4" />
+                            Today
+                        </button>
                         <template v-if="bookmarks.length">
                             <div class="text-dimmed mt-2 px-2 text-xs font-medium">Bookmarks</div>
                             <BookmarkList :groups="bookmarks" @edit="(bookmark) => (editingBookmark = bookmark)" />

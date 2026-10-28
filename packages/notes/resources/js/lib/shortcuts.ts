@@ -16,6 +16,7 @@ export type ShortcutId =
     | 'next-note'
     | 'previous-note'
     | 'back'
+    | 'today'
     | 'forward'
     | 'shortcuts'
     | 'save'
@@ -47,6 +48,7 @@ export const SHORTCUTS: Shortcut[] = [
     { id: 'search', label: 'Search notes', group: 'Notes', keys: ['meta', 'shift', 'F'] },
     { id: 'next-note', label: 'Next note in the list', group: 'Notes', keys: ['meta', 'alt', 'ArrowDown'] },
     { id: 'previous-note', label: 'Previous note in the list', group: 'Notes', keys: ['meta', 'alt', 'ArrowUp'] },
+    { id: 'today', label: "Today's note", group: 'Notes', keys: ['meta', 'shift', 'D'] },
     { id: 'back', label: 'Back to the previous note', group: 'Notes', keys: ['meta', '['] },
     { id: 'forward', label: 'Forward', group: 'Notes', keys: ['meta', ']'] },
     { id: 'shortcuts', label: 'Keyboard shortcuts', group: 'Notes', keys: ['meta', 'shift', '/'] },

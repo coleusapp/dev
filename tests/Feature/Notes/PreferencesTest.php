@@ -50,6 +50,7 @@ it('saves preferences for the current user only', function () use ($defaults) {
         'list.layout' => 'list',
         'search.sort' => 'relevance',
         'reading.line_breaks' => 'soft',
+        'daily.title_format' => 'YYYY-MM-DD',
     ]);
 
     $this->actingAs(User::factory()->create());

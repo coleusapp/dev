@@ -91,7 +91,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O7.10 Keyboard shortcuts, a fixed well-chosen set (new note, search, cycle notes) (Bear 8.2) (Apple: Cmd+N new note, Cmd+Shift+N new folder, Cmd+L checklist, Cmd+Shift+T/H/J title/heading/subheading, Cmd+U underline) 🍎
 
 ## O9. Daily notes, templates, productivity
-- [ ] O9.1 Daily notes: "today's note" command, configurable title format and template, folder
+- [x] O9.1 Daily notes: "today's note" command, configurable title format and template, folder
 - [ ] O9.2 Periodic navigation: previous/next daily note, calendar picker (could use the Calendar package)
 - [x] O9.3 Templates: notes in a templates folder; insert with variables `{{title}}`, `{{date}}`, `{{time}}`, custom formats (Box: template gallery) 📦
 - [x] O9.4 New note from template

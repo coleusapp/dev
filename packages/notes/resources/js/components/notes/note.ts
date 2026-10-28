@@ -247,6 +247,7 @@ export type NotePreferences = {
     'list.layout': 'list' | 'gallery';
     'search.sort': 'relevance' | 'list';
     'reading.line_breaks': 'soft' | 'hard';
+    'daily.title_format': string;
 };
 
 export type BookmarkItem = {

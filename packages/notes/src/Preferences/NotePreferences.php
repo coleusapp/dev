@@ -34,6 +34,7 @@ class NotePreferences
         'list.layout' => ['default' => 'list', 'options' => ['list', 'gallery']],
         'search.sort' => ['default' => 'relevance', 'options' => ['relevance', 'list']],
         'reading.line_breaks' => ['default' => 'soft', 'options' => ['soft', 'hard']],
+        'daily.title_format' => ['default' => 'YYYY-MM-DD', 'options' => ['YYYY-MM-DD', 'dddd, MMMM D, YYYY', 'D MMMM YYYY', 'MMMM D, YYYY', 'DD/MM/YYYY', 'MM/DD/YYYY']],
     ];
 
     /**

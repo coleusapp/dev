@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import NotesPasswordSettings from '@/components/notes/NotesPasswordSettings.vue';
 import type { NotePreferences } from '@/components/notes/note';
+import NotesPasswordSettings from '@/components/notes/NotesPasswordSettings.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import { formatDate } from '@/lib/templates';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 type Definition = {
@@ -86,6 +87,12 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
         label: 'Line breaks in the reading view',
         help: 'Markdown joins lines that are only one line break apart into one paragraph; keep them to show each line as you typed it.',
         optionLabel: (value) => ({ soft: 'Join lines (Markdown)', hard: 'Keep every line break' })[value as string] ?? String(value),
+    },
+    {
+        key: 'daily.title_format',
+        label: 'Daily note titles',
+        help: 'How a daily note is titled. They go in a "Daily notes" folder; a template titled "Daily note" in your Templates folder is used for new ones.',
+        optionLabel: (value) => formatDate(new Date(), String(value)),
     },
     {
         key: 'search.sort',

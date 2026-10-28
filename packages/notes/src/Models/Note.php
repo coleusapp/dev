@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $locked_body
  * @property \Illuminate\Support\Carbon|null $archived_at
  * @property \Illuminate\Support\Carbon|null $opened_at
+ * @property \Illuminate\Support\Carbon|null $daily_on
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -76,6 +77,7 @@ class Note extends NotesModelDefaults
             'read_only_at' => 'datetime',
             'archived_at' => 'datetime',
             'opened_at' => 'datetime',
+            'daily_on' => 'date',
             'deleted_at' => 'datetime',
         ];
     }

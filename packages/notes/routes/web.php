@@ -4,6 +4,7 @@ use Coleus\Notes\Http\Controllers\ArchiveController;
 use Coleus\Notes\Http\Controllers\AttachmentController;
 use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
+use Coleus\Notes\Http\Controllers\DailyNoteController;
 use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
 use Coleus\Notes\Http\Controllers\LayoutController;
@@ -64,6 +65,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/link-preview', [LinkPreviewController::class, 'show'])->name('link-preview')->middleware('throttle:60,1');
         Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
+        Route::post('/daily', [DailyNoteController::class, 'store'])->name('daily.store');
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');
         Route::post('/{note}/relink', [RelinkController::class, 'store'])->name('relink.store')->whereNumber('note');
