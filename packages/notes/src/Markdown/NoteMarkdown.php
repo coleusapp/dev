@@ -38,12 +38,12 @@ class NoteMarkdown
      */
     public static function toHtml(string $body, ?WikiLinkResolver $wikiLinks = null): string
     {
-        return (string) self::converter($wikiLinks)->convert($body);
+        return (string) self::converter($wikiLinks)->convert(FrontMatter::blankOut($body));
     }
 
     public static function parse(string $body): Document
     {
-        return new MarkdownParser(self::converter()->getEnvironment())->parse($body);
+        return new MarkdownParser(self::converter()->getEnvironment())->parse(FrontMatter::blankOut($body));
     }
 
     private static function converter(?WikiLinkResolver $wikiLinks = null): GithubFlavoredMarkdownConverter

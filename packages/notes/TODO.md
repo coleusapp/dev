@@ -74,7 +74,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O5.8 Safe-subset HTML: allow a vetted allow-list (e.g. `<details>`, `<kbd>`, `<sup>`) while still blocking scripts
 
 ## O6. Properties (front matter)
-- [ ] O6.1 YAML front matter parsed and hidden from preview/title/snippet
+- [x] O6.1 YAML front matter parsed and hidden from preview/title/snippet
 - [ ] O6.2 Properties panel: typed fields (text, list, number, checkbox, date, datetime) editable in UI, written back to YAML (Box: metadata templates on notes) 📦
 - [ ] O6.3 Special properties: `tags` (merged with #tags), `aliases` (used by link resolution/autocomplete)
 - [ ] O6.4 All-properties view: every property used across notes with counts; rename a property everywhere

@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Http\Resources;
 
+use Coleus\Notes\Markdown\FrontMatter;
 use Coleus\Notes\Markdown\NoteMarkdown;
 use Coleus\Notes\Markdown\WikiLinks\Backlinks;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
@@ -21,6 +22,7 @@ class NoteDetailResource extends NoteResource
             ...parent::toArray($request),
             'html' => NoteMarkdown::toHtml($this->body, WikiLinkResolver::forBody($this->body, $this->id)),
             'tags' => $this->tags()->orderBy('name')->pluck('name')->all(),
+            'properties' => FrontMatter::parse($this->body),
             'backlinks' => Backlinks::for($this->resource)
                 ->map(fn ($note) => ['id' => $note->id, 'title' => $note->title, 'updated_at_for_humans' => $note->updated_at?->diffForHumans()])
                 ->all(),

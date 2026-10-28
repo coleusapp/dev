@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Support;
 
+use Coleus\Notes\Markdown\FrontMatter;
 use Coleus\Notes\Search\Highlighter;
 use Illuminate\Support\Str;
 
@@ -24,7 +25,7 @@ class NoteText
      */
     public static function title(string $body): string
     {
-        $firstLine = collect(preg_split('/\R/', $body) ?: [])
+        $firstLine = collect(preg_split('/\R/', FrontMatter::split($body)[1]) ?: [])
             ->first(fn (string $line) => self::isTextLine($line), '');
 
         return Str::limit(self::plainLine($firstLine), self::TITLE_LENGTH - 3);
@@ -36,7 +37,7 @@ class NoteText
      */
     public static function snippet(string $body, int $length = self::SNIPPET_LENGTH): string
     {
-        $lines = collect(preg_split('/\R/', $body) ?: [])
+        $lines = collect(preg_split('/\R/', FrontMatter::split($body)[1]) ?: [])
             ->skipUntil(fn (string $line) => self::isTextLine($line))
             ->skip(1)
             ->filter(fn (string $line) => self::isTextLine($line))
