@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown;
 
+use Coleus\Notes\Markdown\Attachments\AttachmentEmbedExtension;
 use Coleus\Notes\Markdown\Callouts\CalloutExtension;
 use Coleus\Notes\Markdown\Dates\DateChipExtension;
 use Coleus\Notes\Markdown\Math\MathExtension;
@@ -111,6 +112,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new FootnoteExtension);
         $converter->getEnvironment()->addExtension(new DateChipExtension);
         $converter->getEnvironment()->addExtension(new MathExtension);
+        $converter->getEnvironment()->addExtension(new AttachmentEmbedExtension);
         $converter->getEnvironment()->addRenderer(Image::class, new AttachmentImageRenderer, 10);
         // Above GFM's DisallowedRawHtml renderers (priority 50), which would otherwise pass most HTML through.
         $converter->getEnvironment()->addRenderer(HtmlBlock::class, new SafeHtmlRenderer, 100);

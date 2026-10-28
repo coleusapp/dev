@@ -4,6 +4,7 @@ import DateMenu from '@/components/notes/DateMenu.vue';
 import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import HighlightedText from '@/components/notes/HighlightedText.vue';
+import ImageViewer from '@/components/notes/ImageViewer.vue';
 import LinkMenu from '@/components/notes/LinkMenu.vue';
 import LinkPreviewCard from '@/components/notes/LinkPreviewCard.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
@@ -295,8 +296,21 @@ useChecklistDrag(
     (line, beforeLine) => changeChecklist(route('notes.checklist.move', { note: props.note.id }), { line, before_line: beforeLine }),
 );
 
+/**
+ * An image clicked in the reading view, shown full screen (O3.2).
+ */
+const viewedImage = ref<{ src: string; alt: string } | null>(null);
+
 const onPreviewClick = (event: MouseEvent): void => {
     const target = event.target;
+
+    if (target instanceof HTMLImageElement && !target.closest('a')) {
+        event.preventDefault();
+        viewedImage.value = { src: target.getAttribute('src') ?? target.src, alt: target.alt };
+
+        return;
+    }
+
     const wikiLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a.wiki-link') : null;
     const inNoteLink = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href^="#"]:not(.wiki-link)') : null;
 
@@ -1575,6 +1589,7 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
         </div>
         <!-- Outside the editing area, so pressing on the card doesn't close it before its link is followed. -->
         <LinkPreviewCard v-if="linkPreview.card.value" :preview="linkPreview.card.value" @enter="linkPreview.keep" @leave="linkPreview.hide" />
+        <ImageViewer :image="viewedImage" @close="viewedImage = null" />
         <UiSlideover v-if="!isLarge" v-model:open="outlineSheetOpen" title="Outline" description="Jump to a heading in this note.">
             <template #body>
                 <OutlinePanel :headings="outline" @jump="jumpToHeading" />

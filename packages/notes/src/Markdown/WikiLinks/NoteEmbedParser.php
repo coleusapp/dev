@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown\WikiLinks;
 
+use Coleus\Notes\Markdown\Attachments\AttachmentEmbedExtension;
 use League\CommonMark\Parser\Block\AbstractBlockContinueParser;
 use League\CommonMark\Parser\Block\BlockContinue;
 use League\CommonMark\Parser\Block\BlockContinueParserInterface;
@@ -44,7 +45,8 @@ class NoteEmbedParser extends AbstractBlockContinueParser
 
                 ['title' => $title, 'heading' => $heading, 'label' => $label] = WikiLinks::split($match[1]);
 
-                if ($title === '') {
+                // ![[photo.png]] is an attachment (Markdown\Attachments), not a note.
+                if ($title === '' || AttachmentEmbedExtension::isFileName($title)) {
                     return BlockStart::none();
                 }
 

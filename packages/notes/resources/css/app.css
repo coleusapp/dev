@@ -98,7 +98,11 @@
 }
 
 .note-preview img {
-    @apply max-w-full rounded-md;
+    @apply max-w-full cursor-zoom-in rounded-md;
+}
+
+.note-preview .attachment-missing {
+    @apply text-muted rounded border border-dashed px-1 text-xs;
 }
 
 .note-preview table {
