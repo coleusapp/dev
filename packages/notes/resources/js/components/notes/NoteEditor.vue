@@ -3,6 +3,7 @@ import FindBar from '@/components/notes/FindBar.vue';
 import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import NoteInfo from '@/components/notes/NoteInfo.vue';
+import NoteTitle from '@/components/notes/NoteTitle.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
@@ -33,6 +34,7 @@ import {
 } from '@/lib/markdownFormat';
 import { pasteUrlOverSelection } from '@/lib/paste';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
+import { renameFirstLine } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import { computed, onActivated, ref, useTemplateRef, watch } from 'vue';
@@ -60,6 +62,16 @@ const tags = ref(props.note.tags);
 const backlinks = ref(props.note.backlinks);
 
 const updatedAt = ref(props.note.updated_at);
+const savedTitle = ref(props.note.title);
+
+/**
+ * Renaming rewrites the note's first line (titles come from it); the
+ * visual editor reloads the new text and autosave stores it.
+ */
+const renameNote = (title: string): void => {
+    body.value = renameFirstLine(body.value, title);
+    savedTitle.value = title;
+};
 
 /**
  * Coming back to a note kept alive (for its undo history): if the note
@@ -75,6 +87,7 @@ onActivated(() => {
 
 const onServerSave = (note: NoteDetailData): void => {
     updatedAt.value = note.updated_at;
+    savedTitle.value = note.title;
     html.value = note.html;
     tags.value = note.tags;
     backlinks.value = note.backlinks;
@@ -723,6 +736,7 @@ const onKeydown = (event: KeyboardEvent): void => {
 
 <template>
     <div class="flex h-full flex-col gap-2">
+        <NoteTitle :title="savedTitle" :readonly="readonly" @rename="renameNote" />
         <FormatToolbar
             v-if="mode !== 'preview'"
             :active-style="mode === 'edit' ? visualStyle : null"
