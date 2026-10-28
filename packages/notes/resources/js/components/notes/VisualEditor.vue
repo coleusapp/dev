@@ -413,13 +413,13 @@ const insertWikiLink = (range: { from: number; to: number }, link: string): void
 };
 
 /**
- * Puts an uploaded file in at the cursor: an image shows, anything else is a link.
+ * Puts an uploaded file in at the cursor: images, video, audio and PDFs
+ * show in place (the server's Markdown starts "!"), anything else is a link.
  */
 const insertAttachment = (attachment: UploadedAttachment): void => {
-    const node =
-        attachment.kind === 'image'
-            ? { type: 'image', attrs: { src: attachment.url, alt: attachment.name } }
-            : { type: 'text', text: attachment.name, marks: [{ type: 'link', attrs: { href: attachment.url } }] };
+    const node = attachment.markdown.startsWith('!')
+        ? { type: 'image', attrs: { src: attachment.url, alt: attachment.name } }
+        : { type: 'text', text: attachment.name, marks: [{ type: 'link', attrs: { href: attachment.url } }] };
 
     editor.value
         ?.chain()

@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown;
 
+use Coleus\Notes\Markdown\Attachments\MediaPlayer;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Image;
 use League\CommonMark\Extension\CommonMark\Renderer\Inline\ImageRenderer;
 use League\CommonMark\Node\Node;
@@ -43,8 +44,18 @@ class AttachmentImageRenderer implements ConfigurationAwareInterface, NodeRender
             return $element;
         }
 
-        $element->setAttribute('loading', 'lazy');
         $src = (string) $element->getAttribute('src');
+
+        // ![clip.mp4](/notes/attachments/…) of attached video, audio or a PDF plays in place (O3.4).
+        if (preg_match(self::ATTACHMENT, $src) === 1) {
+            $player = MediaPlayer::for($src, (string) $element->getAttribute('alt'));
+
+            if ($player !== null) {
+                return $player;
+            }
+        }
+
+        $element->setAttribute('loading', 'lazy');
 
         if (preg_match(self::ATTACHMENT, $src) === 1) {
             $widths = (array) config('notes.attachments.image_widths');

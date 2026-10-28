@@ -68,7 +68,8 @@ class AttachmentEmbedExtension implements ExtensionInterface, InlineParserInterf
         }
 
         if ($attachment->kind !== AttachmentKind::Image) {
-            return new HtmlElement('a', ['href' => $attachment->url(), 'class' => 'attachment-link'], Xml::escape($attachment->name));
+            return MediaPlayer::for($attachment->url(), $attachment->name, $node->width, $node->height)
+                ?? new HtmlElement('a', ['href' => $attachment->url(), 'class' => 'attachment-link'], Xml::escape($attachment->name));
         }
 
         $src = $attachment->url();

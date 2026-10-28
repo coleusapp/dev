@@ -70,14 +70,17 @@ class Attachment extends NotesModelDefaults
     }
 
     /**
-     * The Markdown a note gets for it: an image shows, anything else links.
+     * The Markdown a note gets for it: images, video, audio and PDFs show
+     * in place (![…](…), rendered as players for media, O3.4); other files link.
      */
     public function markdown(): string
     {
         $label = str_replace(['[', ']'], ['(', ')'], $this->name);
         $url = str_replace([' ', '(', ')'], ['%20', '%28', '%29'], $this->url());
 
-        return $this->kind === AttachmentKind::Image ? "![{$label}]({$url})" : "[{$label}]({$url})";
+        $shows = $this->kind !== AttachmentKind::Document || $this->mime === 'application/pdf';
+
+        return $shows ? "![{$label}]({$url})" : "[{$label}]({$url})";
     }
 
     /**

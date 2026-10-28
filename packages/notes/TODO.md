@@ -45,7 +45,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
   - [x] O3.1g Upload progress bar and cancel
 - [x] O3.2 Image embeds `![[image.png]]` with size syntax `![[image.png|300]]` (Apple: small/large size toggle, full-screen viewer) 🍎 📦
 - [x] O3.3 Note transclusion `![[Other note]]`, `![[Note#Heading]]` (rendered inline, loop-safe)
-- [ ] O3.4 PDF, audio and video embeds with inline players/viewer 🍎 📦
+- [x] O3.4 PDF, audio and video embeds with inline players/viewer 🍎 📦
 - [ ] O3.5 Attachment manager: list attachments, show which notes use each one, delete unused ones (Apple: grouped as photos & videos, scans, maps, websites, audio, documents) 🍎
 - [ ] O3.6 Audio recorder: record a voice memo into the current note 🍎
 

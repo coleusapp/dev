@@ -101,6 +101,21 @@
     @apply max-w-full cursor-zoom-in rounded-md;
 }
 
+.note-preview .attachment-video,
+.tiptap .attachment-video {
+    @apply mb-2 max-w-full rounded-md;
+}
+
+.note-preview .attachment-audio,
+.tiptap .attachment-audio {
+    @apply mb-2 w-full max-w-md;
+}
+
+.note-preview .attachment-pdf,
+.tiptap .attachment-pdf {
+    @apply border-default mb-2 h-[36rem] w-full rounded-md border;
+}
+
 .note-preview .attachment-missing {
     @apply text-muted rounded border border-dashed px-1 text-xs;
 }

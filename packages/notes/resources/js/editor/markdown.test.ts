@@ -59,6 +59,17 @@ describe('round trip', () => {
         expect(roundTrip('[[A note]] #tag')).toBe('[[A note]] #tag');
     });
 
+    it('plays attached media in place and keeps its Markdown', () => {
+        const markdown =
+            '![Clip.mp4](/notes/attachments/abc/Clip.mp4) ![Memo.m4a](/notes/attachments/abc/Memo.m4a) ![R.pdf](/notes/attachments/abc/R.pdf) ![p](/notes/attachments/abc/p.png)';
+
+        expect(roundTrip(markdown)).toBe(markdown);
+        expect(editor.view.dom.querySelector('video')?.getAttribute('src')).toBe('/notes/attachments/abc/Clip.mp4');
+        expect(editor.view.dom.querySelector('audio')).not.toBeNull();
+        expect(editor.view.dom.querySelector('iframe.attachment-pdf')).not.toBeNull();
+        expect(editor.view.dom.querySelectorAll('img:not(.ProseMirror-separator)')).toHaveLength(1);
+    });
+
     it('keeps TeX exactly as written', () => {
         const markdown = 'Area $\\pi r^2$ and $a_1 * b_2$\n\n$$\n\\int_0^1 x\\,dx\n$$';
 
