@@ -201,7 +201,11 @@ class NoteService extends Service
 
         return $view->scope($order['sort']->apply(Note::query(), $order['direction']))
             ->when($folderId !== null, fn (Builder $query) => $query->where('folder_id', $folderId))
-            ->when($tag !== null, fn (Builder $query) => $this->whereTagged($query, (string) $tag))
+            ->when($tag !== null, function (Builder $query) use ($tag) {
+                foreach (explode(',', (string) $tag) as $each) {
+                    $this->whereTagged($query, $each);
+                }
+            })
             ->when($search !== null, fn (Builder $query) => $query->search((string) $search))
             ->get();
     }

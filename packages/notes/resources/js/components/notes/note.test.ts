@@ -28,3 +28,16 @@ describe('compareNotes', () => {
         expect(ids('title', 'desc')).toEqual([4, 2, 1, 3]);
     });
 });
+
+describe('tag filters', () => {
+    it('adds and removes tags in a combined filter', async () => {
+        const { toggleTagFilter, describeTags, tagList } = await import('@/components/notes/note');
+
+        expect(toggleTagFilter(null, 'work')).toBe('work');
+        expect(toggleTagFilter('work', 'urgent')).toBe('work,urgent');
+        expect(toggleTagFilter('work,urgent', 'work')).toBe('urgent');
+        expect(toggleTagFilter('work', 'work')).toBeNull();
+        expect(describeTags('work,urgent')).toBe('#work + #urgent');
+        expect(tagList(null)).toEqual([]);
+    });
+});

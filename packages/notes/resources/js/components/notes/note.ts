@@ -89,6 +89,29 @@ export type NoteFilters = {
     folder: number | null;
 };
 
+/**
+ * The tags in a "?tag=" filter ("work,urgent" means notes with both).
+ */
+export const tagList = (tag: string | null): string[] => (tag ? tag.split(',').filter((each) => each !== '') : []);
+
+/**
+ * The filter with `tag` added, or removed when it's already in it.
+ */
+export const toggleTagFilter = (current: string | null, tag: string): string | null => {
+    const tags = tagList(current);
+    const next = tags.includes(tag) ? tags.filter((each) => each !== tag) : [...tags, tag];
+
+    return next.length ? next.join(',') : null;
+};
+
+/**
+ * "#work + #urgent" for headings and messages.
+ */
+export const describeTags = (tag: string | null): string =>
+    tagList(tag)
+        .map((each) => `#${each}`)
+        .join(' + ');
+
 export type FolderNode = {
     id: number;
     name: string;

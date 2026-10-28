@@ -4,6 +4,7 @@ import FolderModal from '@/components/notes/FolderModal.vue';
 import FolderTree from '@/components/notes/FolderTree.vue';
 import {
     compareNotes,
+    describeTags,
     filterQuery,
     NOTE_DRAG_TYPE,
     type FolderDialog,
@@ -136,7 +137,10 @@ const onNoteSaved = (saved: NoteDetailData): void => {
 const createNote = (): void => {
     const { tag, folder } = props.filters;
 
-    router.post(route('notes.store', filterQuery({ tag, folder })), { body: tag ? `\n\n#${tag}` : '', folder_id: folder });
+    router.post(route('notes.store', filterQuery({ tag, folder })), {
+        body: tag ? `\n\n${describeTags(tag).replace(/ \+ /g, ' ')}` : '',
+        folder_id: folder,
+    });
 };
 
 const flattenFolders = (nodes: FolderNode[]): FolderNode[] => nodes.flatMap((node) => [node, ...flattenFolders(node.children)]);
@@ -282,7 +286,7 @@ const viewTitles = { notes: 'Notes', archive: 'Archive', trash: 'Trash', recent:
 const listTitle = computed(() => {
     const base = currentFolder.value && props.filters.view === 'notes' ? currentFolder.value.name : viewTitles[props.filters.view];
 
-    return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}#${props.filters.tag}` : base;
+    return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}${describeTags(props.filters.tag)}` : base;
 });
 
 const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);

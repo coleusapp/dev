@@ -14,6 +14,8 @@ use Illuminate\Validation\Rule;
  */
 class NoteListRequest extends FormRequest
 {
+    public const int MAX_TAGS = 5;
+
     public const int MAX_SEARCH_LENGTH = 200;
 
     public function authorize(): bool
@@ -27,7 +29,20 @@ class NoteListRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tag' => ['nullable', 'string', 'max:'.Hashtags::MAX_LENGTH],
+            'tag' => [
+                'nullable',
+                'string',
+                'max:'.(self::MAX_TAGS * (Hashtags::MAX_LENGTH + 1)),
+                function (string $attribute, mixed $value, Closure $fail) {
+                    $tags = is_string($value) ? array_filter(explode(',', $value), fn (string $tag) => trim($tag) !== '') : [];
+
+                    if (count($tags) > self::MAX_TAGS) {
+                        $fail('Filter by at most '.self::MAX_TAGS.' tags at a time.');
+                    } elseif (collect($tags)->contains(fn (string $tag) => mb_strlen(trim($tag)) > Hashtags::MAX_LENGTH)) {
+                        $fail('That tag is too long.');
+                    }
+                },
+            ],
             'q' => ['nullable', 'string', 'max:'.self::MAX_SEARCH_LENGTH],
             'view' => ['nullable', Rule::enum(NoteView::class)],
             'folder' => [
@@ -54,11 +69,27 @@ class NoteListRequest extends FormRequest
         ];
     }
 
+    /**
+     * The tags to filter by: "?tag=work,urgent" means notes tagged with all
+     * of them (each including its nested tags). Normalized like hashtags.
+     *
+     * @return list<string>
+     */
+    public function tags(): array
+    {
+        return collect(explode(',', (string) $this->validated('tag')))
+            ->map(fn (string $tag) => trim(mb_strtolower($tag), "/# \t"))
+            ->filter(fn (string $tag) => $tag !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public function tag(): ?string
     {
-        $tag = trim(mb_strtolower((string) $this->validated('tag')), "/# \t");
+        $tags = $this->tags();
 
-        return $tag === '' ? null : $tag;
+        return $tags === [] ? null : implode(',', $tags);
     }
 
     public function search(): ?string

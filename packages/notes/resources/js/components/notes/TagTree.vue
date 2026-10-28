@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { TagNode } from '@/components/notes/note';
-import { Link } from '@inertiajs/vue3';
+import { tagList, toggleTagFilter, type TagNode } from '@/components/notes/note';
+import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -13,7 +13,26 @@ const props = defineProps<{
 /**
  * Branches start open when they contain the selected tag.
  */
-const isOnSelectedPath = (tag: TagNode): boolean => props.selected !== null && props.selected.startsWith(`${tag.path}/`);
+const selectedTags = (): string[] => tagList(props.selected);
+
+const isSelected = (tag: TagNode): boolean => selectedTags().includes(tag.path);
+
+const isOnSelectedPath = (tag: TagNode): boolean => selectedTags().some((selected) => selected.startsWith(`${tag.path}/`));
+
+/**
+ * Cmd/Ctrl/Shift-click adds the tag to the filter (or takes it out), to
+ * show only notes that have all the selected tags. A plain click shows
+ * just this tag.
+ */
+const onTagClick = (event: MouseEvent, tag: TagNode): void => {
+    if (!event.metaKey && !event.ctrlKey && !event.shiftKey) {
+        return;
+    }
+
+    event.preventDefault();
+    const next = toggleTagFilter(props.selected, tag.path);
+    router.visit(route('notes.index', { ...(next ? { tag: next } : {}), ...(props.search ? { q: props.search } : {}) }), { preserveScroll: true });
+};
 
 const expanded = ref<Record<string, boolean>>(Object.fromEntries(props.tags.map((tag) => [tag.path, isOnSelectedPath(tag)])));
 
@@ -27,7 +46,7 @@ const toggle = (tag: TagNode): void => {
         <li v-for="tag in tags" :key="tag.path" role="treeitem" :aria-expanded="tag.children.length ? !!expanded[tag.path] : undefined">
             <div
                 class="hover:bg-elevated flex items-center gap-1 rounded-md pr-2 text-sm"
-                :class="{ 'bg-elevated font-medium': selected === tag.path }"
+                :class="{ 'bg-elevated font-medium': isSelected(tag) }"
                 :style="{ paddingLeft: `${(depth ?? 0) * 12}px` }"
             >
                 <UiButton
@@ -43,6 +62,8 @@ const toggle = (tag: TagNode): void => {
                 <Link
                     :href="route('notes.index', { tag: tag.path, ...(search ? { q: search } : {}) })"
                     preserve-scroll
+                    :title="'Cmd/Ctrl-click to combine with other tags'"
+                    @click="(event: MouseEvent) => onTagClick(event, tag)"
                     class="flex min-w-0 flex-1 items-center gap-1 py-1.5"
                 >
                     <UiIcon name="i-lucide-hash" class="text-dimmed size-3.5 shrink-0" />

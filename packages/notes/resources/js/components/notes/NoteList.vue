@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HighlightedText from '@/components/notes/HighlightedText.vue';
-import { filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
+import { describeTags, filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { groupNotesByDate } from '@/lib/dateGroups';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -34,7 +34,7 @@ const groups = computed(() => (props.groupBy ? groupNotesByDate(props.notes, pro
 
 const emptyMessage = computed(() => {
     if (props.filters.q) {
-        return `No notes match “${props.filters.q}”${props.filters.tag ? ` in #${props.filters.tag}` : ''}.`;
+        return `No notes match “${props.filters.q}”${props.filters.tag ? ` in ${describeTags(props.filters.tag)}` : ''}.`;
     }
 
     if (props.filters.view === 'trash') {
@@ -46,10 +46,10 @@ const emptyMessage = computed(() => {
     }
 
     if (props.filters.view === 'archive') {
-        return props.filters.tag ? `No archived notes tagged #${props.filters.tag}.` : 'The archive is empty.';
+        return props.filters.tag ? `No archived notes tagged ${describeTags(props.filters.tag)}.` : 'The archive is empty.';
     }
 
-    return props.filters.tag ? `No notes tagged #${props.filters.tag}.` : 'No notes yet.';
+    return props.filters.tag ? `No notes tagged ${describeTags(props.filters.tag)}.` : 'No notes yet.';
 });
 </script>
 

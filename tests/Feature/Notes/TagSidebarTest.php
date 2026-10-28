@@ -122,3 +122,19 @@ it('keeps the search across a delete redirect', function () {
     $this->delete(route('notes.destroy', ['note' => $note, 'q' => 'plans', 'tag' => 'work']))
         ->assertRedirect(route('notes.index', ['tag' => 'work', 'q' => 'plans']));
 });
+
+it('filters by several tags at once, notes needing all of them', function () {
+    $both = Note::factory()->create(['body' => '#work #urgent']);
+    $nested = Note::factory()->create(['body' => '#work/meetings #urgent']);
+    Note::factory()->create(['body' => '#work']);
+    Note::factory()->create(['body' => '#urgent']);
+
+    $this->get(route('notes.index', ['tag' => 'work, #Urgent']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.tag', 'work,urgent')
+            ->where('notes.data', fn ($notes) => collect($notes)->pluck('id')->sort()->values()->all() === collect([$both->id, $nested->id])->sort()->values()->all()));
+});
+
+it('limits how many tags can be combined', function () {
+    $this->get(route('notes.index', ['tag' => 'a,b,c,d,e,f']))->assertSessionHasErrors('tag');
+});
