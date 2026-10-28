@@ -128,3 +128,38 @@ it('duplicates a locked note as a locked note', function () {
     $copy = Note::query()->whereKeyNot($note->id)->sole();
     expect($copy->isLocked())->toBeTrue()->and($copy->locked_body)->toBe(base64_encode('secret text'))->and($copy->title)->toBe('Secret');
 });
+
+it('changes the password by re-encrypting every note locked with it, all or nothing', function () {
+    $key = $this->postJson(route('notes.lock-keys.store'), lockKeyPayload())->json('data.id');
+    $a = Note::factory()->create(['body' => '# A']);
+    $b = Note::factory()->create(['body' => '# B']);
+    $this->postJson(route('notes.lock.store', $a), lockPayload($key, ['title' => 'A']));
+    $this->postJson(route('notes.lock.store', $b), lockPayload($key, ['title' => 'B']));
+    $b->delete();
+
+    $this->getJson(route('notes.lock-keys.notes', $key))->assertOk()->assertJsonCount(2, 'data');
+
+    $change = fn (array $notes) => $this->putJson(route('notes.lock-keys.update', $key), [...lockKeyPayload(['salt' => base64_encode('newsaltnewsalt12'), 'hint' => 'new hint']), 'notes' => $notes]);
+
+    $change([['id' => $a->id, 'iv' => base64_encode('ivivivivivi1'), 'ciphertext' => base64_encode('A again')]])
+        ->assertUnprocessable()->assertJsonValidationErrors('notes');
+    expect($a->fresh()->locked_body)->toBe(base64_encode('secret text'));
+
+    $change([
+        ['id' => $a->id, 'iv' => base64_encode('ivivivivivi1'), 'ciphertext' => base64_encode('A again')],
+        ['id' => $b->id, 'iv' => base64_encode('ivivivivivi2'), 'ciphertext' => base64_encode('B again')],
+    ])->assertOk()->assertJsonPath('data.salt', base64_encode('newsaltnewsalt12'))->assertJsonPath('data.hint', 'new hint');
+
+    expect($a->fresh()->locked_body)->toBe(base64_encode('A again'))
+        ->and(Note::withTrashed()->find($b->id)->locked_body)->toBe(base64_encode('B again'));
+});
+
+it('changes only the current password, and edits the hint', function () {
+    $old = $this->postJson(route('notes.lock-keys.store'), lockKeyPayload())->json('data.id');
+    $current = $this->postJson(route('notes.lock-keys.store'), lockKeyPayload())->json('data.id');
+
+    $this->putJson(route('notes.lock-keys.update', $old), [...lockKeyPayload(), 'notes' => []])->assertUnprocessable();
+
+    $this->patchJson(route('notes.lock-keys.hint', $current), ['hint' => 'kitchen'])->assertOk()->assertJsonPath('data.hint', 'kitchen');
+    $this->patchJson(route('notes.lock-keys.hint', $current), ['hint' => null])->assertOk()->assertJsonPath('data.hint', null);
+});

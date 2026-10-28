@@ -1,5 +1,5 @@
 import { jsonHeaders } from '@/lib/http';
-import { createLockKey, unlockKey, type LockKeyParams } from '@/lib/noteCrypto';
+import { createLockKey, decryptText, encryptText, unlockKey, type Encrypted, type LockKeyParams } from '@/lib/noteCrypto';
 import { ref } from 'vue';
 
 /**
@@ -99,4 +99,48 @@ export const setPassword = async (password: string, hint: string | null): Promis
     rememberKey(payload.data.id, key);
 
     return { id: payload.data.id, key };
+};
+
+const send = async (method: 'PUT' | 'PATCH', url: string, data: unknown): Promise<{ ok: boolean; message: string | null }> => {
+    const response = await fetch(url, { method, headers: jsonHeaders(), credentials: 'same-origin', body: JSON.stringify(data) });
+    const payload = await response.json().catch(() => null);
+    const firstError = payload?.errors ? (Object.values(payload.errors as Record<string, string[]>)[0]?.[0] ?? null) : null;
+
+    return { ok: response.ok, message: response.ok ? null : (firstError ?? payload?.message ?? 'Something went wrong.') };
+};
+
+/**
+ * Changes the current notes password (A7.1): checks the old one, then
+ * re-encrypts every note locked with it here in the browser and sends
+ * the new key parameters and all of them together.
+ */
+export const changePassword = async (oldPassword: string, newPassword: string, hint: string | null): Promise<{ error: string | null }> => {
+    const current = await currentKeyParams();
+
+    if (!current) {
+        return { error: 'There is no notes password to change yet.' };
+    }
+
+    const oldKey = await unlockKey(oldPassword, current);
+
+    if (!oldKey) {
+        return { error: 'The current password is wrong.' };
+    }
+
+    const locked = (await getJson<(Encrypted & { id: number })[]>(route('notes.lock-keys.notes', { lockKey: current.id }))) ?? [];
+    const { key, params } = await createLockKey(newPassword, hint);
+    const notes = await Promise.all(locked.map(async (note) => ({ id: note.id, ...(await encryptText(key, await decryptText(oldKey, note))) })));
+    const result = await send('PUT', route('notes.lock-keys.update', { lockKey: current.id }), { ...params, notes });
+
+    if (result.ok) {
+        rememberKey(current.id, key);
+    }
+
+    return { error: result.message };
+};
+
+export const changeHint = async (id: number, hint: string | null): Promise<{ error: string | null }> => {
+    const result = await send('PATCH', route('notes.lock-keys.hint', { lockKey: id }), { hint: hint?.trim() || null });
+
+    return { error: result.message };
 };

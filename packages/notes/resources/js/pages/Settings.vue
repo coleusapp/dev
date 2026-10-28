@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NotesPasswordSettings from '@/components/notes/NotesPasswordSettings.vue';
 import type { NotePreferences } from '@/components/notes/note';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -153,6 +154,9 @@ const save = (): void => {
                             <Link :href="route('notes.index')" class="text-dimmed ml-auto text-sm hover:underline">Back to notes</Link>
                         </div>
                     </form>
+                    <div class="mx-auto w-full max-w-xl pt-6">
+                        <NotesPasswordSettings />
+                    </div>
                 </template>
             </UiDashboardPanel>
         </template>
