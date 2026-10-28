@@ -28,7 +28,7 @@ use League\CommonMark\Parser\MarkdownParser;
  * Headings get ids ("heading-" + slug, unique per note) and an empty anchor
  * the stylesheet shows as "#" on hover; a "[TOC]" line becomes a table of
  * contents linking to them. [^1] footnotes collect at the end of the note,
- * linked both ways. The prefix keeps a heading like "Notes 2" from
+ * linked both ways, and %%comments%% are left out (Comments). The prefix keeps a heading like "Notes 2" from
  * clashing with ids on the page around the note.
  */
 class NoteMarkdown
@@ -62,7 +62,7 @@ class NoteMarkdown
      */
     public static function toHtml(string $body, ?WikiLinkResolver $wikiLinks = null): string
     {
-        return (string) self::converter($wikiLinks)->convert(FrontMatter::blankOut($body));
+        return (string) self::converter($wikiLinks)->convert(Comments::strip(FrontMatter::blankOut($body)));
     }
 
     public static function parse(string $body): Document
