@@ -70,7 +70,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O5.4 Math: inline `$…$` and block `$$…$$` (LaTeX) ⚠️ dep (KaTeX/MathJax)
 - [ ] O5.5 Mermaid diagrams in ```mermaid blocks ⚠️ dep (mermaid)
 - [x] O5.6 Heading anchors / IDs in preview, plus a table of contents 📦
-- [ ] O5.7 Strict vs soft line-break setting
+- [x] O5.7 Strict vs soft line-break setting
 - [ ] O5.8 Safe-subset HTML: allow a vetted allow-list (e.g. `<details>`, `<kbd>`, `<sup>`) while still blocking scripts
 
 ## O6. Properties (front matter)

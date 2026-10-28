@@ -48,6 +48,7 @@ it('saves preferences for the current user only', function () use ($defaults) {
         'list.relative_dates' => false,
         'list.show_snippets' => true,
         'search.sort' => 'relevance',
+        'reading.line_breaks' => 'soft',
     ]);
 
     $this->actingAs(User::factory()->create());

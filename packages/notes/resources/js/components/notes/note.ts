@@ -233,6 +233,7 @@ export type NotePreferences = {
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
     'search.sort': 'relevance' | 'list';
+    'reading.line_breaks': 'soft' | 'hard';
 };
 
 export type BookmarkItem = {

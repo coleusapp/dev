@@ -75,6 +75,12 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
     { key: 'list.relative_dates', label: 'Relative dates in the list', help: 'Show "5 minutes ago" instead of the full date and time.' },
     { key: 'list.show_snippets', label: 'Show snippets in the list', help: 'Show a couple of lines of each note under its title.' },
     {
+        key: 'reading.line_breaks',
+        label: 'Line breaks in the reading view',
+        help: 'Markdown joins lines that are only one line break apart into one paragraph; keep them to show each line as you typed it.',
+        optionLabel: (value) => ({ soft: 'Join lines (Markdown)', hard: 'Keep every line break' })[value as string] ?? String(value),
+    },
+    {
         key: 'search.sort',
         label: 'Order search results',
         help: 'Best match puts notes that mention your search most (in the title above all) first. Otherwise results keep the list order.',

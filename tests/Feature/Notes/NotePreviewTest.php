@@ -1,6 +1,7 @@
 <?php
 
 use Coleus\Notes\Models\Note;
+use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Users\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -39,4 +40,14 @@ it('neutralizes script tags and javascript links in the preview', function () {
             ->where('note.data.html', fn (string $html) => ! str_contains($html, '<script')
                 && str_contains($html, '&lt;script&gt;')
                 && ! str_contains(strtolower($html), 'javascript:')));
+});
+
+it('keeps single line breaks in the preview when the user asks for it', function () {
+    $note = Note::factory()->create(['body' => "first\nsecond"]);
+
+    $this->putJson(route('notes.update', $note), ['body' => "first\nsecond"])->assertJsonPath('data.html', "<p>first\nsecond</p>\n");
+
+    NotePreferences::save(['reading.line_breaks' => 'hard']);
+
+    $this->putJson(route('notes.update', $note), ['body' => "first\nsecond"])->assertJsonPath('data.html', "<p>first<br />\nsecond</p>\n");
 });

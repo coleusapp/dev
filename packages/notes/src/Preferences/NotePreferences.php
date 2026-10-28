@@ -32,6 +32,7 @@ class NotePreferences
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],
         'search.sort' => ['default' => 'relevance', 'options' => ['relevance', 'list']],
+        'reading.line_breaks' => ['default' => 'soft', 'options' => ['soft', 'hard']],
     ];
 
     /**
