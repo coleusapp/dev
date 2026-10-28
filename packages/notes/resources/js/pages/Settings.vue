@@ -74,6 +74,12 @@ const fields: { key: keyof NotePreferences; label: string; help: string; optionL
     },
     { key: 'list.relative_dates', label: 'Relative dates in the list', help: 'Show "5 minutes ago" instead of the full date and time.' },
     { key: 'list.show_snippets', label: 'Show snippets in the list', help: 'Show a couple of lines of each note under its title.' },
+    {
+        key: 'search.sort',
+        label: 'Order search results',
+        help: 'Best match puts notes that mention your search most (in the title above all) first. Otherwise results keep the list order.',
+        optionLabel: (value) => ({ relevance: 'Best match first', list: 'Same as the list' })[value as string] ?? String(value),
+    },
 ];
 
 const inputName = (key: string): string => key.replace(/\./g, '_');

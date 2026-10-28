@@ -135,9 +135,9 @@ watch(
  * reloaded only when the note's hashtags changed.
  */
 const onNoteSaved = (saved: NoteDetailData): void => {
-    // Recents stay in the order they were opened; other lists re-sort like the server.
+    // Recents and best-match search results keep their order; other lists re-sort like the server.
     listedNotes.value =
-        props.filters.view === 'recent'
+        props.filters.view === 'recent' || bestMatchFirst.value
             ? listedNotes.value.map((listed) => (listed.id === saved.id ? saved : listed))
             : [saved, ...listedNotes.value.filter((listed) => listed.id !== saved.id)].sort(compareNotes(props.sort));
     title.value = saved.title;
@@ -192,6 +192,17 @@ const toggleGroupByDate = (on: boolean): void => {
     router.put(route('notes.settings.update'), { list_group_by_date: on }, { preserveScroll: true, preserveState: true });
 };
 
+/**
+ * Search results ranked by how well they match (search.sort preference).
+ */
+const bestMatchFirst = computed(
+    () => Boolean(props.filters.q) && props.filters.view !== 'recent' && props.preferences['search.sort'] === 'relevance',
+);
+
+const setBestMatchFirst = (on: boolean): void => {
+    router.put(route('notes.settings.update'), { search_sort: on ? 'relevance' : 'list' }, { preserveScroll: true, preserveState: true });
+};
+
 const sortItems = computed<DropdownMenuItem[][]>(() => {
     const fields: [SortField, string][] = [
         ['modified', 'Date edited'],
@@ -211,6 +222,18 @@ const sortItems = computed<DropdownMenuItem[][]>(() => {
     const inFolder = props.filters.view === 'notes' && props.filters.folder !== null;
 
     return [
+        ...(props.filters.q && props.filters.view !== 'recent'
+            ? [
+                  [
+                      {
+                          label: 'Best match first',
+                          type: 'checkbox' as const,
+                          checked: bestMatchFirst.value,
+                          onUpdateChecked: (checked: boolean) => setBestMatchFirst(checked),
+                      },
+                  ],
+              ]
+            : []),
         [{ type: 'label', label: inFolder ? 'Sort this folder by' : 'Sort by' }],
         fields.map(([value, label]) => ({
             label,

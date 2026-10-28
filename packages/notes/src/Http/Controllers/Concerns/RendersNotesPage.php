@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Http\Controllers\Concerns;
 
+use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Facades\Notes;
 use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
@@ -23,10 +24,17 @@ trait RendersNotesPage
     protected function notesPage(NoteListRequest $request, ?Note $note): Response
     {
         $search = $request->search();
-        $notes = NoteResource::collection(Notes::note()->list($request->tag(), $search, $request->view(), $request->folderId(), $request->smartFolder()?->rules, $request->property()));
+        $listed = Notes::note()->list($request->tag(), $search, $request->view(), $request->folderId(), $request->smartFolder()?->rules, $request->property());
+        $query = $search === null ? null : SearchQuery::parse($search);
 
-        if ($search !== null) {
-            $words = SearchQuery::parse($search)->highlightTerms();
+        if ($query !== null && $request->view() !== NoteView::Recent && NotePreferences::get('search.sort') === 'relevance') {
+            $listed = $query->rank($listed);
+        }
+
+        $notes = NoteResource::collection($listed);
+
+        if ($query !== null) {
+            $words = $query->highlightTerms();
             $notes->collection->each(fn (NoteResource $resource) => $resource->highlight($words));
         }
 

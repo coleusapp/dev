@@ -158,6 +158,33 @@ final class SearchQuery
         return $notes->filter(fn (Note $note) => $this->matchesTasks($note->body))->values();
     }
 
+    /**
+     * Best match first: notes are ranked by how often the search terms
+     * appear, a title hit counting for ten body hits. The given order
+     * breaks ties.
+     *
+     * @template TNote of Note
+     *
+     * @param  Collection<int, TNote>  $notes
+     * @return Collection<int, TNote>
+     */
+    public function rank(Collection $notes): Collection
+    {
+        $terms = $this->highlightTerms();
+
+        if ($terms === []) {
+            return $notes;
+        }
+
+        $count = fn (string $text): int => array_sum(array_map(fn (string $term) => mb_substr_count(mb_strtolower($text), $term), $terms));
+
+        return $notes
+            ->map(fn (Note $note, int $position) => ['note' => $note, 'score' => $count($note->title) * 10 + $count($note->body), 'position' => $position])
+            ->sort(fn (array $a, array $b) => [$b['score'], $a['position']] <=> [$a['score'], $b['position']])
+            ->pluck('note')
+            ->values();
+    }
+
     public function matchesTasks(string $body): bool
     {
         preg_match_all(self::TASK_LINE, FrontMatter::blankOut($body), $items, PREG_SET_ORDER);

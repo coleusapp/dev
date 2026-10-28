@@ -21,6 +21,11 @@ class NoteText
     public const int SEARCH_CONTEXT = 30;
 
     /**
+     * Matching lines sent per note in search results.
+     */
+    public const int MATCH_LINES = 20;
+
+    /**
      * The first non-empty line of the body as plain text, like Bear's title.
      */
     public static function title(string $body): string
@@ -56,8 +61,58 @@ class NoteText
     public static function searchSnippet(string $body, array $words, int $length = self::SNIPPET_LENGTH): string
     {
         $text = self::snippet($body, PHP_INT_MAX);
-        $offset = Highlighter::firstMatch($text, $words);
 
+        return self::clipAround($text, Highlighter::firstMatch($text, $words), $length);
+    }
+
+    /**
+     * The body's lines (after the title line) that contain a search word, as
+     * plain text clipped around the first match, with 1-based line numbers
+     * that count front matter. At most $limit lines; $total counts them all.
+     *
+     * @param  list<string>  $words
+     * @return array{lines: list<array{line: int, text: string}>, total: int}
+     */
+    public static function matchingLines(string $body, array $words, int $limit = self::MATCH_LINES): array
+    {
+        $lines = [];
+        $total = 0;
+        $pastTitle = false;
+
+        foreach (preg_split('/\R/', FrontMatter::blankOut($body)) ?: [] as $index => $line) {
+            if (! self::isTextLine($line)) {
+                continue;
+            }
+
+            if (! $pastTitle) {
+                $pastTitle = true;
+
+                continue;
+            }
+
+            $text = self::plainLine($line);
+            $offset = Highlighter::firstMatch($text, $words);
+
+            if ($offset === null) {
+                continue;
+            }
+
+            $total++;
+
+            if (count($lines) < $limit) {
+                $lines[] = ['line' => $index + 1, 'text' => self::clipAround($text, $offset)];
+            }
+        }
+
+        return ['lines' => $lines, 'total' => $total];
+    }
+
+    /**
+     * Text cut to $length, starting a little before the match (on a word
+     * boundary) when the match would otherwise be far in.
+     */
+    private static function clipAround(string $text, ?int $offset, int $length = self::SNIPPET_LENGTH): string
+    {
         if ($offset === null || $offset < self::SEARCH_CONTEXT) {
             return Str::limit($text, $length);
         }

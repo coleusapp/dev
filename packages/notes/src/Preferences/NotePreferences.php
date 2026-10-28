@@ -31,6 +31,7 @@ class NotePreferences
         'list.group_by_date' => ['default' => false, 'type' => 'boolean'],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],
+        'search.sort' => ['default' => 'relevance', 'options' => ['relevance', 'list']],
     ];
 
     /**

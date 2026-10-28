@@ -29,6 +29,21 @@ class NoteResource extends JsonResource
         return $this;
     }
 
+    /**
+     * The matching lines in context, for search results.
+     *
+     * @return array{lines: list<array{line: int, parts: list<array{text: string, match: bool}>}>, total: int}
+     */
+    private function matches(): array
+    {
+        $found = NoteText::matchingLines($this->body, $this->highlightWords);
+
+        return [
+            'lines' => array_map(fn (array $line) => ['line' => $line['line'], 'parts' => Highlighter::parts($line['text'], $this->highlightWords)], $found['lines']),
+            'total' => $found['total'],
+        ];
+    }
+
     public function toArray(Request $request): array
     {
         $snippet = $this->highlightWords === []
@@ -45,6 +60,7 @@ class NoteResource extends JsonResource
                 'title' => Highlighter::parts($this->title, $this->highlightWords),
                 'snippet' => Highlighter::parts($snippet, $this->highlightWords),
             ],
+            'matches' => $this->highlightWords === [] ? null : $this->matches(),
             'pinned' => $this->pinned_at !== null,
             'archived' => $this->archived_at !== null,
             'trashed' => $this->deleted_at !== null,

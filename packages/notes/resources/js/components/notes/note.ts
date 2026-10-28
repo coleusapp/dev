@@ -16,6 +16,10 @@ export type NoteData = {
     folder_id: number | null;
     trashed: boolean;
     highlights: { title: HighlightPart[]; snippet: HighlightPart[] } | null;
+    /**
+     * Search results only: lines that match, in context (up to 20), and how many match in all.
+     */
+    matches?: { lines: { line: number; parts: HighlightPart[] }[]; total: number } | null;
     created_at: string;
     updated_at: string;
     updated_at_for_humans: string;
@@ -206,6 +210,7 @@ export type NotePreferences = {
     'list.group_by_date': boolean;
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
+    'search.sort': 'relevance' | 'list';
 };
 
 export type BookmarkItem = {
