@@ -6,6 +6,7 @@ use Coleus\Notes\Markdown\Callouts\CalloutExtension;
 use Coleus\Notes\Markdown\Underline\UnderlineExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
+use League\CommonMark\Extension\Footnote\FootnoteExtension;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
 use League\CommonMark\Extension\Highlight\HighlightExtension;
 use League\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
@@ -26,7 +27,8 @@ use League\CommonMark\Parser\MarkdownParser;
  *
  * Headings get ids ("heading-" + slug, unique per note) and an empty anchor
  * the stylesheet shows as "#" on hover; a "[TOC]" line becomes a table of
- * contents linking to them. The prefix keeps a heading like "Notes 2" from
+ * contents linking to them. [^1] footnotes collect at the end of the note,
+ * linked both ways. The prefix keeps a heading like "Notes 2" from
  * clashing with ids on the page around the note.
  */
 class NoteMarkdown
@@ -80,6 +82,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new HeadingPermalinkExtension);
         $converter->getEnvironment()->addExtension(new TableOfContentsExtension);
         $converter->getEnvironment()->addExtension(new CalloutExtension);
+        $converter->getEnvironment()->addExtension(new FootnoteExtension);
 
         return $converter;
     }

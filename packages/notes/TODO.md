@@ -65,7 +65,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## O5. Markdown extensions (rendering)
 - [x] O5.1 Callouts: `> [!note]`, `[!warning]`, foldable `[!tip]-`, custom titles
-- [ ] O5.2 Footnotes: `[^1]` references and definitions; footnotes view
+- [x] O5.2 Footnotes: `[^1]` references and definitions; footnotes view
 - [ ] O5.3 Comments: `%%hidden%%` stripped from preview
 - [ ] O5.4 Math: inline `$…$` and block `$$…$$` (LaTeX) ⚠️ dep (KaTeX/MathJax)
 - [ ] O5.5 Mermaid diagrams in ```mermaid blocks ⚠️ dep (mermaid)

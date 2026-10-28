@@ -95,3 +95,11 @@ it('keeps checklist parsing working next to headings and a table of contents', f
 
     expect($html)->toContain('data-task-line="5"')->toContain('data-task-line="6"');
 });
+
+it('renders footnotes, linked both ways', function () {
+    $html = NoteMarkdown::toHtml("Lisbon is hilly[^hills] and old[^1].\n\n[^hills]: Seven of them.\n[^1]: Very.");
+
+    expect($html)->toContain('<sup id="fnref:hills"><a class="footnote-ref" href="#fn:hills" role="doc-noteref">1</a></sup>')
+        ->toContain('<li class="footnote" id="fn:hills" role="doc-endnote"><p>Seven of them.&nbsp;<a class="footnote-backref" rev="footnote" href="#fnref:hills" role="doc-backlink">↩</a></p></li>')
+        ->and(NoteMarkdown::toHtml('no definition[^x]'))->toContain('[^x]');
+});

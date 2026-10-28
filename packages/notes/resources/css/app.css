@@ -213,6 +213,23 @@
     --callout: var(--color-neutral-500);
 }
 
+.note-preview .footnotes {
+    @apply text-muted mt-4 text-xs;
+}
+
+.note-preview .footnotes hr {
+    @apply my-2;
+}
+
+.tiptap .footnote-definition::before {
+    @apply text-primary me-1 text-xs;
+    content: '[' attr(data-footnote-definition) ']:';
+}
+
+.tiptap .footnote-marker {
+    @apply text-primary px-0.5 text-xs;
+}
+
 .tiptap .callout-marker {
     @apply bg-elevated text-primary rounded px-1.5 py-0.5 text-xs font-semibold;
 }

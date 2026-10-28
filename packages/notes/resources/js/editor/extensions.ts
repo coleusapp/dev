@@ -3,6 +3,7 @@ import { CalloutMarker } from '@/editor/CalloutMarker';
 import { CheckedToBottom } from '@/editor/checklists';
 import { Find } from '@/editor/Find';
 import { Folding } from '@/editor/Folding';
+import { FootnoteDefinition, FootnoteMarker } from '@/editor/FootnoteMarker';
 import { Hashtags } from '@/editor/Hashtags';
 import { NoteHighlight } from '@/editor/Highlight';
 import { LineCommands } from '@/editor/LineCommands';
@@ -50,6 +51,8 @@ export const editorExtensions = ({
     WikiLink,
     TableOfContents,
     CalloutMarker,
+    FootnoteMarker,
+    FootnoteDefinition,
     Hashtags,
     Placeholder.configure({ placeholder }),
     CheckedToBottom.configure({ enabled: checkedToBottom }),

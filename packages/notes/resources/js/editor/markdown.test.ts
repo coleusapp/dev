@@ -38,6 +38,7 @@ describe('round trip', () => {
         ['soft line break', 'line one\nline two'],
         ['front matter', '---\ntitle: x\ntags: [a, b]\n---\n\nbody'],
         ['table of contents placeholder', '# A\n\n[TOC]\n\n## B'],
+        ['footnotes', 'Lisbon is hilly[^hills] and old[^1].\n\n[^hills]: Seven of them.\n\n[^1]: Very.'],
         ['callouts', '> [!note] Title\n> body text\n\n> [!warning]-\n> folded\n\n> [!tip]+ Open'],
         ['note embeds', '# A\n\n![[Packing]]\n\n![[Trip#Day one]]\n\nsee ![[X]] here'],
     ])('keeps %s', (_, markdown) => {
@@ -50,6 +51,12 @@ describe('round trip', () => {
 
     it('does not escape wiki links or hashtags', () => {
         expect(roundTrip('[[A note]] #tag')).toBe('[[A note]] #tag');
+    });
+
+    it('keeps footnote references and definitions unescaped', () => {
+        expect(roundTrip('hilly[^hills].\n\n[^hills]: Seven.')).toBe('hilly[^hills].\n\n[^hills]: Seven.');
+        expect(editor.view.dom.querySelector('[data-footnote]')?.textContent).toBe('hills');
+        expect(editor.view.dom.querySelector('[data-footnote-definition]')?.textContent).toBe('Seven.');
     });
 
     it('keeps callout markers as written and shows them as chips', () => {
