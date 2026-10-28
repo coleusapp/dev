@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HighlightedText from '@/components/notes/HighlightedText.vue';
-import { describeTags, filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
+import { describeProperty, describeTags, filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { groupNotesByDate } from '@/lib/dateGroups';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -47,6 +47,10 @@ const emptyMessage = computed(() => {
 
     if (props.filters.view === 'archive') {
         return props.filters.tag ? `No archived notes tagged ${describeTags(props.filters.tag)}.` : 'The archive is empty.';
+    }
+
+    if (props.filters.prop) {
+        return `No notes with ${describeProperty(props.filters)}.`;
     }
 
     return props.filters.tag ? `No notes tagged ${describeTags(props.filters.tag)}.` : 'No notes yet.';

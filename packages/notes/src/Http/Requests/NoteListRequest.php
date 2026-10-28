@@ -46,6 +46,8 @@ class NoteListRequest extends FormRequest
             ],
             'q' => ['nullable', 'string', 'max:'.self::MAX_SEARCH_LENGTH],
             'view' => ['nullable', Rule::enum(NoteView::class)],
+            'prop' => ['nullable', 'string', 'max:255'],
+            'value' => ['nullable', 'string', 'max:255'],
             'smart' => [
                 'nullable',
                 'integer',
@@ -121,6 +123,20 @@ class NoteListRequest extends FormRequest
         return $smart === null ? null : SmartFolder::query()->find((int) $smart);
     }
 
+    /**
+     * A property filter: notes having the property, or the property with a
+     * given value ("?prop=status&value=draft").
+     *
+     * @return array{key: string, value: string|null}|null
+     */
+    public function property(): ?array
+    {
+        $key = trim((string) $this->validated('prop'));
+        $value = trim((string) $this->validated('value'));
+
+        return $key === '' ? null : ['key' => $key, 'value' => $value === '' ? null : $value];
+    }
+
     public function folderId(): ?int
     {
         $folder = $this->validated('folder');
@@ -129,10 +145,18 @@ class NoteListRequest extends FormRequest
     }
 
     /**
-     * @return array{tag: string|null, q: string|null, view: string, folder: int|null, smart: int|null}
+     * @return array{tag: string|null, q: string|null, view: string, folder: int|null, smart: int|null, prop: string|null, value: string|null}
      */
     public function filters(): array
     {
-        return ['tag' => $this->tag(), 'q' => $this->search(), 'view' => $this->view()->value, 'folder' => $this->folderId(), 'smart' => $this->smartFolder()?->id];
+        return [
+            'tag' => $this->tag(),
+            'q' => $this->search(),
+            'view' => $this->view()->value,
+            'folder' => $this->folderId(),
+            'smart' => $this->smartFolder()?->id,
+            'prop' => $this->property()['key'] ?? null,
+            'value' => $this->property()['value'] ?? null,
+        ];
     }
 }

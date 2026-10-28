@@ -88,7 +88,15 @@ export type NoteFilters = {
     view: NoteView;
     folder: number | null;
     smart: number | null;
+    prop: string | null;
+    value: string | null;
 };
+
+/**
+ * "status", or "status: draft" when filtering by a value too.
+ */
+export const describeProperty = (filters: Pick<NoteFilters, 'prop' | 'value'>): string =>
+    filters.prop ? (filters.value ? `${filters.prop}: ${filters.value}` : filters.prop) : '';
 
 export type SmartRules = {
     tags: string[];

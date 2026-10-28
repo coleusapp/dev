@@ -68,14 +68,23 @@ const rename = (): void => {
                                             <UiButton type="submit" size="xs" :loading="form.processing">Rename</UiButton>
                                             <UiButton size="xs" color="neutral" variant="ghost" @click="renaming = null">Cancel</UiButton>
                                         </form>
-                                        <template v-else>{{ property.key }}</template>
+                                        <UiLink v-else :to="route('notes.index', { prop: property.key })" class="hover:underline">{{
+                                            property.key
+                                        }}</UiLink>
                                         <p v-if="renaming === property.key && form.errors.to" class="text-error text-xs" role="alert">
                                             {{ form.errors.to }}
                                         </p>
                                     </td>
                                     <td class="text-muted py-2">{{ property.types.join(', ') }}</td>
                                     <td class="py-2 text-end tabular-nums">{{ property.count }}</td>
-                                    <td class="text-muted max-w-60 truncate py-2 ps-4">{{ property.examples.join(', ') }}</td>
+                                    <td class="text-muted max-w-60 truncate py-2 ps-4">
+                                        <template v-for="(example, index) in property.examples" :key="example"
+                                            >{{ index ? ', ' : ''
+                                            }}<UiLink :to="route('notes.index', { prop: property.key, value: example })" class="hover:underline">{{
+                                                example
+                                            }}</UiLink></template
+                                        >
+                                    </td>
                                     <td class="py-2 text-end">
                                         <UiButton
                                             v-if="renaming !== property.key"

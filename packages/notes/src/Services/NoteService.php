@@ -218,14 +218,16 @@ class NoteService extends Service
      */
     /**
      * @param  array<string, mixed>|null  $smartRules  a Smart Folder's rules (Search\SmartFolderRules)
+     * @param  array{key: string, value: string|null}|null  $property
      */
-    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes, ?int $folderId = null, ?array $smartRules = null): Collection
+    public function list(?string $tag = null, ?string $search = null, NoteView $view = NoteView::Notes, ?int $folderId = null, ?array $smartRules = null, ?array $property = null): Collection
     {
         $order = $this->sortFor($folderId === null ? null : Folder::query()->find($folderId));
 
         return $view->scope($order['sort']->apply(Note::query(), $order['direction']))
             ->when($folderId !== null, fn (Builder $query) => $query->where('folder_id', $folderId))
             ->when($smartRules !== null, fn (Builder $query) => SmartFolderRules::apply($query, (array) $smartRules))
+            ->when($property !== null, fn (Builder $query) => NoteProperties::whereProperty($query, $property['key'], $property['value']))
             ->when($tag !== null, function (Builder $query) use ($tag) {
                 foreach (explode(',', (string) $tag) as $each) {
                     $this->whereTagged($query, $each);

@@ -6,6 +6,7 @@ import FolderModal from '@/components/notes/FolderModal.vue';
 import FolderTree from '@/components/notes/FolderTree.vue';
 import {
     compareNotes,
+    describeProperty,
     describeTags,
     filterQuery,
     NOTE_DRAG_TYPE,
@@ -243,7 +244,9 @@ const savingSearch = ref(false);
 /**
  * A list can be saved as a search when something narrows it down.
  */
-const canSaveSearch = computed(() => Boolean(props.filters.q || props.filters.tag || props.filters.folder || props.filters.view !== 'notes'));
+const canSaveSearch = computed(() =>
+    Boolean(props.filters.q || props.filters.tag || props.filters.folder || props.filters.prop || props.filters.view !== 'notes'),
+);
 
 const suggestedSearchName = computed(() =>
     [props.filters.q ? `“${props.filters.q}”` : null, listTitle.value !== 'Notes' ? listTitle.value : null].filter(Boolean).join(' in '),
@@ -341,7 +344,11 @@ const listTitle = computed(() => {
               ? currentFolder.value.name
               : viewTitles[props.filters.view];
 
-    return props.filters.tag ? `${base === 'Notes' ? '' : `${base} · `}${describeTags(props.filters.tag)}` : base;
+    const narrowing = [props.filters.tag ? describeTags(props.filters.tag) : null, describeProperty(props.filters) || null]
+        .filter(Boolean)
+        .join(' · ');
+
+    return narrowing ? `${base === 'Notes' ? '' : `${base} · `}${narrowing}` : base;
 });
 
 const flattenTags = (nodes: TagNode[]): TagNode[] => nodes.flatMap((node) => [node, ...flattenTags(node.children)]);
@@ -505,7 +512,10 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         <Link
                             :href="route('notes.index', filters.q ? { q: filters.q } : {})"
                             class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
-                            :class="{ 'bg-elevated font-medium': !filters.tag && !filters.folder && !filters.smart && filters.view === 'notes' }"
+                            :class="{
+                                'bg-elevated font-medium':
+                                    !filters.tag && !filters.folder && !filters.smart && !filters.prop && filters.view === 'notes',
+                            }"
                             @dragover="acceptNoteDrag"
                             @drop="onAllNotesDrop"
                         >

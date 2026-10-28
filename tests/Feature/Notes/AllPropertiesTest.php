@@ -82,3 +82,24 @@ it('keeps properties private', function () {
     $this->actingAs($this->user);
     $this->get(route('notes.properties.index'))->assertInertia(fn (Assert $page) => $page->where('properties.0.key', 'mine'));
 });
+
+it('filters the list by a property, or by its value', function () {
+    $draft = Note::factory()->create(['body' => "---\nstatus: Draft\n---\na"]);
+    $done = Note::factory()->create(['body' => "---\nstatus: done\n---\nb"]);
+    $tagged = Note::factory()->create(['body' => "---\ntopics: [travel, food]\n---\nc"]);
+    Note::factory()->create(['body' => 'no properties']);
+
+    $ids = function (array $query): array {
+        $found = [];
+        $this->get(route('notes.index', $query))->assertInertia(function (Assert $page) use (&$found) {
+            $found = collect($page->toArray()['props']['notes']['data'])->pluck('id')->sort()->values()->all();
+        });
+
+        return $found;
+    };
+
+    expect($ids(['prop' => 'Status']))->toBe(collect([$draft->id, $done->id])->sort()->values()->all())
+        ->and($ids(['prop' => 'status', 'value' => 'draft']))->toBe([$draft->id])
+        ->and($ids(['prop' => 'topics', 'value' => 'food']))->toBe([$tagged->id])
+        ->and($ids(['prop' => 'topics', 'value' => 'foo']))->toBe([]);
+});

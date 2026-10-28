@@ -1,4 +1,4 @@
-import { compareNotes, filterQuery } from '@/components/notes/note';
+import { compareNotes, describeProperty, filterQuery } from '@/components/notes/note';
 import { describe, expect, it } from 'vitest';
 
 describe('filterQuery', () => {
@@ -47,5 +47,13 @@ describe('noteHeadings', () => {
         const { noteHeadings } = await import('@/components/notes/note');
 
         expect(noteHeadings('# Trip\ntext\n## **Packing** list\n```\n# not this\n```\n### Done ##')).toEqual(['Trip', 'Packing list', 'Done']);
+    });
+});
+
+describe('describeProperty', () => {
+    it('names the property, with its value when filtering by one', () => {
+        expect(describeProperty({ prop: 'status', value: null })).toBe('status');
+        expect(describeProperty({ prop: 'status', value: 'draft' })).toBe('status: draft');
+        expect(describeProperty({ prop: null, value: null })).toBe('');
     });
 });
