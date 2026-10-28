@@ -18,7 +18,7 @@ class WikiLinkResolver
     /**
      * @param  array<string, int>  $idsByTitle  lowercased title => note id
      */
-    public function __construct(private readonly array $idsByTitle)
+    public function __construct(private readonly array $idsByTitle, public readonly ?int $fromNoteId = null)
     {
         //
     }
@@ -32,7 +32,7 @@ class WikiLinkResolver
         $titles = WikiLinks::titles($body);
 
         if ($titles === []) {
-            return new self([]);
+            return new self([], $fromNoteId);
         }
 
         $lowered = array_map(mb_strtolower(...), $titles);
@@ -63,7 +63,7 @@ class WikiLinkResolver
 
         $ids = [...$ids, ...$byTitle];
 
-        return new self($ids);
+        return new self($ids, $fromNoteId);
     }
 
     public function resolve(string $title): ?int

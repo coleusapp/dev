@@ -139,6 +139,23 @@
     @apply ring-primary ring-2;
 }
 
+.note-preview .note-embed {
+    @apply border-default mb-2 rounded-md border-y border-s-4 border-e;
+}
+
+.note-preview .note-embed-title {
+    @apply border-default bg-elevated border-b px-3 py-1 text-xs font-semibold;
+}
+
+.note-preview .note-embed-body {
+    @apply max-h-96 overflow-y-auto px-3 py-2;
+}
+
+.note-preview .note-embed-missing,
+.note-preview .note-embed-skipped {
+    @apply text-muted text-xs;
+}
+
 .note-preview a.wiki-link-missing {
     @apply text-muted decoration-dashed;
 }

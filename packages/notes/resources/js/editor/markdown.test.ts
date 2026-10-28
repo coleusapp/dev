@@ -38,6 +38,7 @@ describe('round trip', () => {
         ['soft line break', 'line one\nline two'],
         ['front matter', '---\ntitle: x\ntags: [a, b]\n---\n\nbody'],
         ['table of contents placeholder', '# A\n\n[TOC]\n\n## B'],
+        ['note embeds', '# A\n\n![[Packing]]\n\n![[Trip#Day one]]\n\nsee ![[X]] here'],
     ])('keeps %s', (_, markdown) => {
         expect(normalizeMarkdown(roundTrip(markdown))).toBe(normalizeMarkdown(markdown));
     });

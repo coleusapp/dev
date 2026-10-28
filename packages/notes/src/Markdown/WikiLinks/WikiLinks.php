@@ -4,6 +4,7 @@ namespace Coleus\Notes\Markdown\WikiLinks;
 
 use Coleus\Notes\Markdown\FrontMatter;
 use Coleus\Notes\Markdown\NoteMarkdown;
+use Coleus\Notes\Support\NoteText;
 use League\CommonMark\Extension\CommonMark\Node\Block\Heading;
 use League\CommonMark\Node\Node;
 use League\CommonMark\Node\NodeIterator;
@@ -99,6 +100,38 @@ class WikiLinks
     }
 
     /**
+     * The part of a body under a heading (found like heading links: exact,
+     * then any case and spacing), up to the next heading of the same or a
+     * higher level, heading line included; null when there's no such heading.
+     */
+    public static function section(string $body, string $heading): ?string
+    {
+        $lines = preg_split('/\R/', FrontMatter::split($body)[1]) ?: [];
+        $loose = fn (string $text): string => mb_strtolower(self::normalizeTitle($text));
+        $headings = [];
+        $fence = null;
+
+        foreach ($lines as $index => $line) {
+            if (preg_match('/^ {0,3}(`{3,}|~{3,})/', $line, $marker) === 1) {
+                $fence = $fence === null ? $marker[1] : ($marker[1][0] === $fence[0] && strlen($marker[1]) >= strlen($fence) ? null : $fence);
+            } elseif ($fence === null && preg_match('/^ {0,3}(#{1,6})\s+(.+?)\s*#*\s*$/u', $line, $match) === 1) {
+                $headings[] = ['index' => $index, 'level' => strlen($match[1]), 'text' => NoteText::plainLine($line)];
+            }
+        }
+
+        $found = collect($headings)->firstWhere('text', self::normalizeTitle($heading))
+            ?? collect($headings)->first(fn (array $each) => $loose($each['text']) === $loose($heading));
+
+        if ($found === null) {
+            return null;
+        }
+
+        $end = collect($headings)->first(fn (array $each) => $each['index'] > $found['index'] && $each['level'] <= $found['level'])['index'] ?? count($lines);
+
+        return implode("\n", array_slice($lines, $found['index'], $end - $found['index']));
+    }
+
+    /**
      * The text a link shows when it has no alias: "Title", "Title > Heading",
      * or "Heading" within the same note.
      *
@@ -176,7 +209,7 @@ class WikiLinks
         $titles = [];
 
         foreach (NoteMarkdown::parse($body)->iterator() as $node) {
-            if ($node instanceof WikiLink && $node->title !== '') {
+            if (($node instanceof WikiLink || $node instanceof NoteEmbed) && $node->title !== '') {
                 $titles[mb_strtolower($node->title)] ??= $node->title;
             }
         }

@@ -17,5 +17,7 @@ class WikiLinkExtension implements ExtensionInterface
         // Above the standard "[" link parser so "[[x]]" never becomes a reference link.
         $environment->addInlineParser(new WikiLinkParser, 200);
         $environment->addRenderer(WikiLink::class, new WikiLinkRenderer($this->resolver));
+        $environment->addBlockStartParser(NoteEmbedParser::blockStartParser(), 80);
+        $environment->addRenderer(NoteEmbed::class, new NoteEmbedRenderer($this->resolver));
     }
 }
