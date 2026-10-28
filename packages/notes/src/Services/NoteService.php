@@ -140,6 +140,20 @@ class NoteService extends Service
     }
 
     /**
+     * How many notes each sidebar list holds.
+     *
+     * @return array{notes: int, archive: int, trash: int}
+     */
+    public function counts(): array
+    {
+        return [
+            'notes' => NoteView::Notes->scope(Note::query())->count(),
+            'archive' => NoteView::Archive->scope(Note::query())->count(),
+            'trash' => NoteView::Trash->scope(Note::query())->count(),
+        ];
+    }
+
+    /**
      * Remembers when a note was last opened (for Recents), without
      * counting as an edit.
      */

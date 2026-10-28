@@ -134,7 +134,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A1.2 Tag browser with multi-select: pick several tags to filter by all of them (AND)
 - [x] A1.3 Group list by date: Pinned, Today, Yesterday, Previous 7 Days, Previous 30 Days, then month/year sections
 - [ ] A1.4 Gallery view: grid of note cards with thumbnails (first image, sketch or text preview), toggle list/gallery per folder
-- [ ] A1.6 Note count per folder / tag / smart folder in the sidebar
+- [x] A1.6 Note count per folder / tag / smart folder in the sidebar
 - [ ] A1.8 Swipe actions on mobile list rows: pin, move, lock, delete
 
 ## A2. Rich text formatting (Apple Notes)

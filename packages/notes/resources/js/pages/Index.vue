@@ -33,6 +33,7 @@ const props = defineProps<{
     note: NoteResource | null;
     tags: TagNode[];
     folders: FolderNode[];
+    counts: { notes: number; archive: number; trash: number };
     filters: NoteFilters;
     preferences: NotePreferences;
     sort: ListSort;
@@ -431,6 +432,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         >
                             <UiIcon name="i-lucide-notebook" class="text-dimmed size-4" />
                             All notes
+                            <span class="text-dimmed ms-auto text-xs">{{ counts.notes }}</span>
                         </Link>
                         <div class="text-dimmed mt-2 flex items-center justify-between px-2 text-xs font-medium">
                             Folders
@@ -477,6 +479,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         >
                             <UiIcon name="i-lucide-archive" class="text-dimmed size-4" />
                             Archive
+                            <span class="text-dimmed ms-auto text-xs">{{ counts.archive }}</span>
                         </Link>
                         <Link
                             :href="route('notes.index', filterQuery({ view: 'trash', q: filters.q }))"
@@ -485,6 +488,7 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                         >
                             <UiIcon name="i-lucide-trash-2" class="text-dimmed size-4" />
                             Trash
+                            <span class="text-dimmed ms-auto text-xs">{{ counts.trash }}</span>
                         </Link>
                         <Link :href="route('notes.settings.edit')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
                             <UiIcon name="i-lucide-settings" class="text-dimmed size-4" />

@@ -37,6 +37,7 @@ trait RendersNotesPage
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),
             'folders' => app(FolderService::class)->tree(),
+            'counts' => Notes::note()->counts(),
             'filters' => $request->filters(),
             'preferences' => NotePreferences::all(),
         ]);
