@@ -1,4 +1,5 @@
 import { AutoPair } from '@/editor/AutoPair';
+import { CalloutMarker } from '@/editor/CalloutMarker';
 import { CheckedToBottom } from '@/editor/checklists';
 import { Find } from '@/editor/Find';
 import { Folding } from '@/editor/Folding';
@@ -48,6 +49,7 @@ export const editorExtensions = ({
     TableKit,
     WikiLink,
     TableOfContents,
+    CalloutMarker,
     Hashtags,
     Placeholder.configure({ placeholder }),
     CheckedToBottom.configure({ enabled: checkedToBottom }),

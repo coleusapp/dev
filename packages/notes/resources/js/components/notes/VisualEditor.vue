@@ -335,6 +335,24 @@ const runSlash = (command: SlashCommand, range: { from: number; to: number }): v
         case 'tableOfContents':
             current.chain().focus().insertContent({ type: 'tableOfContents' }).run();
             break;
+        case 'callout':
+            current
+                .chain()
+                .focus()
+                .insertContent({
+                    type: 'blockquote',
+                    content: [
+                        {
+                            type: 'paragraph',
+                            content: [
+                                { type: 'calloutMarker', attrs: { type: 'note' } },
+                                { type: 'text', text: ' ' },
+                            ],
+                        },
+                    ],
+                })
+                .run();
+            break;
         case 'wikiLink':
             current.chain().focus().insertContent('[[]]').run();
             current.commands.setTextSelection(current.state.selection.from - 2);

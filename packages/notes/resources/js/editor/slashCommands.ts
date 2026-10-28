@@ -15,6 +15,7 @@ export type SlashCommand = {
         | { type: 'table' }
         | { type: 'divider' }
         | { type: 'tableOfContents' }
+        | { type: 'callout' }
         | { type: 'wikiLink' }
         | { type: 'date' };
 };
@@ -45,6 +46,13 @@ export const SLASH_COMMANDS: SlashCommand[] = [
         icon: 'i-lucide-square-code',
         keywords: ['monostyled', 'pre'],
         action: { type: 'style', style: 'monostyled' },
+    },
+    {
+        id: 'callout',
+        label: 'Callout',
+        icon: 'i-lucide-message-square-warning',
+        keywords: ['note', 'warning', 'tip', 'admonition'],
+        action: { type: 'callout' },
     },
     { id: 'table', label: 'Table', icon: 'i-lucide-table', keywords: ['grid'], action: { type: 'table' } },
     { id: 'divider', label: 'Divider', icon: 'i-lucide-minus', keywords: ['hr', 'rule', 'separator'], action: { type: 'divider' } },

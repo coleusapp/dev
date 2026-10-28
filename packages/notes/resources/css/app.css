@@ -156,6 +156,67 @@
     @apply text-muted text-xs;
 }
 
+.note-preview .callout {
+    --callout: var(--color-sky-500);
+    @apply mb-2 rounded-md border-s-4 px-3 py-2;
+    border-color: var(--callout);
+    background: color-mix(in oklab, var(--callout) 10%, transparent);
+}
+
+.note-preview .callout-title {
+    @apply font-semibold;
+    color: var(--callout);
+}
+
+.note-preview summary.callout-title {
+    @apply cursor-pointer;
+}
+
+.note-preview .callout-body {
+    @apply mt-1;
+}
+
+.note-preview .callout-body > :last-child {
+    @apply mb-0;
+}
+
+.note-preview .callout-abstract,
+.note-preview .callout-tip {
+    --callout: var(--color-teal-500);
+}
+
+.note-preview .callout-todo,
+.note-preview .callout-info {
+    --callout: var(--color-blue-500);
+}
+
+.note-preview .callout-success {
+    --callout: var(--color-green-500);
+}
+
+.note-preview .callout-question,
+.note-preview .callout-warning {
+    --callout: var(--color-amber-500);
+}
+
+.note-preview .callout-failure,
+.note-preview .callout-danger,
+.note-preview .callout-bug {
+    --callout: var(--color-red-500);
+}
+
+.note-preview .callout-example {
+    --callout: var(--color-violet-500);
+}
+
+.note-preview .callout-quote {
+    --callout: var(--color-neutral-500);
+}
+
+.tiptap .callout-marker {
+    @apply bg-elevated text-primary rounded px-1.5 py-0.5 text-xs font-semibold;
+}
+
 .note-preview a.wiki-link-missing {
     @apply text-muted decoration-dashed;
 }

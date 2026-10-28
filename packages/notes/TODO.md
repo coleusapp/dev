@@ -64,7 +64,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O4.15 Word / character count + reading time in status bar / info panel (Bear 7.3) 🍎
 
 ## O5. Markdown extensions (rendering)
-- [ ] O5.1 Callouts: `> [!note]`, `[!warning]`, foldable `[!tip]-`, custom titles
+- [x] O5.1 Callouts: `> [!note]`, `[!warning]`, foldable `[!tip]-`, custom titles
 - [ ] O5.2 Footnotes: `[^1]` references and definitions; footnotes view
 - [ ] O5.3 Comments: `%%hidden%%` stripped from preview
 - [ ] O5.4 Math: inline `$…$` and block `$$…$$` (LaTeX) ⚠️ dep (KaTeX/MathJax)

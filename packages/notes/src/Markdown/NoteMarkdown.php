@@ -2,6 +2,7 @@
 
 namespace Coleus\Notes\Markdown;
 
+use Coleus\Notes\Markdown\Callouts\CalloutExtension;
 use Coleus\Notes\Markdown\Underline\UnderlineExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkExtension;
 use Coleus\Notes\Markdown\WikiLinks\WikiLinkResolver;
@@ -78,6 +79,7 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new WikiLinkExtension($wikiLinks));
         $converter->getEnvironment()->addExtension(new HeadingPermalinkExtension);
         $converter->getEnvironment()->addExtension(new TableOfContentsExtension);
+        $converter->getEnvironment()->addExtension(new CalloutExtension);
 
         return $converter;
     }

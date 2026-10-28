@@ -697,6 +697,9 @@ const chooseSlash = (command: SlashCommand): void => {
         case 'tableOfContents':
             editSource(insertText('[TOC]\n'));
             break;
+        case 'callout':
+            editSource(insertText('> [!note] '));
+            break;
         case 'wikiLink':
             editSource(insertText('[[]]', 2));
             break;
