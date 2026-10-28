@@ -4,6 +4,7 @@ import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import NoteInfo from '@/components/notes/NoteInfo.vue';
 import NoteTitle from '@/components/notes/NoteTitle.vue';
+import PropertiesPanel from '@/components/notes/PropertiesPanel.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
@@ -87,6 +88,7 @@ onMounted(focusRequestedHeading);
 onActivated(focusRequestedHeading);
 watch(() => props.focusHeading, focusRequestedHeading);
 const savedTitle = ref(props.note.title);
+const propertiesPanel = useTemplateRef<InstanceType<typeof PropertiesPanel>>('propertiesPanel');
 
 /**
  * Renaming rewrites the note's first line (titles come from it); the
@@ -760,7 +762,20 @@ const onKeydown = (event: KeyboardEvent): void => {
 
 <template>
     <div class="flex h-full flex-col gap-2">
-        <NoteTitle :title="savedTitle" :readonly="readonly" @rename="renameNote" />
+        <div class="flex items-center gap-1">
+            <NoteTitle :title="savedTitle" :readonly="readonly" @rename="renameNote" />
+            <UiTooltip v-if="!readonly" text="Add property">
+                <UiButton
+                    icon="i-lucide-list-plus"
+                    aria-label="Add property"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    @click="propertiesPanel?.startAdding()"
+                />
+            </UiTooltip>
+        </div>
+        <PropertiesPanel ref="propertiesPanel" :markdown="body" :readonly="readonly" @update="(markdown) => (body = markdown)" />
         <FormatToolbar
             v-if="mode !== 'preview'"
             :active-style="mode === 'edit' ? visualStyle : null"

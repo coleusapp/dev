@@ -57,3 +57,12 @@ it('does not read hashtags or wiki links from front matter', function () {
     expect(Coleus\Notes\Markdown\Hashtags::parse($body))->toBe(['real'])
         ->and(Coleus\Notes\Markdown\WikiLinks\WikiLinks::titles($body))->toBe([]);
 });
+
+it('reads what the properties panel writes', function () {
+    $written = "---\nstatus: draft\ncount: 3\ndone: true\nwhen: 2026-10-28\ntags:\n  - a\n  - b c\nnote: \"a: b\"\ncode: \"007\"\nempty:\nyes: \"true\"\n---\n# Body";
+
+    expect(FrontMatter::parse($written))->toBe([
+        'status' => 'draft', 'count' => 3, 'done' => true, 'when' => '2026-10-28', 'tags' => ['a', 'b c'],
+        'note' => 'a: b', 'code' => '007', 'empty' => null, 'yes' => 'true',
+    ]);
+});
