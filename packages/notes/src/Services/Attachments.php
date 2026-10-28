@@ -37,7 +37,7 @@ class Attachments
     {
         $name = self::cleanName($file->getClientOriginalName());
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        $mime = self::sniff($file);
+        $mime = self::audioOnlyWebm(self::sniff($file), $extension);
         $kind = AttachmentKind::forMime($mime);
 
         if (in_array($extension, AttachmentKind::BLOCKED_EXTENSIONS, true) || $kind === null) {
@@ -101,6 +101,17 @@ class Attachments
         }
 
         return $disk->response($path, $attachment->name, $headers, $disposition);
+    }
+
+    /**
+     * WebM is one container for both video and sound, and libmagic calls
+     * every WebM video/webm. A ".weba" WebM (how the browser's voice memos
+     * are named, O3.6) is taken as audio/webm. That only chooses between two
+     * allowed media types, never lets anything else in.
+     */
+    private static function audioOnlyWebm(string $mime, string $extension): string
+    {
+        return $extension === 'weba' && in_array($mime, ['video/webm', 'audio/webm'], true) ? 'audio/webm' : $mime;
     }
 
     /**

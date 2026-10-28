@@ -15,7 +15,7 @@ export const MEDIA_KIND = (src: string): 'video' | 'audio' | 'pdf' | null => {
 
     return /\.(mp4|webm|mov|m4v|ogv)$/i.test(path)
         ? 'video'
-        : /\.(mp3|m4a|aac|wav|ogg|oga|flac)$/i.test(path)
+        : /\.(mp3|m4a|aac|wav|ogg|oga|weba|flac)$/i.test(path)
           ? 'audio'
           : /\.pdf$/i.test(path)
             ? 'pdf'

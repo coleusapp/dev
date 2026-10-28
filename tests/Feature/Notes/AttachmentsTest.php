@@ -75,3 +75,23 @@ it('serves SVG only as a download', function () {
         ->assertHeader('Content-Disposition', 'attachment; filename=logo.svg')
         ->assertHeader('Content-Security-Policy', 'sandbox');
 });
+
+it('takes a .weba recording as audio, and other WebM as video', function () {
+    if (! Illuminate\Support\Facades\Process::run(['ffmpeg', '-version'])->successful()) {
+        $this->markTestSkipped('Needs FFmpeg to make the recording.');
+    }
+
+    $file = tempnam(sys_get_temp_dir(), 'memo');
+    Illuminate\Support\Facades\Process::run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=duration=1', '-c:a', 'libopus', '-f', 'webm', $file])->throw();
+    $bytes = (string) file_get_contents($file);
+    @unlink($file);
+
+    $this->postJson(route('notes.attachments.store'), ['file' => UploadedFile::fake()->createWithContent('Voice memo 2026-10-28 14.05.09.weba', $bytes)])
+        ->assertCreated()
+        ->assertJsonPath('data.kind', 'audio')
+        ->assertJsonPath('data.mime', 'audio/webm');
+
+    $this->postJson(route('notes.attachments.store'), ['file' => UploadedFile::fake()->createWithContent('clip.webm', $bytes)])
+        ->assertCreated()
+        ->assertJsonPath('data.kind', 'video');
+});

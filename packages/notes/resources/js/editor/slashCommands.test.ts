@@ -58,5 +58,6 @@ describe('recording commands', () => {
     it('offers recording the camera and the screen', () => {
         expect(filterSlashCommands('screen')[0].action).toEqual({ type: 'record', kind: 'screen' });
         expect(filterSlashCommands('webcam')[0].action).toEqual({ type: 'record', kind: 'camera' });
+        expect(filterSlashCommands('voice')[0].action).toEqual({ type: 'record', kind: 'audio' });
     });
 });

@@ -14,7 +14,7 @@ class MediaPlayer
 {
     public const string VIDEO = '/\.(mp4|webm|mov|m4v|ogv)$/i';
 
-    public const string AUDIO = '/\.(mp3|m4a|aac|wav|ogg|oga|flac)$/i';
+    public const string AUDIO = '/\.(mp3|m4a|aac|wav|ogg|oga|weba|flac)$/i';
 
     public const string PDF = '/\.pdf$/i';
 

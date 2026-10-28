@@ -24,7 +24,7 @@ use League\CommonMark\Util\Xml;
  */
 class AttachmentEmbedExtension implements ExtensionInterface, InlineParserInterface, NodeRendererInterface
 {
-    public const string FILE_ENDING = '/\.(png|jpe?g|gif|webp|avif|heic|heif|svg|mp4|webm|mov|m4v|ogv|mp3|m4a|aac|wav|ogg|oga|flac|pdf)$/i';
+    public const string FILE_ENDING = '/\.(png|jpe?g|gif|webp|avif|heic|heif|svg|mp4|webm|mov|m4v|ogv|mp3|m4a|aac|wav|ogg|oga|weba|flac|pdf)$/i';
 
     public function register(EnvironmentBuilderInterface $environment): void
     {

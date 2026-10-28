@@ -95,6 +95,13 @@ export const SLASH_COMMANDS: SlashCommand[] = [
         keywords: ['screencast', 'capture'],
         action: { type: 'record', kind: 'screen' },
     },
+    {
+        id: 'voice',
+        label: 'Voice memo',
+        icon: 'i-lucide-mic',
+        keywords: ['audio', 'record', 'dictaphone'],
+        action: { type: 'record', kind: 'audio' },
+    },
     { id: 'date', label: "Today's date", icon: 'i-lucide-calendar', keywords: ['today', 'now'], action: { type: 'date' } },
 ];
 

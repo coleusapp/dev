@@ -211,6 +211,17 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                 <UiButton icon="i-lucide-camera" aria-label="Camera" color="neutral" variant="ghost" size="xs" @mousedown.prevent />
             </UiTooltip>
         </UiDropdownMenu>
+        <UiTooltip text="Record a voice memo">
+            <UiButton
+                icon="i-lucide-mic"
+                aria-label="Record a voice memo"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                @mousedown.prevent
+                @click="emit('record', 'audio')"
+            />
+        </UiTooltip>
         <UiTooltip text="Highlight">
             <UiButton
                 icon="i-lucide-highlighter"

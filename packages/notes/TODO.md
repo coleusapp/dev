@@ -47,7 +47,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O3.3 Note transclusion `![[Other note]]`, `![[Note#Heading]]` (rendered inline, loop-safe)
 - [x] O3.4 PDF, audio and video embeds with inline players/viewer 🍎 📦
 - [ ] O3.5 Attachment manager: list attachments, show which notes use each one, delete unused ones (Apple: grouped as photos & videos, scans, maps, websites, audio, documents) 🍎
-- [ ] O3.6 Audio recorder: record a voice memo into the current note 🍎
+- [x] O3.6 Audio recorder: record a voice memo into the current note 🍎
 
 ## O4. Editor
 - [x] O4.0 Tiptap editor: WYSIWYG editing that loads and saves Markdown (`@tiptap/markdown`), custom nodes for [[wiki links]], #tags, checklists and ==highlights==, a Source toggle for raw Markdown, round-trip tests ⚠️ dep

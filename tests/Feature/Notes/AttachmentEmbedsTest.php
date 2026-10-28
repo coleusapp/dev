@@ -56,3 +56,10 @@ it('plays attached video and audio and shows PDFs in place', function () {
         ->and($pdf->markdown())->toStartWith('![Report.pdf]')
         ->and(NoteMarkdown::toHtml('![x](https://elsewhere.test/a.mp4)'))->toContain('<img');
 });
+
+it('gives voice memos an audio player', function () {
+    $memo = Attachment::query()->create(['uuid' => (string) Str::uuid(), 'name' => 'Voice memo.weba', 'mime' => 'audio/webm', 'kind' => 'audio', 'size' => 10, 'path' => 'x']);
+
+    expect(NoteMarkdown::toHtml($memo->markdown()))->toContain('<audio src="/notes/attachments/'.$memo->uuid.'/Voice%20memo.weba"')
+        ->and(NoteMarkdown::toHtml('![[Voice memo.weba]]'))->toContain('<audio ');
+});
