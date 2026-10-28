@@ -30,6 +30,7 @@ describe('matchesShortcut', () => {
         expect(matchesShortcut(press('?', 'Slash', { metaKey: true, shiftKey: true }), 'shortcuts')).toBe(true);
         expect(matchesShortcut(press('ArrowDown', 'ArrowDown', { metaKey: true, altKey: true }), 'next-note')).toBe(true);
         expect(matchesShortcut(press('Dead', 'KeyN', { metaKey: true, altKey: true }), 'new-note')).toBe(true);
+        expect(matchesShortcut(press('[', 'BracketLeft', { metaKey: true }), 'back')).toBe(true);
     });
 
     it('falls back to the character on other keyboard layouts', () => {

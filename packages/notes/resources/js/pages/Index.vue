@@ -36,6 +36,7 @@ import ShortcutsModal from '@/components/notes/ShortcutsModal.vue';
 import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
+import { useNoteHistory } from '@/composables/useNoteHistory';
 import NotesLayout from '@/layouts/NotesLayout.vue';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
@@ -269,6 +270,11 @@ const stepNote = (step: 1 | -1): void => {
     }
 };
 
+const noteHistory = useNoteHistory(
+    () => props.note?.data.id ?? null,
+    (id) => route('notes.show', { note: id, ...filterQuery(props.filters) }),
+);
+
 /**
  * The page-wide part of the shortcut set (lib/shortcuts.ts); the editor
  * handles its own. These work from anywhere, including the editor: the
@@ -282,6 +288,8 @@ const pageShortcuts: [ShortcutId, () => void][] = [
     ['search', focusSearch],
     ['next-note', () => stepNote(1)],
     ['previous-note', () => stepNote(-1)],
+    ['back', noteHistory.back],
+    ['forward', noteHistory.forward],
     ['shortcuts', () => (showingShortcuts.value = true)],
 ];
 
@@ -584,6 +592,12 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         label: 'Go to',
         commands: [
             { id: 'go.open', label: 'Open note…', icon: 'i-lucide-search', kbds: shortcutKeys('open-note'), run: () => (switching.value = true) },
+            ...(noteHistory.canGoBack.value
+                ? [{ id: 'go.back', label: 'Go back', icon: 'i-lucide-arrow-left', kbds: shortcutKeys('back'), run: noteHistory.back }]
+                : []),
+            ...(noteHistory.canGoForward.value
+                ? [{ id: 'go.forward', label: 'Go forward', icon: 'i-lucide-arrow-right', kbds: shortcutKeys('forward'), run: noteHistory.forward }]
+                : []),
             { id: 'go.search', label: 'Search notes', icon: 'i-lucide-text-search', kbds: shortcutKeys('search'), run: focusSearch },
             ...(listedNotes.value.length
                 ? [
@@ -865,6 +879,28 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                                 aria-label="Back to notes"
                                 :to="route('notes.index', listQuery)"
                             />
+                            <div class="hidden items-center lg:flex">
+                                <UiTooltip text="Back" :kbds="shortcutKeys('back')">
+                                    <UiButton
+                                        icon="i-lucide-arrow-left"
+                                        color="neutral"
+                                        variant="ghost"
+                                        aria-label="Back"
+                                        :disabled="!noteHistory.canGoBack.value"
+                                        @click="noteHistory.back"
+                                    />
+                                </UiTooltip>
+                                <UiTooltip text="Forward" :kbds="shortcutKeys('forward')">
+                                    <UiButton
+                                        icon="i-lucide-arrow-right"
+                                        color="neutral"
+                                        variant="ghost"
+                                        aria-label="Forward"
+                                        :disabled="!noteHistory.canGoForward.value"
+                                        @click="noteHistory.forward"
+                                    />
+                                </UiTooltip>
+                            </div>
                             <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" @click="createNote">New note</UiButton>
                         </template>
 

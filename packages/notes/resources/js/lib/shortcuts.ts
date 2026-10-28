@@ -15,6 +15,8 @@ export type ShortcutId =
     | 'search'
     | 'next-note'
     | 'previous-note'
+    | 'back'
+    | 'forward'
     | 'shortcuts'
     | 'save'
     | 'find'
@@ -45,6 +47,8 @@ export const SHORTCUTS: Shortcut[] = [
     { id: 'search', label: 'Search notes', group: 'Notes', keys: ['meta', 'shift', 'F'] },
     { id: 'next-note', label: 'Next note in the list', group: 'Notes', keys: ['meta', 'alt', 'ArrowDown'] },
     { id: 'previous-note', label: 'Previous note in the list', group: 'Notes', keys: ['meta', 'alt', 'ArrowUp'] },
+    { id: 'back', label: 'Back to the previous note', group: 'Notes', keys: ['meta', '['] },
+    { id: 'forward', label: 'Forward', group: 'Notes', keys: ['meta', ']'] },
     { id: 'shortcuts', label: 'Keyboard shortcuts', group: 'Notes', keys: ['meta', 'shift', '/'] },
     { id: 'save', label: 'Save now', group: 'Editor', keys: ['meta', 'S'] },
     { id: 'find', label: 'Find in note', group: 'Editor', keys: ['meta', 'F'] },
@@ -83,7 +87,9 @@ const keyCode = (key: string): string => {
         return `Digit${key}`;
     }
 
-    return key === '/' ? 'Slash' : key;
+    const named: Record<string, string> = { '/': 'Slash', '[': 'BracketLeft', ']': 'BracketRight' };
+
+    return named[key] ?? key;
 };
 
 /**
