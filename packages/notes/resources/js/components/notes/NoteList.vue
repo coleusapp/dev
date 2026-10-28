@@ -13,8 +13,9 @@ const props = withDefaults(
         relativeDates?: boolean;
         showSnippets?: boolean;
         groupBy?: 'updated_at' | 'created_at' | null;
+        layout?: 'list' | 'gallery';
     }>(),
-    { relativeDates: true, showSnippets: true, groupBy: null },
+    { relativeDates: true, showSnippets: true, groupBy: null, layout: 'list' },
 );
 
 defineEmits<{
@@ -112,9 +113,25 @@ const emptyMessage = computed(() => {
     </div>
     <nav v-else ref="list" class="flex flex-col">
         <p v-if="filters.q" class="text-dimmed px-3 pb-1 text-xs" role="status">{{ resultSummary }}</p>
-        <section v-for="group in groups" :key="group.label" class="divide-default flex flex-col divide-y" :aria-label="group.label || undefined">
-            <h3 v-if="group.label" class="bg-default text-dimmed sticky top-0 z-10 px-3 pt-3 pb-1 text-xs font-semibold">{{ group.label }}</h3>
-            <div v-for="note in group.notes" :key="note.id" class="flex flex-col" :class="{ 'bg-elevated': note.id === selectedId }">
+        <section
+            v-for="group in groups"
+            :key="group.label"
+            :class="layout === 'gallery' ? 'grid grid-cols-2 gap-2 p-2' : 'divide-default flex flex-col divide-y'"
+            :aria-label="group.label || undefined"
+        >
+            <h3
+                v-if="group.label"
+                class="bg-default text-dimmed sticky top-0 z-10 px-3 pt-3 pb-1 text-xs font-semibold"
+                :class="{ 'col-span-2 px-1': layout === 'gallery' }"
+            >
+                {{ group.label }}
+            </h3>
+            <div
+                v-for="note in group.notes"
+                :key="note.id"
+                class="flex flex-col"
+                :class="[{ 'bg-elevated': note.id === selectedId }, layout === 'gallery' ? 'border-default overflow-hidden rounded-md border' : '']"
+            >
                 <Link
                     :data-note-id="note.id"
                     :href="route('notes.show', { note: note.id, ...query })"
@@ -122,8 +139,17 @@ const emptyMessage = computed(() => {
                     preserve-scroll
                     draggable="true"
                     @dragstart="(event: DragEvent) => event.dataTransfer?.setData(NOTE_DRAG_TYPE, String(note.id))"
-                    class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
+                    class="hover:bg-elevated flex flex-col gap-1"
+                    :class="layout === 'gallery' ? 'p-2' : 'px-3 py-3'"
                 >
+                    <!-- Gallery card (A1.4): the note's first picture, or its text. -->
+                    <div v-if="layout === 'gallery'" class="bg-elevated aspect-[4/3] overflow-hidden rounded">
+                        <img v-if="note.thumbnail" :src="note.thumbnail" alt="" class="size-full object-cover" loading="lazy" draggable="false" />
+                        <p v-else-if="note.locked" class="text-dimmed flex size-full items-center justify-center">
+                            <UiIcon name="i-lucide-lock" class="size-6" />
+                        </p>
+                        <p v-else class="text-muted line-clamp-6 p-2 text-[0.65rem] leading-snug">{{ note.snippet }}</p>
+                    </div>
                     <span class="flex items-center gap-1">
                         <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">
                             <HighlightedText v-if="note.highlights && note.title" :parts="note.highlights.title" />
@@ -132,7 +158,7 @@ const emptyMessage = computed(() => {
                         <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
                         <UiIcon v-if="note.read_only" name="i-lucide-lock" class="text-dimmed size-3 shrink-0" aria-label="Read-only" />
                     </span>
-                    <ul v-if="note.matches?.lines.length" class="flex flex-col gap-0.5" aria-label="Matching lines">
+                    <ul v-if="layout === 'list' && note.matches?.lines.length" class="flex flex-col gap-0.5" aria-label="Matching lines">
                         <li
                             v-for="match in visibleMatches(note)"
                             :key="match.line"
@@ -141,7 +167,7 @@ const emptyMessage = computed(() => {
                             <HighlightedText :parts="match.parts" />
                         </li>
                     </ul>
-                    <span v-else-if="showSnippets && note.snippet" class="text-muted line-clamp-2 text-xs">
+                    <span v-else-if="layout === 'list' && showSnippets && note.snippet" class="text-muted line-clamp-2 text-xs">
                         <HighlightedText v-if="note.highlights" :parts="note.highlights.snippet" />
                         <template v-else>{{ note.snippet }}</template>
                     </span>
@@ -150,7 +176,7 @@ const emptyMessage = computed(() => {
                     }}</time>
                 </Link>
                 <button
-                    v-if="note.matches && note.matches.total > COLLAPSED_MATCHES"
+                    v-if="layout === 'list' && note.matches && note.matches.total > COLLAPSED_MATCHES"
                     type="button"
                     class="text-dimmed hover:text-default -mt-2 px-3 pb-2 text-start text-xs"
                     :aria-expanded="expanded.has(note.id)"

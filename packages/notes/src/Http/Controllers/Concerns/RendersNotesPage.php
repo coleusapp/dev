@@ -13,6 +13,7 @@ use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Notes\Search\SearchQuery;
 use Coleus\Notes\Services\BookmarkService;
 use Coleus\Notes\Services\FolderService;
+use Coleus\Notes\Services\NoteThumbnails;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,10 +39,19 @@ trait RendersNotesPage
             $notes->collection->each(fn (NoteResource $resource) => $resource->highlight($words));
         }
 
-        $order = Notes::note()->sortFor($request->folderId() === null ? null : Folder::query()->find($request->folderId()));
+        $folder = $request->folderId() === null ? null : Folder::query()->find($request->folderId());
+        $order = Notes::note()->sortFor($folder);
+        $layout = $folder?->layout ?? NotePreferences::get('list.layout');
+
+        // Pictures for the cards, only when they're shown (A1.4).
+        if ($layout === 'gallery') {
+            $thumbnails = app(NoteThumbnails::class)->for($notes->collection->map(fn (NoteResource $resource) => $resource->resource));
+            $notes->collection->each(fn (NoteResource $resource) => $resource->thumbnail($thumbnails[$resource->resource->id] ?? null));
+        }
 
         return Inertia::render('Index', [
             'sort' => ['sort' => $order['sort']->value, 'direction' => $order['direction'], 'scope' => $order['scope']],
+            'layout' => ['layout' => $layout, 'scope' => $folder?->layout !== null ? 'folder' : 'default'],
             'notes' => $notes,
             'note' => $note ? new NoteDetailResource($note) : null,
             'tags' => Notes::note()->tagTree(),

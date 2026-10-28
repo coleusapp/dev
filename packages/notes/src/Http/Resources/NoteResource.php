@@ -17,6 +17,18 @@ class NoteResource extends JsonResource
      */
     protected array $highlightWords = [];
 
+    protected ?string $thumbnail = null;
+
+    /**
+     * The picture shown on the note's card in the gallery (Services\NoteThumbnails).
+     */
+    public function thumbnail(?string $url): static
+    {
+        $this->thumbnail = $url;
+
+        return $this;
+    }
+
     /**
      * Mark these search words in the title and snippet.
      *
@@ -61,6 +73,7 @@ class NoteResource extends JsonResource
                 'snippet' => Highlighter::parts($snippet, $this->highlightWords),
             ],
             'matches' => $this->highlightWords === [] ? null : $this->matches(),
+            'thumbnail' => $this->thumbnail,
             'pinned' => $this->pinned_at !== null,
             'read_only' => $this->read_only_at !== null,
             'locked' => $this->lock_key_id !== null,

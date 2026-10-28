@@ -47,6 +47,7 @@ it('saves preferences for the current user only', function () use ($defaults) {
         'list.group_by_date' => false,
         'list.relative_dates' => false,
         'list.show_snippets' => true,
+        'list.layout' => 'list',
         'search.sort' => 'relevance',
         'reading.line_breaks' => 'soft',
     ]);

@@ -64,6 +64,7 @@ const props = defineProps<{
     filters: NoteFilters;
     preferences: NotePreferences;
     sort: ListSort;
+    layout: { layout: 'list' | 'gallery'; scope: 'folder' | 'default' };
 }>();
 
 /**
@@ -195,6 +196,15 @@ const groupBy = computed(() =>
             : 'updated_at'
         : null,
 );
+
+/**
+ * List or gallery of cards (A1.4): a folder's own choice when in a folder, otherwise the default.
+ */
+const setLayout = (layout: 'list' | 'gallery'): void => {
+    const folderId = props.filters.view === 'notes' ? props.filters.folder : null;
+
+    router.put(route('notes.layout.update'), { layout, folder_id: folderId }, { preserveScroll: true, preserveState: true });
+};
 
 const toggleGroupByDate = (on: boolean): void => {
     router.put(route('notes.settings.update'), { list_group_by_date: on }, { preserveScroll: true, preserveState: true });
@@ -804,6 +814,9 @@ const commandGroups = computed<PaletteGroup[]>(() => [
             { id: 'go.archive', label: 'Archive', icon: 'i-lucide-archive', run: () => visitList({ view: 'archive' }) },
             { id: 'go.trash', label: 'Trash', icon: 'i-lucide-trash-2', run: () => visitList({ view: 'trash' }) },
             { id: 'go.properties', label: 'Properties', icon: 'i-lucide-list-tree', run: () => router.visit(route('notes.properties.index')) },
+            props.layout.layout === 'gallery'
+                ? { id: 'list.layout', label: 'Show as list', icon: 'i-lucide-list', run: () => setLayout('list') }
+                : { id: 'list.layout', label: 'Show as gallery', icon: 'i-lucide-layout-grid', run: () => setLayout('gallery') },
             { id: 'go.attachments', label: 'Attachments', icon: 'i-lucide-paperclip', run: () => router.visit(route('notes.attachments.index')) },
             { id: 'go.settings', label: 'Settings', icon: 'i-lucide-settings', run: () => router.visit(route('notes.settings.edit')) },
             {
@@ -1005,6 +1018,15 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                                 aria-label="Save search"
                                 @click="savingSearch = true"
                             />
+                            <UiTooltip :text="layout.layout === 'gallery' ? 'Show as list' : 'Show as gallery'">
+                                <UiButton
+                                    :icon="layout.layout === 'gallery' ? 'i-lucide-list' : 'i-lucide-layout-grid'"
+                                    color="neutral"
+                                    variant="ghost"
+                                    :aria-label="layout.layout === 'gallery' ? 'Show as list' : 'Show as gallery'"
+                                    @click="setLayout(layout.layout === 'gallery' ? 'list' : 'gallery')"
+                                />
+                            </UiTooltip>
                             <UiDropdownMenu v-if="filters.view !== 'recent'" :items="sortItems">
                                 <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
                             </UiDropdownMenu>
@@ -1081,6 +1103,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                         :relative-dates="preferences['list.relative_dates']"
                         :show-snippets="preferences['list.show_snippets']"
                         :group-by="groupBy"
+                        :layout="layout.layout"
                         @create="createNote"
                     />
                 </template>

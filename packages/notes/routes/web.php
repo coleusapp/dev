@@ -6,6 +6,7 @@ use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
+use Coleus\Notes\Http\Controllers\LayoutController;
 use Coleus\Notes\Http\Controllers\LockKeyController;
 use Coleus\Notes\Http\Controllers\MentionController;
 use Coleus\Notes\Http\Controllers\NoteController;
@@ -36,6 +37,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
         Route::put('/properties', [PropertyController::class, 'rename'])->name('properties.rename');
         Route::put('/sort', [SortController::class, 'update'])->name('sort.update');
+        Route::put('/layout', [LayoutController::class, 'update'])->name('layout.update');
         Route::post('/smart-folders', [SmartFolderController::class, 'store'])->name('smart-folders.store');
         Route::put('/smart-folders/{smartFolder}', [SmartFolderController::class, 'update'])->name('smart-folders.update')->whereNumber('smartFolder');
         Route::delete('/smart-folders/{smartFolder}', [SmartFolderController::class, 'destroy'])->name('smart-folders.destroy')->whereNumber('smartFolder');

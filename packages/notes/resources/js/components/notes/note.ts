@@ -11,6 +11,10 @@ export type NoteData = {
     title: string;
     body: string;
     snippet: string;
+    /**
+     * The note's first attached image, small, for gallery cards (only sent in the gallery layout).
+     */
+    thumbnail?: string | null;
     pinned: boolean;
     read_only: boolean;
     locked: boolean;
@@ -239,6 +243,7 @@ export type NotePreferences = {
     'list.group_by_date': boolean;
     'list.relative_dates': boolean;
     'list.show_snippets': boolean;
+    'list.layout': 'list' | 'gallery';
     'search.sort': 'relevance' | 'list';
     'reading.line_breaks': 'soft' | 'hard';
 };
