@@ -94,7 +94,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O9.1 Daily notes: "today's note" command, configurable title format and template, folder
 - [ ] O9.2 Periodic navigation: previous/next daily note, calendar picker (could use the Calendar package)
 - [x] O9.3 Templates: notes in a templates folder; insert with variables `{{title}}`, `{{date}}`, `{{time}}`, custom formats (Box: template gallery) 📦
-- [ ] O9.4 New note from template
+- [x] O9.4 New note from template
 - [ ] O9.5 Note composer: merge notes; extract selection into a new note, leaving a link or embed
 - [ ] O9.6 Tasks view: all open/done checklist items across notes, filters by tag/folder/note, toggle from the list
 - [ ] O9.8 Due dates and reminders on checklist items (e.g. `- [ ] pay rent @2026-11-01`): shown in the Tasks view (O9.6), reminder notification before the due date (Box)

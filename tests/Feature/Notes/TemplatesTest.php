@@ -42,3 +42,14 @@ it('has no templates without the folder, and never another users', function () {
 
     $this->getJson(route('notes.templates.index'))->assertExactJson(['data' => []]);
 });
+
+it('creates a note from a filled template, front matter included, in the folder being viewed', function () {
+    $work = $this->folders->create('Work', null);
+
+    $this->post(route('notes.store', ['folder' => $work->id]), ['body' => "---\ntype: meeting\n---\n# Standup 2026-10-28", 'folder_id' => $work->id])->assertRedirect();
+
+    $note = Note::query()->latest('id')->first();
+    expect($note->folder_id)->toBe($work->id)
+        ->and($note->body)->toBe("---\ntype: meeting\n---\n# Standup 2026-10-28")
+        ->and($note->properties()->pluck('key')->all())->toBe(['type']);
+});

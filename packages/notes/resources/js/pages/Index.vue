@@ -39,6 +39,7 @@ import SearchTips from '@/components/notes/SearchTips.vue';
 import ShortcutsModal from '@/components/notes/ShortcutsModal.vue';
 import SmartFolderModal from '@/components/notes/SmartFolderModal.vue';
 import TagTree from '@/components/notes/TagTree.vue';
+import TemplatePicker, { type NoteTemplate } from '@/components/notes/TemplatePicker.vue';
 import VersionHistory from '@/components/notes/VersionHistory.vue';
 import { useNoteHistory } from '@/composables/useNoteHistory';
 import { cachedKey, currentKeyParams, keyParams, setPassword, unlockWithPassword } from '@/composables/useNoteKeys';
@@ -47,6 +48,7 @@ import NotesLayout from '@/layouts/NotesLayout.vue';
 import { jsonHeaders } from '@/lib/http';
 import { encryptText } from '@/lib/noteCrypto';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
+import { fillTemplate } from '@/lib/templates';
 import { titleOf } from '@/lib/title';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import type { DropdownMenuItem } from '@nuxt/ui';
@@ -170,6 +172,19 @@ const createNote = (): void => {
         body: tag ? `\n\n${describeTags(tag).replace(/ \+ /g, ' ')}` : '',
         folder_id: folder,
     });
+};
+
+/**
+ * New note from a template (O9.4): the template filled in (front matter
+ * included), in the folder being viewed. {{title}} reads "Untitled", since
+ * the note has no title until you give it one.
+ */
+const choosingTemplate = ref(false);
+
+const createFromTemplate = (template: NoteTemplate): void => {
+    const { folder } = props.filters;
+
+    router.post(route('notes.store', filterQuery({ folder })), { body: fillTemplate(template.body, { title: 'Untitled' }), folder_id: folder });
 };
 
 const flattenFolders = (nodes: FolderNode[]): FolderNode[] => nodes.flatMap((node) => [node, ...flattenFolders(node.children)]);
@@ -758,6 +773,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         label: 'Create',
         commands: [
             { id: 'note.new', label: 'New note', icon: 'i-lucide-file-plus', kbds: shortcutKeys('new-note'), run: createNote },
+            { id: 'note.template', label: 'New note from template…', icon: 'i-lucide-file-text', run: () => (choosingTemplate.value = true) },
             {
                 id: 'folder.new',
                 label: 'New folder',
@@ -1144,7 +1160,24 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                                     />
                                 </UiTooltip>
                             </div>
-                            <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" @click="createNote">New note</UiButton>
+                            <div class="flex">
+                                <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle" class="rounded-e-none" @click="createNote"
+                                    >New note</UiButton
+                                >
+                                <UiDropdownMenu
+                                    :items="[
+                                        { label: 'New note from template…', icon: 'i-lucide-file-text', onSelect: () => (choosingTemplate = true) },
+                                    ]"
+                                >
+                                    <UiButton
+                                        icon="i-lucide-chevron-down"
+                                        color="neutral"
+                                        variant="subtle"
+                                        class="rounded-s-none"
+                                        aria-label="More ways to start a note"
+                                    />
+                                </UiDropdownMenu>
+                            </div>
                         </template>
 
                         <template #right>
@@ -1189,6 +1222,7 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         <QuickSwitcher v-model:open="switching" :filters="filters" />
         <CommandPalette v-model:open="showingCommands" :groups="commandGroups" />
         <ShortcutsModal v-model:open="showingShortcuts" />
+        <TemplatePicker v-model:open="choosingTemplate" title="New note from template" @choose="createFromTemplate" />
         <PasswordModal
             :open="passwordPrompt !== null"
             :mode="passwordPrompt?.mode ?? 'enter'"

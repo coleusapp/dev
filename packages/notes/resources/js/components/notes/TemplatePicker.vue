@@ -8,6 +8,8 @@ export type NoteTemplate = { id: number; title: string; body: string };
 /**
  * Picks a template (O9.3): the notes in the "Templates" folder, searched by title.
  */
+withDefaults(defineProps<{ title?: string }>(), { title: 'Insert template' });
+
 const open = defineModel<boolean>('open', { required: true });
 
 const emit = defineEmits<{
@@ -41,12 +43,7 @@ const groups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => [
 </script>
 
 <template>
-    <UiModal
-        v-model:open="open"
-        title="Insert template"
-        description="Notes in your Templates folder."
-        :ui="{ header: 'sr-only', body: 'p-0 sm:p-0' }"
-    >
+    <UiModal v-model:open="open" :title="title" description="Notes in your Templates folder." :ui="{ header: 'sr-only', body: 'p-0 sm:p-0' }">
         <template #body>
             <p v-if="templates !== null && !templates.length" class="text-dimmed p-4 text-sm">
                 No templates yet. Put notes in a folder named “Templates”; <code>&#123;&#123;title&#125;&#125;</code>,
