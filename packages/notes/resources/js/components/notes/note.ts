@@ -1,3 +1,4 @@
+import { noteOutline } from '@/lib/outline';
 import type { Resource } from '@coleus/support/types/resource';
 
 export type HighlightPart = {
@@ -233,24 +234,6 @@ export const bookmarkHref = (bookmark: BookmarkItem): string => {
 };
 
 /**
- * The headings in a note's Markdown (outside code blocks), for bookmarking.
+ * The headings in a note's Markdown (see lib/outline.ts), for bookmarking.
  */
-export const noteHeadings = (markdown: string): string[] => {
-    const headings: string[] = [];
-    let inFence = false;
-
-    for (const line of markdown.split('\n')) {
-        if (/^\s*(```|~~~)/.test(line)) {
-            inFence = !inFence;
-            continue;
-        }
-
-        const match = /^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/.exec(line);
-
-        if (!inFence && match) {
-            headings.push(match[1].replace(/[*_`~=]|\+\+/g, '').trim());
-        }
-    }
-
-    return headings.filter((heading) => heading !== '');
-};
+export const noteHeadings = (markdown: string): string[] => noteOutline(markdown).map((heading) => heading.text);

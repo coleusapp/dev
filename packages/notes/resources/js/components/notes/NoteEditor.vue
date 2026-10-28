@@ -5,6 +5,7 @@ import FormatToolbar from '@/components/notes/FormatToolbar.vue';
 import type { ChecklistAction, EditorMode, NoteDetailData, TableAction } from '@/components/notes/note';
 import NoteInfo from '@/components/notes/NoteInfo.vue';
 import NoteTitle from '@/components/notes/NoteTitle.vue';
+import OutlinePanel from '@/components/notes/OutlinePanel.vue';
 import PropertiesPanel from '@/components/notes/PropertiesPanel.vue';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import SlashMenu from '@/components/notes/SlashMenu.vue';
@@ -34,12 +35,13 @@ import {
     type Selection,
     type TextEdit,
 } from '@/lib/markdownFormat';
+import { noteOutline, type OutlineHeading } from '@/lib/outline';
 import { pasteUrlOverSelection } from '@/lib/paste';
 import { matchesShortcut, shortcutKeys, type ShortcutId } from '@/lib/shortcuts';
 import { formatTable, insertTable, moveToCell } from '@/lib/tables';
 import { renameFirstLine } from '@/lib/title';
 import { Link, router } from '@inertiajs/vue3';
-import { useMediaQuery } from '@vueuse/core';
+import { useLocalStorage, useMediaQuery } from '@vueuse/core';
 import { computed, onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
@@ -67,17 +69,24 @@ const backlinks = ref(props.note.backlinks);
 
 const updatedAt = ref(props.note.updated_at);
 
+const root = useTemplateRef<HTMLElement>('root');
+
+/**
+ * Scrolls a heading of the visual editor or the reading view into view: the
+ * nth one (0-based) with that text, among those currently shown.
+ */
+const scrollToHeading = (heading: string, occurrence = 0): void => {
+    const target = Array.from(
+        root.value?.querySelectorAll<HTMLElement>('.tiptap :is(h1,h2,h3,h4,h5,h6), .note-preview > :is(h1,h2,h3,h4,h5,h6)') ?? [],
+    ).filter((element) => element.offsetParent !== null && element.textContent?.trim() === heading)[occurrence];
+
+    target?.scrollIntoView({ block: 'start' });
+};
+
 /**
  * Opened from a heading bookmark: scroll that heading into view once the
  * editor or the reading view has rendered.
  */
-const scrollToHeading = (heading: string): void => {
-    const target = Array.from(document.querySelectorAll<HTMLElement>('.tiptap :is(h1,h2,h3,h4,h5,h6), .note-preview > :is(h1,h2,h3,h4,h5,h6)')).find(
-        (element) => element.offsetParent !== null && element.textContent?.trim() === heading,
-    );
-
-    target?.scrollIntoView({ block: 'start' });
-};
 
 const focusRequestedHeading = (): void => {
     if (props.focusHeading) {
@@ -301,6 +310,56 @@ const saveNow = (event: KeyboardEvent): void => {
 };
 
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
+
+const outline = computed(() => noteOutline(body.value));
+const isLarge = useMediaQuery('(min-width: 1024px)');
+
+/**
+ * The outline sits beside the note on large screens, where it stays open
+ * across notes and visits; on smaller ones it slides over and closes after
+ * a jump.
+ */
+const outlinePinned = useLocalStorage('notes.outline.open', false);
+const outlineSheetOpen = ref(false);
+const showsOutline = computed(() => (isLarge.value ? outlinePinned.value : outlineSheetOpen.value));
+
+const toggleOutline = (): void => {
+    if (isLarge.value) {
+        outlinePinned.value = !outlinePinned.value;
+    } else {
+        outlineSheetOpen.value = !outlineSheetOpen.value;
+    }
+};
+
+/**
+ * Puts the caret at a Markdown position and scrolls that line to the top
+ * of the source textarea.
+ */
+const revealSourceOffset = (offset: number): void => {
+    const area = textarea.value;
+
+    if (!area) {
+        return;
+    }
+
+    area.focus({ preventScroll: true });
+    area.setSelectionRange(offset, offset);
+
+    const lineHeight = parseFloat(getComputedStyle(area).lineHeight) || 24;
+    area.scrollTop += textareaCaretPosition(area, offset).top - area.getBoundingClientRect().top - lineHeight;
+};
+
+const jumpToHeading = (heading: OutlineHeading): void => {
+    outlineSheetOpen.value = false;
+
+    if (showsSource.value) {
+        revealSourceOffset(heading.offset);
+    }
+
+    if (mode.value !== 'source') {
+        scrollToHeading(heading.text, heading.occurrence);
+    }
+};
 
 /**
  * The "/" command menu, open in either editor. `range` is the typed
@@ -822,8 +881,15 @@ const onShortcutKeydown = (event: KeyboardEvent): void => {
  * editing commands only when the note can be edited in the current mode.
  */
 const paletteCommands = computed<PaletteCommand[]>(() => {
+    const outlineCommand: PaletteCommand = {
+        id: 'outline',
+        label: showsOutline.value ? 'Hide outline' : 'Show outline',
+        icon: 'i-lucide-table-of-contents',
+        run: toggleOutline,
+    };
+
     if (props.readonly) {
-        return [];
+        return [outlineCommand];
     }
 
     const modes: PaletteCommand[] = modeItems.value
@@ -836,11 +902,12 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
         }));
 
     if (mode.value === 'preview') {
-        return modes;
+        return [...modes, outlineCommand];
     }
 
     return [
         ...modes,
+        outlineCommand,
         { id: 'find', label: 'Find in note', icon: 'i-lucide-search', kbds: shortcutKeys('find'), run: () => finder.show(false) },
         { id: 'replace', label: 'Find and replace', icon: 'i-lucide-replace', kbds: shortcutKeys('replace'), run: () => finder.show(true) },
         ...formatCommands.map(({ command, label, icon, kbds }) => ({ id: `format.${command}`, label, icon, kbds, run: () => format(command) })),
@@ -889,9 +956,20 @@ defineExpose({ paletteCommands });
 </script>
 
 <template>
-    <div class="flex h-full flex-col gap-2">
+    <div ref="root" class="flex h-full flex-col gap-2">
         <div class="flex items-center gap-1">
             <NoteTitle :title="savedTitle" :readonly="readonly" @rename="renameNote" />
+            <UiTooltip text="Outline">
+                <UiButton
+                    icon="i-lucide-table-of-contents"
+                    aria-label="Outline"
+                    :aria-pressed="showsOutline"
+                    color="neutral"
+                    :variant="showsOutline ? 'soft' : 'ghost'"
+                    size="xs"
+                    @click="toggleOutline"
+                />
+            </UiTooltip>
             <UiTooltip v-if="!readonly" text="Add property">
                 <UiButton
                     icon="i-lucide-list-plus"
@@ -994,7 +1072,15 @@ defineExpose({ paletteCommands });
                 @click="onPreviewClick"
                 v-html="html"
             />
+            <aside v-if="isLarge && outlinePinned" class="border-default w-52 shrink-0 overflow-y-auto border-s ps-3">
+                <OutlinePanel :headings="outline" @jump="jumpToHeading" />
+            </aside>
         </div>
+        <UiSlideover v-if="!isLarge" v-model:open="outlineSheetOpen" title="Outline" description="Jump to a heading in this note.">
+            <template #body>
+                <OutlinePanel :headings="outline" @jump="jumpToHeading" />
+            </template>
+        </UiSlideover>
         <ul v-if="tags.length" class="flex flex-wrap gap-1" aria-label="Tags">
             <li v-for="tag in tags" :key="tag">
                 <UiBadge color="neutral" variant="soft" size="sm" icon="i-lucide-hash">{{ tag }}</UiBadge>

@@ -86,7 +86,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O7.3 Search operators: `tag:`, `folder:`, `task:`, `"exact phrase"`
 - [ ] O7.5 Search results with matching lines in context (expandable), sort options, result count
 - [x] O7.6 Saved searches (ties to bookmarks)
-- [ ] O7.8 Outline panel: heading tree of the current note, click to jump
+- [x] O7.8 Outline panel: heading tree of the current note, click to jump
 - [x] O7.9 Navigation history: back/forward between notes
 - [x] O7.10 Keyboard shortcuts, a fixed well-chosen set (new note, search, cycle notes) (Bear 8.2) (Apple: Cmd+N new note, Cmd+Shift+N new folder, Cmd+L checklist, Cmd+Shift+T/H/J title/heading/subheading, Cmd+U underline) 🍎
 
