@@ -48,9 +48,10 @@ final class BaseTable
 
     /**
      * @param  array<string, mixed>  $definition
+     * @param  int  $limit  how many rows to send (an embed shows fewer)
      * @return Table
      */
-    public static function build(array $definition, ?CarbonImmutable $now = null): array
+    public static function build(array $definition, ?CarbonImmutable $now = null, int $limit = self::MAX_ROWS): array
     {
         $definition = BaseDefinition::normalize($definition);
         $errors = [];
@@ -101,10 +102,10 @@ final class BaseTable
         $groups = null;
 
         if ($definition['group_by'] !== '') {
-            [$rows, $groups] = self::group($rows, $definition['group_by']);
+            [$rows, $groups] = self::group($rows, $definition['group_by'], $limit);
         }
 
-        $sent = $rows->take(self::MAX_ROWS)->values();
+        $sent = $rows->take($limit)->values();
         $thumbnails = $definition['view'] === 'cards' ? app(NoteThumbnails::class)->for($sent->pluck('note')) : null;
 
         return [
@@ -287,13 +288,13 @@ final class BaseTable
 
     /**
      * Rows reordered group by group, and the groups in that order with how
-     * many rows each has and how many of those are sent (MAX_ROWS). A list
+     * many rows each has and how many of those are sent ($limit). A list
      * value groups as its items joined; text groups without case.
      *
      * @param  Collection<int, array{note: Note, resolve: Closure(string): mixed}>  $rows
      * @return array{0: Collection<int, array{note: Note, resolve: Closure(string): mixed}>, 1: list<Group>}
      */
-    private static function group(Collection $rows, string $column): array
+    private static function group(Collection $rows, string $column, int $limit): array
     {
         $buckets = [];
 
@@ -312,7 +313,7 @@ final class BaseTable
         });
 
         $groups = [];
-        $left = self::MAX_ROWS;
+        $left = $limit;
 
         foreach ($buckets as $bucket) {
             $count = min(count($bucket['rows']), $left);

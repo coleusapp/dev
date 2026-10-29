@@ -23,6 +23,22 @@ const editing = ref(false);
 const creating = ref(false);
 const saving = ref(false);
 const createForm = useForm({ name: '' });
+const copied = ref(false);
+
+/**
+ * The line that embeds this base in a note (O11.3).
+ */
+const embedLine = computed(() => (props.base ? `![[${props.base.name}.base]]` : ''));
+
+const copyEmbed = async (): Promise<void> => {
+    try {
+        await navigator.clipboard.writeText(embedLine.value);
+        copied.value = true;
+        window.setTimeout(() => (copied.value = false), 1500);
+    } catch {
+        copied.value = false;
+    }
+};
 
 const baseItems = computed<DropdownMenuItem[][]>(() => [
     props.bases.map((each) => ({
@@ -126,6 +142,17 @@ const tableErrors = computed(() =>
                                     @click="setView(view)"
                                 />
                             </div>
+                            <UiTooltip v-if="base" :text="`Copy ${embedLine} to put this base in a note`">
+                                <UiButton
+                                    :icon="copied ? 'i-lucide-check' : 'i-lucide-copy'"
+                                    color="neutral"
+                                    variant="ghost"
+                                    size="sm"
+                                    :aria-label="`Copy embed ${embedLine}`"
+                                    @click="copyEmbed"
+                                    >{{ copied ? 'Copied' : 'Embed' }}</UiButton
+                                >
+                            </UiTooltip>
                             <UiButton v-if="base" icon="i-lucide-settings-2" color="neutral" variant="soft" size="sm" @click="editing = true"
                                 >Edit</UiButton
                             >

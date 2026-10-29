@@ -47,6 +47,7 @@ describe('round trip', () => {
             '# A\n\n![Lisbon day 1.png](/notes/attachments/abc/Lisbon%20day%201.png)\n\nsee [doc.pdf](/notes/attachments/x/doc.pdf) and ![](https://x.test/a.png)',
         ],
         ['note embeds', '# A\n\n![[Packing]]\n\n![[Trip#Day one]]\n\nsee ![[X]] here'],
+        ['base embeds', '# A\n\n![[Books.base]]\n\n![[Reading list.base|cards]]'],
     ])('keeps %s', (_, markdown) => {
         expect(normalizeMarkdown(roundTrip(markdown))).toBe(normalizeMarkdown(markdown));
     });

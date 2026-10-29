@@ -34,7 +34,7 @@ class BaseRequest extends FormRequest
         };
 
         return [
-            'name' => ['required', 'string', 'max:100'],
+            'name' => ['required', 'string', 'max:100', 'not_regex:/[\[\]|#\n]/'],
             'definition' => ['sometimes', 'array'],
             'definition.query' => ['nullable', 'string', 'max:500'],
             'definition.columns' => ['array', 'max:'.BaseDefinition::MAX_COLUMNS],
@@ -62,6 +62,7 @@ class BaseRequest extends FormRequest
     {
         return [
             'name.required' => 'Give the base a name.',
+            'name.not_regex' => 'Leave out [ ] | and # so the base can be embedded as ![[Name.base]].',
             'definition.columns.max' => 'Use at most '.BaseDefinition::MAX_COLUMNS.' columns.',
             'definition.formulas.max' => 'Use at most '.BaseDefinition::MAX_FORMULAS.' formulas.',
             'definition.formulas.*.name.required' => 'Name the formula.',

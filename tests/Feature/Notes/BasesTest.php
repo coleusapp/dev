@@ -261,6 +261,7 @@ it('rejects a definition it cannot use', function (array $definition, string $fi
 
 it('requires a name', function () {
     $this->post(route('notes.bases.store'), ['name' => ''])->assertSessionHasErrors(['name' => 'Give the base a name.']);
+    $this->post(route('notes.bases.store'), ['name' => 'A|B'])->assertSessionHasErrors(['name' => 'Leave out [ ] | and # so the base can be embedded as ![[Name.base]].']);
 });
 
 it("keeps other people's bases out of reach", function () {
