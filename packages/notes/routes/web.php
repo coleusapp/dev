@@ -78,6 +78,8 @@ Route::middleware(['web', 'auth'])
         Route::delete('/bases/{base}', [BaseController::class, 'destroy'])->name('bases.destroy')->whereNumber('base');
         Route::get('/canvases', [CanvasController::class, 'index'])->name('canvases.index');
         Route::post('/canvases', [CanvasController::class, 'store'])->name('canvases.store');
+        Route::post('/canvases/import', [CanvasController::class, 'import'])->name('canvases.import');
+        Route::get('/canvases/{canvas}/export', [CanvasController::class, 'export'])->name('canvases.export')->whereNumber('canvas');
         Route::get('/canvases/{canvas}', [CanvasController::class, 'show'])->name('canvases.show')->whereNumber('canvas');
         Route::put('/canvases/{canvas}', [CanvasController::class, 'update'])->name('canvases.update')->whereNumber('canvas');
         Route::delete('/canvases/{canvas}', [CanvasController::class, 'destroy'])->name('canvases.destroy')->whereNumber('canvas');

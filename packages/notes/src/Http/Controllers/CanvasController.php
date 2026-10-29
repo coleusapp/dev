@@ -4,7 +4,9 @@ namespace Coleus\Notes\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Coleus\Notes\Canvas\CanvasCards;
+use Coleus\Notes\Canvas\CanvasFiles;
 use Coleus\Notes\Canvas\JsonCanvas;
+use Coleus\Notes\Http\Requests\CanvasImportRequest;
 use Coleus\Notes\Http\Requests\CanvasRequest;
 use Coleus\Notes\Models\Canvas;
 use Coleus\Notes\Models\Note;
@@ -13,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Canvases (O10.1): boards of cards and arrows, saved as JSON Canvas.
@@ -68,6 +71,32 @@ class CanvasController extends Controller
         ]);
 
         return response()->json(['data' => ['name' => $canvas->name, 'cards' => CanvasCards::for($data)]]);
+    }
+
+    /**
+     * Downloads the board as a .canvas file (O10.2).
+     */
+    public function export(Canvas $canvas, CanvasFiles $files): StreamedResponse
+    {
+        Gate::authorize('viewAny', Note::class);
+
+        $json = (string) json_encode($files->export($canvas), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return response()->streamDownload(function () use ($json) {
+            echo $json;
+        }, CanvasFiles::fileName($canvas->name).'.canvas', ['Content-Type' => 'application/json; charset=UTF-8']);
+    }
+
+    /**
+     * Makes a canvas from a .canvas file (O10.2).
+     */
+    public function import(CanvasImportRequest $request, CanvasFiles $files): RedirectResponse
+    {
+        Gate::authorize('create', Note::class);
+
+        $canvas = $files->import((array) $request->canvasJson(), $request->canvasName());
+
+        return to_route('notes.canvases.show', $canvas);
     }
 
     public function destroy(Canvas $canvas): RedirectResponse

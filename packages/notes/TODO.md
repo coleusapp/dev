@@ -101,7 +101,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## O10. Canvas
 - [x] O10.1 Canvas: infinite whiteboard with cards (text, notes, images, links), connections, groups, colours 🧩 ⚠️ dep likely
-- [ ] O10.2 Canvas stored as JSON Canvas format; export/import `.canvas`
+- [x] O10.2 Canvas stored as JSON Canvas format; export/import `.canvas`
 
 ## O11. Bases (database views)
 - [x] O11.1 Bases: table view over notes with columns from properties, filters, sorting, formulas 🧩

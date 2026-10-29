@@ -16,6 +16,21 @@ defineProps<{
 const creating = ref(false);
 const deleting = ref<CanvasSummary | null>(null);
 const form = useForm({ name: '' });
+const importForm = useForm<{ file: File | null }>({ file: null });
+const importInput = ref<HTMLInputElement | null>(null);
+
+/**
+ * Makes a canvas from a .canvas file, e.g. one saved by Obsidian (O10.2).
+ */
+const importFile = (event: Event): void => {
+    const input = event.target as HTMLInputElement;
+    importForm.file = input.files?.[0] ?? null;
+    input.value = '';
+
+    if (importForm.file) {
+        importForm.post(route('notes.canvases.import'), { forceFormData: true });
+    }
+};
 
 const openCreate = (): void => {
     form.reset();
@@ -55,6 +70,16 @@ const edited = (iso: string | null): string =>
                             />
                         </template>
                         <template #right>
+                            <UiButton
+                                icon="i-lucide-upload"
+                                size="sm"
+                                color="neutral"
+                                variant="ghost"
+                                :loading="importForm.processing"
+                                @click="importInput?.click()"
+                                >Import .canvas</UiButton
+                            >
+                            <input ref="importInput" type="file" accept=".canvas,.json,application/json" class="hidden" @change="importFile" />
                             <UiButton icon="i-lucide-plus" size="sm" @click="openCreate">New canvas</UiButton>
                         </template>
                     </UiDashboardNavbar>
@@ -62,6 +87,7 @@ const edited = (iso: string | null): string =>
 
                 <template #body>
                     <div class="mx-auto w-full max-w-3xl">
+                        <p v-if="importForm.errors.file" class="text-error mb-3 text-sm" role="alert">{{ importForm.errors.file }}</p>
                         <div v-if="!canvases.length" class="flex flex-col items-center gap-3 py-16 text-center">
                             <UiIcon name="i-lucide-layout-dashboard" class="text-dimmed size-10" />
                             <p class="font-medium">No canvases yet</p>

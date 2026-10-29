@@ -572,6 +572,19 @@ const hasSelection = computed(() => selected.value.size > 0 || selectedEdge.valu
                         </template>
                         <template #right>
                             <SaveStatus :status="status" :error="error" @retry="flush" />
+                            <UiTooltip text="Download as a .canvas file (opens in Obsidian)">
+                                <UiButton
+                                    icon="i-lucide-download"
+                                    size="sm"
+                                    color="neutral"
+                                    variant="ghost"
+                                    :href="route('notes.canvases.export', { canvas: canvas.id })"
+                                    external
+                                    download
+                                    @click="flush"
+                                    >Export</UiButton
+                                >
+                            </UiTooltip>
                         </template>
                     </UiDashboardNavbar>
 
