@@ -86,4 +86,18 @@ return [
         'ffmpeg' => env('NOTES_FFMPEG', 'ffmpeg'),
         'ffprobe' => env('NOTES_FFPROBE', 'ffprobe'),
     ],
+
+    /*
+     * Reminders for checklist items with a due date ("- [ ] pay rent
+     * @2026-11-01", O9.8): sent daily at `at` for items due within
+     * days_before days or overdue, once per item and date.
+     *
+     * Default: on, mail, 1 day before, 08:00
+     */
+    'reminders' => [
+        'enabled' => env('NOTES_REMINDERS', true),
+        'channels' => ['mail'],
+        'days_before' => 1,
+        'at' => '08:00',
+    ],
 ];

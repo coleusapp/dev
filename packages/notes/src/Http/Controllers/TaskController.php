@@ -23,7 +23,7 @@ class TaskController extends Controller
         Gate::authorize('viewAny', Note::class);
 
         $filters = $request->validate([
-            'state' => ['nullable', Rule::in(['open', 'done', 'all'])],
+            'state' => ['nullable', Rule::in(['open', 'done', 'all', 'due'])],
             'tag' => ['nullable', 'string', 'max:191'],
             'folder' => ['nullable', 'integer'],
         ]);

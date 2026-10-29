@@ -97,7 +97,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O9.4 New note from template
 - [ ] O9.5 Note composer: merge notes; extract selection into a new note, leaving a link or embed
 - [x] O9.6 Tasks view: all open/done checklist items across notes, filters by tag/folder/note, toggle from the list
-- [ ] O9.8 Due dates and reminders on checklist items (e.g. `- [ ] pay rent @2026-11-01`): shown in the Tasks view (O9.6), reminder notification before the due date (Box)
+- [x] O9.8 Due dates and reminders on checklist items (e.g. `- [ ] pay rent @2026-11-01`): shown in the Tasks view (O9.6), reminder notification before the due date (Box)
 
 ## O10. Canvas
 - [ ] O10.1 Canvas: infinite whiteboard with cards (text, notes, images, links), connections, groups, colours 🧩 ⚠️ dep likely

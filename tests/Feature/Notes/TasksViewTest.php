@@ -28,8 +28,8 @@ it('lists open checklist items across notes, with their lines', function () {
 
     expect(taskGroups($this))->toBe([
         ['note' => ['id' => $trip->id, 'title' => 'Trip #travel', 'archived' => false], 'items' => [
-            ['line' => 2, 'checked' => false, 'text' => 'book flights', 'depth' => 0],
-            ['line' => 4, 'checked' => false, 'text' => 'pack', 'depth' => 0],
+            ['line' => 2, 'checked' => false, 'text' => 'book flights', 'depth' => 0, 'due' => null],
+            ['line' => 4, 'checked' => false, 'text' => 'pack', 'depth' => 0, 'due' => null],
         ]],
     ]);
 });
@@ -54,4 +54,18 @@ it('leaves out locked notes and other users notes', function () {
     Note::factory()->create(['body' => "# Secret\n- [ ] hidden"])->forceFill(['lock_key_id' => 1, 'body' => ''])->save();
 
     expect(taskGroups($this))->toBe([]);
+});
+
+it('reads due dates and lists due items soonest first', function () {
+    $rent = Note::factory()->create(['body' => "# Bills\n- [ ] pay rent @2026-11-01\n- [ ] someday\n- [x] paid @2026-10-01"]);
+    $trip = Note::factory()->create(['body' => "# Trip\n- [ ] renew passport @2026-10-20 urgent\n- [ ] bad date @2026-02-30"]);
+
+    expect(taskGroups($this, ['state' => 'due']))->toBe([
+        ['note' => ['id' => $trip->id, 'title' => 'Trip', 'archived' => false], 'items' => [
+            ['line' => 2, 'checked' => false, 'text' => 'renew passport urgent', 'depth' => 0, 'due' => '2026-10-20'],
+        ]],
+        ['note' => ['id' => $rent->id, 'title' => 'Bills', 'archived' => false], 'items' => [
+            ['line' => 2, 'checked' => false, 'text' => 'pay rent', 'depth' => 0, 'due' => '2026-11-01'],
+        ]],
+    ]);
 });

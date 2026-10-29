@@ -4,6 +4,7 @@ namespace Coleus\Notes;
 
 use Coleus\Notes\Commands\PurgeTrashCommand;
 use Coleus\Notes\Commands\ReindexCommand;
+use Coleus\Notes\Commands\SendTaskRemindersCommand;
 use Coleus\Notes\Http\Middleware\HandleInertiaRequests;
 use Coleus\Notes\Models\App as NotesApp;
 use Coleus\Notes\Models\Note;
@@ -25,6 +26,7 @@ class NotesServiceProvider extends PackageServiceProvider
             ->hasCommands([
                 PurgeTrashCommand::class,
                 ReindexCommand::class,
+                SendTaskRemindersCommand::class,
             ])
             ->hasRoute('web')
             ->hasAssets()
@@ -37,6 +39,7 @@ class NotesServiceProvider extends PackageServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command(PurgeTrashCommand::class)->daily()->withoutOverlapping();
+            $schedule->command(SendTaskRemindersCommand::class)->dailyAt((string) config('notes.reminders.at', '08:00'))->withoutOverlapping();
         });
 
         if (Str::of(request()?->path())->startsWith(config('notes.route_prefix'))) {

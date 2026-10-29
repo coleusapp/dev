@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { FolderNode } from '@/components/notes/note';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import { isoDate } from '@/lib/dates';
 import { jsonHeaders } from '@/lib/http';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-type TaskItem = { line: number; checked: boolean; text: string; depth: number };
+type TaskItem = { line: number; checked: boolean; text: string; depth: number; due: string | null };
 type TaskGroup = { note: { id: number; title: string; archived: boolean }; items: TaskItem[] };
-type TaskFilters = { state: 'open' | 'done' | 'all'; tag: string | null; folder: number | null };
+type TaskFilters = { state: 'open' | 'done' | 'all' | 'due'; tag: string | null; folder: number | null };
 
 const props = defineProps<{
     groups: TaskGroup[];
@@ -27,6 +28,27 @@ const flatten = (nodes: FolderNode[], depth = 0): { id: number; label: string }[
     nodes.flatMap((node) => [{ id: node.id, label: `${'— '.repeat(depth)}${node.name}` }, ...flatten(node.children, depth + 1)]);
 
 const folderOptions = computed(() => [{ id: 0, label: 'All folders' }, ...flatten(props.folders)]);
+
+const today = isoDate(new Date());
+
+/**
+ * Due dates (O9.8, "@2026-11-01" on the item): red when overdue, highlighted today.
+ */
+const dueLabel = (due: string): string => {
+    const [year, month, day] = due.split('-').map(Number);
+    const label = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(year, month - 1, day));
+
+    return due < today ? `Overdue · ${label}` : due === today ? 'Today' : label;
+};
+
+const dueClass = (item: TaskItem): string =>
+    item.checked || !item.due
+        ? 'text-dimmed'
+        : item.due < today
+          ? 'bg-error/10 text-error'
+          : item.due === today
+            ? 'bg-warning/10 text-warning'
+            : 'bg-elevated text-muted';
 
 const count = computed(() => props.groups.reduce((sum, group) => sum + group.items.length, 0));
 
@@ -94,14 +116,14 @@ const toggle = async (group: TaskGroup, item: TaskItem): Promise<void> => {
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="flex gap-1" role="group" aria-label="Show">
                                 <UiButton
-                                    v-for="state in ['open', 'done', 'all'] as const"
+                                    v-for="state in ['open', 'due', 'done', 'all'] as const"
                                     :key="state"
                                     size="sm"
                                     color="neutral"
                                     :variant="filters.state === state ? 'soft' : 'ghost'"
                                     :aria-pressed="filters.state === state"
                                     @click="filter({ state })"
-                                    >{{ { open: 'Open', done: 'Done', all: 'All' }[state] }}</UiButton
+                                    >{{ { open: 'Open', due: 'Due', done: 'Done', all: 'All' }[state] }}</UiButton
                                 >
                             </div>
                             <select
@@ -129,7 +151,10 @@ const toggle = async (group: TaskGroup, item: TaskItem): Promise<void> => {
 
                         <p v-if="error" class="text-error text-sm" role="alert">{{ error }}</p>
                         <p v-if="!groups.length" class="text-dimmed text-sm">
-                            No {{ filters.state === 'all' ? '' : filters.state }} checklist items here.
+                            <template v-if="filters.state === 'due'">
+                                No open items with a due date. Add one with “@” and a date, e.g. “- [ ] pay rent @2026-11-01”.
+                            </template>
+                            <template v-else>No {{ filters.state === 'all' ? '' : filters.state }} checklist items here.</template>
                         </p>
 
                         <section v-for="group in groups" :key="group.note.id" :aria-label="group.note.title || 'Untitled note'">
@@ -156,6 +181,9 @@ const toggle = async (group: TaskGroup, item: TaskItem): Promise<void> => {
                                         @change="toggle(group, item)"
                                     />
                                     <span :class="{ 'text-dimmed line-through': item.checked }">{{ item.text }}</span>
+                                    <span v-if="item.due" class="shrink-0 rounded px-1.5 text-xs" :class="dueClass(item)">{{
+                                        dueLabel(item.due)
+                                    }}</span>
                                 </li>
                             </ul>
                         </section>
