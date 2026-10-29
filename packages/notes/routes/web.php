@@ -4,6 +4,7 @@ use Coleus\Notes\Http\Controllers\ArchiveController;
 use Coleus\Notes\Http\Controllers\AttachmentController;
 use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
+use Coleus\Notes\Http\Controllers\ComposerController;
 use Coleus\Notes\Http\Controllers\DailyNoteController;
 use Coleus\Notes\Http\Controllers\FolderController;
 use Coleus\Notes\Http\Controllers\IndexController;
@@ -78,6 +79,8 @@ Route::middleware(['web', 'auth'])
         Route::put('/{note}', [NoteController::class, 'update'])->name('update')->whereNumber('note');
         Route::delete('/{note}', [NoteController::class, 'destroy'])->name('destroy')->whereNumber('note');
         Route::post('/{note}/duplicate', [NoteController::class, 'duplicate'])->name('duplicate')->whereNumber('note');
+        Route::post('/{note}/merge', [ComposerController::class, 'merge'])->name('merge')->whereNumber('note');
+        Route::post('/extract', [ComposerController::class, 'extract'])->name('extract');
         Route::post('/{note}/pin', [PinController::class, 'store'])->name('pin')->whereNumber('note');
         Route::post('/{note}/read-only', [ReadOnlyController::class, 'store'])->name('read-only.store')->whereNumber('note');
         Route::post('/{note}/lock', [NoteLockController::class, 'store'])->name('lock.store')->whereNumber('note');

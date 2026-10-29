@@ -438,6 +438,35 @@ const replaceRange = (range: { from: number; to: number }, text: string): void =
 };
 
 /**
+ * The selection as Markdown (to extract it into its own note, O9.5).
+ */
+const selectionMarkdown = (): string => {
+    const current = editor.value;
+
+    if (!current || current.state.selection.empty) {
+        return '';
+    }
+
+    const { from, to } = current.state.selection;
+
+    return current.markdown?.serialize({ type: 'doc', content: current.state.doc.slice(from, to).content.toJSON() }).trim() ?? '';
+};
+
+/**
+ * Puts a [[link]] (or ![[embed]]) to another note in place of the selection.
+ */
+const replaceSelectionWithLink = (title: string, embed: boolean): void => {
+    const link = { type: 'wikiLink', attrs: { title } };
+
+    editor.value
+        ?.chain()
+        .focus()
+        .deleteSelection()
+        .insertContent(embed ? [{ type: 'paragraph', content: [{ type: 'text', text: '!' }, link] }] : [link])
+        .run();
+};
+
+/**
  * Inserts Markdown (a filled-in template) as formatted content at the cursor.
  */
 const insertMarkdown = (markdown: string): void => {
@@ -490,6 +519,8 @@ defineExpose({
     insertWikiLink,
     insertAttachment,
     insertMarkdown,
+    selectionMarkdown,
+    replaceSelectionWithLink,
     replaceRange,
     insertText,
     find,

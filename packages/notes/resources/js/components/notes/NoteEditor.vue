@@ -937,6 +937,61 @@ const insertTemplate = (template: NoteTemplate): void => {
     }
 };
 
+/**
+ * Extracting the selection into a new note (O9.5), leaving a link or an
+ * embed to it. The new note goes in this note's folder.
+ */
+const composerError = ref<string | null>(null);
+
+const extractSelection = async (embed: boolean): Promise<void> => {
+    composerError.value = null;
+
+    if (props.encryption) {
+        composerError.value = "Text can't be moved out of a locked note: the new note wouldn't be encrypted.";
+        return;
+    }
+
+    const area = textarea.value;
+    const text =
+        mode.value === 'edit'
+            ? (visual.value?.selectionMarkdown() ?? '')
+            : area
+              ? area.value.slice(area.selectionStart, area.selectionEnd).trim()
+              : '';
+
+    if (text === '') {
+        composerError.value = 'Select the text to move into a new note first.';
+        return;
+    }
+
+    const response = await fetch(route('notes.extract'), {
+        method: 'POST',
+        headers: jsonHeaders(),
+        credentials: 'same-origin',
+        body: JSON.stringify({ body: text, folder_id: props.note.folder_id }),
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.data?.title) {
+        composerError.value = payload?.errors?.body?.[0] ?? payload?.message ?? "Couldn't make the new note.";
+        return;
+    }
+
+    const link = `${embed ? '!' : ''}[[${payload.data.title}]]`;
+
+    if (mode.value === 'edit') {
+        visual.value?.replaceSelectionWithLink(payload.data.title, embed);
+    } else {
+        editSource(({ start, end }) => ({
+            from: start,
+            to: end,
+            insert: link,
+            selectionStart: start + link.length,
+            selectionEnd: start + link.length,
+        }));
+    }
+};
+
 const onPicked = (event: Event): void => {
     const input = event.target as HTMLInputElement;
     attachFiles(Array.from(input.files ?? []));
@@ -1404,6 +1459,18 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
         })),
         { id: 'highlight', label: 'Highlight', icon: 'i-lucide-highlighter', run: () => highlight(null) },
         { id: 'table', label: 'Insert table', icon: 'i-lucide-table', run: () => tableAction('insert') },
+        {
+            id: 'extract.link',
+            label: 'Extract selection to a new note (leave a link)',
+            icon: 'i-lucide-scissors',
+            run: () => void extractSelection(false),
+        },
+        {
+            id: 'extract.embed',
+            label: 'Extract selection to a new note (leave an embed)',
+            icon: 'i-lucide-scissors',
+            run: () => void extractSelection(true),
+        },
         { id: 'template', label: 'Insert template…', icon: 'i-lucide-file-text', run: () => (pickingTemplate.value = true) },
         ...(mode.value === 'edit' && visualInTable.value
             ? [
@@ -1485,6 +1552,10 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
         <input ref="fileInput" type="file" multiple class="hidden" @change="onPicked" />
         <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="onPicked" />
         <input ref="videoInput" type="file" accept="video/*" capture="environment" class="hidden" @change="onPicked" />
+        <p v-if="composerError" class="bg-elevated text-error flex items-center gap-2 rounded-md px-3 py-2 text-xs" role="alert">
+            <span class="flex-1">{{ composerError }}</span>
+            <UiButton size="xs" color="neutral" variant="ghost" icon="i-lucide-x" aria-label="Dismiss" @click="composerError = null" />
+        </p>
         <div
             v-if="uploads.uploading.value || uploads.errors.value.length"
             class="bg-elevated flex flex-col gap-1.5 rounded-md px-3 py-2 text-xs"

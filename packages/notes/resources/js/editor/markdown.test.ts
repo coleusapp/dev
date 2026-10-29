@@ -81,6 +81,19 @@ describe('round trip', () => {
         expect(editorMarkdown(editor, '')).toContain('- [ ] first [[Plan]]');
     });
 
+    it('serializes a selection as Markdown (extracting it to a new note)', () => {
+        loadMarkdown(editor, '# Trip\n\nkeep this\n\n## Budget\n\n- rent [[Bank]]');
+        let start = 0;
+        editor.state.doc.forEach((node, offset) => {
+            if (node.type.name === 'heading' && node.textContent === 'Budget') {
+                start = offset;
+            }
+        });
+        const { content } = editor.state.doc.slice(start, editor.state.doc.content.size);
+
+        expect(editor.markdown?.serialize({ type: 'doc', content: content.toJSON() }).trim()).toBe('## Budget\n\n- rent [[Bank]]');
+    });
+
     it('keeps TeX exactly as written', () => {
         const markdown = 'Area $\\pi r^2$ and $a_1 * b_2$\n\n$$\n\\int_0^1 x\\,dx\n$$';
 

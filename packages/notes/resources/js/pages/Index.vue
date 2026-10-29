@@ -32,6 +32,7 @@ import {
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
+import NotePicker from '@/components/notes/NotePicker.vue';
 import PasswordModal from '@/components/notes/PasswordModal.vue';
 import QuickSwitcher from '@/components/notes/QuickSwitcher.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
@@ -657,6 +658,12 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
             historyItem(),
             { label: 'Duplicate', icon: 'i-lucide-copy', onSelect: duplicateNote },
             {
+                label: 'Merge into another note…',
+                icon: 'i-lucide-merge',
+                disabled: Boolean(props.note?.data.locked),
+                onSelect: () => (merging.value = true),
+            },
+            {
                 label: noteBookmark.value ? 'Remove bookmark' : 'Bookmark',
                 icon: noteBookmark.value ? 'i-lucide-bookmark-x' : 'i-lucide-bookmark',
                 onSelect: toggleBookmark,
@@ -710,6 +717,18 @@ const editorProps = computed(() => ({
  * dropped afterwards so the readable text doesn't stay in memory.
  */
 const keepAliveGeneration = ref(0);
+
+/**
+ * Merging the open note into another (O9.5): its text is added to the end
+ * of the other note, it goes to the trash, and links to it follow.
+ */
+const merging = ref(false);
+
+const mergeInto = (id: number): void => {
+    if (props.note) {
+        router.post(route('notes.merge', { note: props.note.data.id }), { into: id });
+    }
+};
 const passwordPrompt = ref<{ mode: 'set' | 'enter'; keyId: number | null; hint: string | null; error: string | null; busy: boolean } | null>(null);
 
 const lockWith = async (keyId: number, key: CryptoKey): Promise<void> => {
@@ -1261,6 +1280,13 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         <QuickSwitcher v-model:open="switching" :filters="filters" />
         <CommandPalette v-model:open="showingCommands" :groups="commandGroups" />
         <ShortcutsModal v-model:open="showingShortcuts" />
+        <NotePicker
+            v-model:open="merging"
+            title="Merge into another note"
+            description="This note's text is added to the end of the note you pick; this one goes to the trash and links to it follow."
+            :exclude-id="note?.data.id"
+            @choose="mergeInto"
+        />
         <TemplatePicker v-model:open="choosingTemplate" title="New note from template" @choose="createFromTemplate" />
         <PasswordModal
             :open="passwordPrompt !== null"
