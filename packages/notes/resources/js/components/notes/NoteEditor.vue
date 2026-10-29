@@ -24,6 +24,7 @@ import { useAttachmentUpload, type PendingUpload } from '@/composables/useAttach
 import { useAutosave } from '@/composables/useAutosave';
 import { useChecklistDrag } from '@/composables/useChecklistDrag';
 import { useDateMenu, type OpenDateMenu } from '@/composables/useDateMenu';
+import { useDictation } from '@/composables/useDictation';
 import { useFindReplace } from '@/composables/useFindReplace';
 import { useLinkMenu, type OpenLinkMenu } from '@/composables/useLinkMenu';
 import { useLinkPreview } from '@/composables/useLinkPreview';
@@ -992,6 +993,11 @@ const extractSelection = async (embed: boolean): Promise<void> => {
     }
 };
 
+/**
+ * Dictation (A9.4): what's said is typed at the cursor, in either mode.
+ */
+const dictation = useDictation((text) => insertAtCursor(text));
+
 const onPicked = (event: Event): void => {
     const input = event.target as HTMLInputElement;
     attachFiles(Array.from(input.files ?? []));
@@ -1471,6 +1477,16 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
             icon: 'i-lucide-scissors',
             run: () => void extractSelection(true),
         },
+        ...(dictation.supported
+            ? [
+                  {
+                      id: 'dictate',
+                      label: dictation.listening.value ? 'Stop dictating' : 'Dictate',
+                      icon: 'i-lucide-audio-lines',
+                      run: dictation.toggle,
+                  },
+              ]
+            : []),
         { id: 'template', label: 'Insert template…', icon: 'i-lucide-file-text', run: () => (pickingTemplate.value = true) },
         ...(mode.value === 'edit' && visualInTable.value
             ? [
@@ -1548,10 +1564,21 @@ defineExpose({ paletteCommands, flush, currentBody: () => body.value });
             @insert="insertAtCursor"
             @attach="pickFiles"
             @record="record"
+            @dictate="dictation.toggle"
+            :dictation="{ supported: dictation.supported, listening: dictation.listening.value }"
         />
         <input ref="fileInput" type="file" multiple class="hidden" @change="onPicked" />
         <input ref="photoInput" type="file" accept="image/*" capture="environment" class="hidden" @change="onPicked" />
         <input ref="videoInput" type="file" accept="video/*" capture="environment" class="hidden" @change="onPicked" />
+        <p
+            v-if="dictation.listening.value || dictation.error.value"
+            class="bg-elevated flex items-center gap-2 rounded-md px-3 py-2 text-xs"
+            role="status"
+        >
+            <UiIcon name="i-lucide-audio-lines" class="size-4 shrink-0" :class="dictation.error.value ? 'text-error' : 'text-error animate-pulse'" />
+            <span class="text-muted flex-1 truncate">{{ dictation.error.value ?? (dictation.interim.value || 'Listening…') }}</span>
+            <UiButton v-if="dictation.listening.value" size="xs" color="neutral" variant="soft" @click="dictation.stop">Stop</UiButton>
+        </p>
         <p v-if="composerError" class="bg-elevated text-error flex items-center gap-2 rounded-md px-3 py-2 text-xs" role="alert">
             <span class="flex-1">{{ composerError }}</span>
             <UiButton size="xs" color="neutral" variant="ghost" icon="i-lucide-x" aria-label="Dismiss" @click="composerError = null" />

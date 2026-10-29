@@ -10,6 +10,7 @@ const props = defineProps<{
     activeStyle?: ParagraphStyle | null;
     inTable?: boolean;
     source?: boolean;
+    dictation?: { supported: boolean; listening: boolean };
 }>();
 
 const emit = defineEmits<{
@@ -21,6 +22,7 @@ const emit = defineEmits<{
     insert: [text: string];
     attach: [capture?: 'photo' | 'video'];
     record: [kind: 'camera' | 'screen' | 'audio'];
+    dictate: [];
 }>();
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -211,6 +213,18 @@ const styleItems = computed<DropdownMenuItem[]>(() =>
                 <UiButton icon="i-lucide-camera" aria-label="Camera" color="neutral" variant="ghost" size="xs" @mousedown.prevent />
             </UiTooltip>
         </UiDropdownMenu>
+        <UiTooltip v-if="dictation?.supported" :text="dictation.listening ? 'Stop dictating' : 'Dictate'">
+            <UiButton
+                :icon="dictation.listening ? 'i-lucide-mic-off' : 'i-lucide-audio-lines'"
+                :aria-label="dictation.listening ? 'Stop dictating' : 'Dictate'"
+                :aria-pressed="dictation.listening"
+                :color="dictation.listening ? 'error' : 'neutral'"
+                variant="ghost"
+                size="xs"
+                @mousedown.prevent
+                @click="emit('dictate')"
+            />
+        </UiTooltip>
         <UiTooltip text="Record a voice memo">
             <UiButton
                 icon="i-lucide-mic"
