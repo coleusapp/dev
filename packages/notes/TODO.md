@@ -104,7 +104,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] O10.2 Canvas stored as JSON Canvas format; export/import `.canvas`
 
 ## O11. Bases (database views)
-- [ ] O11.1 Bases: table view over notes with columns from properties, filters, sorting, formulas 🧩
+- [x] O11.1 Bases: table view over notes with columns from properties, filters, sorting, formulas 🧩
 - [ ] O11.2 Cards view and group-by
 - [ ] O11.3 Embed a base inside a note
 

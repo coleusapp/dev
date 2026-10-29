@@ -2,6 +2,7 @@
 
 use Coleus\Notes\Http\Controllers\ArchiveController;
 use Coleus\Notes\Http\Controllers\AttachmentController;
+use Coleus\Notes\Http\Controllers\BaseController;
 use Coleus\Notes\Http\Controllers\BookmarkController;
 use Coleus\Notes\Http\Controllers\ChecklistController;
 use Coleus\Notes\Http\Controllers\ComposerController;
@@ -69,6 +70,11 @@ Route::middleware(['web', 'auth'])
         Route::get('/switcher', SwitcherController::class)->name('switcher');
         Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
         Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+        Route::get('/bases', [BaseController::class, 'index'])->name('bases.index');
+        Route::post('/bases', [BaseController::class, 'store'])->name('bases.store');
+        Route::get('/bases/{base}', [BaseController::class, 'show'])->name('bases.show')->whereNumber('base');
+        Route::put('/bases/{base}', [BaseController::class, 'update'])->name('bases.update')->whereNumber('base');
+        Route::delete('/bases/{base}', [BaseController::class, 'destroy'])->name('bases.destroy')->whereNumber('base');
         Route::post('/daily', [DailyNoteController::class, 'store'])->name('daily.store');
         Route::get('/quick', [QuickNoteController::class, 'create'])->name('quick.create');
         Route::post('/quick', [QuickNoteController::class, 'store'])->name('quick.store');
