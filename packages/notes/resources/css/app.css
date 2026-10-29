@@ -542,3 +542,21 @@ li.is-folded::after {
 .readable-width > .note-preview {
     @apply text-base leading-7;
 }
+
+/* Canvas boards (O10.1, pages/Canvas.vue): a dotted grid; cards and groups take their JSON Canvas colour. */
+.canvas-board {
+    background-image: radial-gradient(var(--ui-border-accented) 1px, transparent 1px);
+}
+
+.canvas-card .canvas-frame {
+    border-color: var(--card-color, var(--ui-border));
+}
+
+.canvas-card[style*='--card-color'] .canvas-frame {
+    background: color-mix(in oklab, var(--card-color) 8%, var(--ui-bg));
+}
+
+.canvas-group .canvas-frame {
+    border-color: var(--card-color, var(--ui-border-accented));
+    background: color-mix(in oklab, var(--card-color, var(--ui-border-accented)) 10%, transparent);
+}

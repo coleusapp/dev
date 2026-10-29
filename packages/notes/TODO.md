@@ -100,7 +100,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O9.8 Due dates and reminders on checklist items (e.g. `- [ ] pay rent @2026-11-01`): shown in the Tasks view (O9.6), reminder notification before the due date (Box)
 
 ## O10. Canvas
-- [ ] O10.1 Canvas: infinite whiteboard with cards (text, notes, images, links), connections, groups, colours 🧩 ⚠️ dep likely
+- [x] O10.1 Canvas: infinite whiteboard with cards (text, notes, images, links), connections, groups, colours 🧩 ⚠️ dep likely
 - [ ] O10.2 Canvas stored as JSON Canvas format; export/import `.canvas`
 
 ## O11. Bases (database views)
