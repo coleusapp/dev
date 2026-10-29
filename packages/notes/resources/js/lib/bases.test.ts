@@ -6,8 +6,10 @@ import {
     nextSort,
     operatorTakesValue,
     renameFormula,
+    sections,
     sortDirection,
     type BaseDefinition,
+    type BaseRow,
 } from '@/lib/bases';
 import { describe, expect, it } from 'vitest';
 
@@ -18,6 +20,8 @@ const definition = (change: Partial<BaseDefinition> = {}): BaseDefinition => ({
     filters: [],
     where: '',
     sort: [],
+    view: 'table',
+    group_by: '',
     ...change,
 });
 
@@ -98,6 +102,7 @@ describe('renameFormula', () => {
                 columns: ['formula.Total', 'author'],
                 filters: [{ column: 'formula.total', operator: 'gt', value: '1' }],
                 sort: [{ column: 'formula.total', direction: 'asc' }],
+                group_by: 'formula.total',
             }),
             'total',
             'sum',
@@ -106,6 +111,7 @@ describe('renameFormula', () => {
         expect(renamed.columns).toEqual(['formula.sum', 'author']);
         expect(renamed.filters[0].column).toBe('formula.sum');
         expect(renamed.sort[0].column).toBe('formula.sum');
+        expect(renamed.group_by).toBe('formula.sum');
         expect(renameFormula(definition({ columns: ['author'] }), '', 'x').columns).toEqual(['author']);
     });
 });
@@ -116,5 +122,30 @@ describe('helpers', () => {
         expect(move(['a', 'b'], 0, -1)).toEqual(['a', 'b']);
         expect(operatorTakesValue('is')).toBe(true);
         expect(operatorTakesValue('empty')).toBe(false);
+    });
+});
+
+describe('sections', () => {
+    const row = (id: number): BaseRow => ({ id, title: `n${id}`, locked: false, cells: {}, errors: {} });
+
+    it('splits rows into their groups, or keeps one section', () => {
+        const rows = [row(1), row(2), row(3)];
+
+        expect(sections({ columns: [], rows, total: 9, groups: null, errors: {} })).toEqual([{ key: 'all', value: null, total: 9, rows }]);
+        expect(
+            sections({
+                columns: [],
+                rows,
+                total: 3,
+                groups: [
+                    { value: 'a', total: 2, count: 2 },
+                    { value: null, total: 4, count: 1 },
+                ],
+                errors: {},
+            }),
+        ).toEqual([
+            { key: 'group-0', value: 'a', total: 2, rows: [row(1), row(2)] },
+            { key: 'group-1', value: null, total: 4, rows: [row(3)] },
+        ]);
     });
 });

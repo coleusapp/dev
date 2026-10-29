@@ -15,11 +15,35 @@ export type BaseDefinition = {
     filters: BaseFilter[];
     where: string;
     sort: BaseSort[];
+    view: BaseViewKind;
+    group_by: string;
 };
 
+export type BaseViewKind = 'table' | 'cards';
+
 export type BaseColumn = { id: string; label: string; kind: 'note' | 'property' | 'formula' };
-export type BaseRow = { id: number; title: string; locked: boolean; cells: Record<string, unknown>; errors: Record<string, string> };
-export type BaseTable = { columns: BaseColumn[]; rows: BaseRow[]; total: number; errors: Record<string, string> };
+export type BaseRow = {
+    id: number;
+    title: string;
+    locked: boolean;
+    cells: Record<string, unknown>;
+    errors: Record<string, string>;
+    /** Cards view only (O11.2). */
+    thumbnail?: string | null;
+    snippet?: string;
+};
+
+/**
+ * A group's value, its row count, and how many of those rows were sent.
+ */
+export type BaseGroup = { value: unknown; total: number; count: number };
+
+export type BaseTable = { columns: BaseColumn[]; rows: BaseRow[]; total: number; groups: BaseGroup[] | null; errors: Record<string, string> };
+
+/**
+ * Rows as shown: one section per group, or one unnamed section.
+ */
+export type BaseSection = { key: string; value: unknown; total: number; rows: BaseRow[] };
 
 export type BaseOptions = {
     fields: Record<string, string>;
@@ -150,7 +174,7 @@ export const columnChoices = (options: BaseOptions, definition: BaseDefinition, 
 export const operatorTakesValue = (operator: string): boolean => operator !== 'empty' && operator !== 'not_empty';
 
 /**
- * Renaming a formula keeps the columns, filters and sort that use it.
+ * Renaming a formula keeps the columns, filters, sort and group that use it.
  */
 export const renameFormula = (definition: BaseDefinition, from: string, to: string): BaseDefinition => {
     const swap = (column: string): string => (from !== '' && column.toLowerCase() === `formula.${from}`.toLowerCase() ? `formula.${to}` : column);
@@ -160,6 +184,7 @@ export const renameFormula = (definition: BaseDefinition, from: string, to: stri
         columns: definition.columns.map(swap),
         filters: definition.filters.map((filter) => ({ ...filter, column: swap(filter.column) })),
         sort: definition.sort.map((sort) => ({ ...sort, column: swap(sort.column) })),
+        group_by: swap(definition.group_by),
     };
 };
 
@@ -177,4 +202,23 @@ export const move = <T>(list: T[], index: number, by: -1 | 1): T[] => {
     [next[index], next[target]] = [next[target], next[index]];
 
     return next;
+};
+
+/**
+ * Splits the rows into their groups (O11.2): the server sends rows group
+ * by group, with each group's count.
+ */
+export const sections = (table: BaseTable): BaseSection[] => {
+    if (!table.groups) {
+        return [{ key: 'all', value: null, total: table.total, rows: table.rows }];
+    }
+
+    let offset = 0;
+
+    return table.groups.map((group, index) => {
+        const rows = table.rows.slice(offset, offset + group.count);
+        offset += group.count;
+
+        return { key: `group-${index}`, value: group.value, total: group.total, rows };
+    });
 };

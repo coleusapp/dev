@@ -14,6 +14,8 @@ namespace Coleus\Notes\Bases;
  *   filters   rows must pass every one: a column, an OPERATORS key and a value
  *   where     an optional Formula a row must make true
  *   sort      up to MAX_SORT columns, each asc or desc; empty: last edited first
+ *   view      how rows show: VIEWS (O11.2)
+ *   group_by  a column whose values group the rows (O11.2); empty: no groups
  *
  * @phpstan-type Definition array{
  *     query: string,
@@ -22,6 +24,8 @@ namespace Coleus\Notes\Bases;
  *     filters: list<array{column: string, operator: string, value: string}>,
  *     where: string,
  *     sort: list<array{column: string, direction: 'asc'|'desc'}>,
+ *     view: 'table'|'cards',
+ *     group_by: string,
  * }
  */
 final class BaseDefinition
@@ -61,6 +65,11 @@ final class BaseDefinition
         'not_empty' => 'is not empty',
     ];
 
+    /**
+     * The ways a base shows its rows.
+     */
+    public const array VIEWS = ['table', 'cards'];
+
     public const string FORMULA_NAME = '/^[\p{L}_][\p{L}\p{N}_]*$/u';
 
     /**
@@ -68,7 +77,7 @@ final class BaseDefinition
      */
     public static function defaults(): array
     {
-        return ['query' => '', 'columns' => ['note.updated'], 'formulas' => [], 'filters' => [], 'where' => '', 'sort' => []];
+        return ['query' => '', 'columns' => ['note.updated'], 'formulas' => [], 'filters' => [], 'where' => '', 'sort' => [], 'view' => 'table', 'group_by' => ''];
     }
 
     /**
@@ -101,6 +110,8 @@ final class BaseDefinition
                 fn (array $sort) => ['column' => trim((string) ($sort['column'] ?? '')), 'direction' => ($sort['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc'],
                 $entries($definition['sort'] ?? []),
             ), fn (array $sort) => $sort['column'] !== '')), 0, self::MAX_SORT),
+            'view' => in_array($definition['view'] ?? null, self::VIEWS, true) ? $definition['view'] : 'table',
+            'group_by' => trim((string) ($definition['group_by'] ?? '')),
         ];
     }
 

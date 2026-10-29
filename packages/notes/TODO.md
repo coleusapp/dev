@@ -105,7 +105,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## O11. Bases (database views)
 - [x] O11.1 Bases: table view over notes with columns from properties, filters, sorting, formulas 🧩
-- [ ] O11.2 Cards view and group-by
+- [x] O11.2 Cards view and group-by
 - [ ] O11.3 Embed a base inside a note
 
 ## O12. History and safety

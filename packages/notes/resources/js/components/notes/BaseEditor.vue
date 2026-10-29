@@ -80,6 +80,7 @@ const removeFormula = (index: number): void => {
         columns: form.definition.columns.filter(keep),
         filters: form.definition.filters.filter((filter) => keep(filter.column)),
         sort: form.definition.sort.filter((sort) => keep(sort.column)),
+        group_by: keep(form.definition.group_by) ? form.definition.group_by : '',
     };
 };
 
@@ -258,6 +259,44 @@ const remove = (): void => {
                     >
                         <UiInput v-model="form.definition.where" size="sm" class="w-full font-mono" placeholder="Optional" />
                     </UiFormField>
+                </section>
+
+                <section class="flex flex-col gap-2" aria-labelledby="base-view">
+                    <h3 id="base-view" class="text-sm font-medium">View</h3>
+                    <div class="flex gap-2">
+                        <UiFormField label="Show as" class="w-32" :error="error('definition.view')">
+                            <UiSelect
+                                v-model="form.definition.view"
+                                :items="[
+                                    { label: 'Table', value: 'table' },
+                                    { label: 'Cards', value: 'cards' },
+                                ]"
+                                size="sm"
+                                class="w-full"
+                            />
+                        </UiFormField>
+                        <UiFormField label="Group by" class="flex-1" :error="error('definition.group_by')">
+                            <UiSelectMenu
+                                :model-value="form.definition.group_by || undefined"
+                                :items="anyItems"
+                                value-key="value"
+                                placeholder="No groups"
+                                size="sm"
+                                class="w-full"
+                                @update:model-value="(value: string) => (form.definition.group_by = value ?? '')"
+                            />
+                        </UiFormField>
+                        <UiButton
+                            v-if="form.definition.group_by"
+                            icon="i-lucide-x"
+                            size="xs"
+                            color="neutral"
+                            variant="ghost"
+                            class="self-end"
+                            aria-label="No groups"
+                            @click="form.definition.group_by = ''"
+                        />
+                    </div>
                 </section>
 
                 <section class="flex flex-col gap-2" aria-labelledby="base-sort">

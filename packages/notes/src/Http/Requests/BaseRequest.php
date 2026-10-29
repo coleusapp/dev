@@ -50,6 +50,8 @@ class BaseRequest extends FormRequest
             'definition.sort' => ['array', 'max:'.BaseDefinition::MAX_SORT],
             'definition.sort.*.column' => ['required', 'string', 'max:191'],
             'definition.sort.*.direction' => ['required', 'in:asc,desc'],
+            'definition.view' => ['nullable', Rule::in(BaseDefinition::VIEWS)],
+            'definition.group_by' => ['nullable', 'string', 'max:191'],
         ];
     }
 

@@ -115,6 +115,44 @@ it('sorts by several columns with empty values last', function () {
         ->and($ids([['column' => 'n', 'direction' => 'desc']]))->toBe([$c->id, $b->id, $a->id, $d->id]);
 });
 
+it('groups rows by a column, groups in order with the empty group last', function () {
+    $a = Note::factory()->create(['body' => "---\ngenre: Sci-fi\nyear: 1969\n---\nA"]);
+    $b = Note::factory()->create(['body' => "---\ngenre: fantasy\nyear: 1968\n---\nB"]);
+    $c = Note::factory()->create(['body' => "---\ngenre: sci-fi\nyear: 1974\n---\nC"]);
+    $d = Note::factory()->create(['body' => 'D']);
+    $e = Note::factory()->create(['body' => "---\ngenre: [x, y]\n---\nE"]);
+
+    $table = BaseTable::build(['group_by' => 'genre', 'sort' => [['column' => 'year', 'direction' => 'desc']]]);
+
+    expect(array_column($table['rows'], 'id'))->toBe([$b->id, $c->id, $a->id, $e->id, $d->id])
+        ->and($table['groups'])->toBe([
+            ['value' => 'fantasy', 'total' => 1, 'count' => 1],
+            ['value' => 'sci-fi', 'total' => 2, 'count' => 2],
+            ['value' => 'x, y', 'total' => 1, 'count' => 1],
+            ['value' => null, 'total' => 1, 'count' => 1],
+        ])
+        ->and(BaseTable::build([])['groups'])->toBeNull();
+});
+
+it('counts only the rows it sends in each group', function () {
+    Note::factory()->count(BaseTable::MAX_ROWS)->create(['body' => "---\nk: a\n---\nA"]);
+    Note::factory()->count(3)->create(['body' => "---\nk: b\n---\nB"]);
+
+    expect(BaseTable::build(['group_by' => 'k'])['groups'])->toBe([['value' => 'a', 'total' => BaseTable::MAX_ROWS, 'count' => BaseTable::MAX_ROWS]]);
+});
+
+it('gives cards a picture or a snippet', function () {
+    $picture = Note::factory()->create(['body' => "# Trip\n![](/notes/attachments/0b6c6a54-8d4e-4c55-9d64-1f0b3b8c4c11/view.jpg)\nSea"]);
+    $text = Note::factory()->create(['body' => "# Plain\nJust **words** here"]);
+
+    $rows = collect(BaseTable::build(['view' => 'cards'])['rows'])->keyBy('id');
+
+    expect($rows[$picture->id]['thumbnail'])->toContain('/notes/attachments/0b6c6a54-8d4e-4c55-9d64-1f0b3b8c4c11/')->toEndWith('?w=320')
+        ->and($rows[$text->id]['thumbnail'])->toBeNull()
+        ->and($rows[$text->id]['snippet'])->toBe('Just words here')
+        ->and(BaseTable::build([])['rows'][0])->not->toHaveKey('thumbnail');
+});
+
 it('reports formula errors in their cells, including loops', function () {
     Note::factory()->create(['body' => "---\nword: hello\n---\nA"]);
 
@@ -154,7 +192,8 @@ it('opens the first base, or an empty page when there is none', function () {
         ->where('bases', [])
         ->where('base', null)
         ->where('table', null)
-        ->where('options.fields.note.updated', 'Edited'));
+        ->has('options.fields', 5)
+        ->where('options.operators.gte', '≥'));
 
     $base = Base::query()->create(['name' => 'Books', 'definition' => []]);
     Base::query()->create(['name' => 'Zoo', 'definition' => []]);
@@ -181,7 +220,7 @@ it('creates, updates and deletes a base', function () {
     $base = Base::query()->sole();
 
     expect($base->name)->toBe('Reading')
-        ->and($base->definition)->toBe(['query' => '', 'columns' => ['note.updated'], 'formulas' => [], 'filters' => [], 'where' => '', 'sort' => []]);
+        ->and($base->definition)->toBe(['query' => '', 'columns' => ['note.updated'], 'formulas' => [], 'filters' => [], 'where' => '', 'sort' => [], 'view' => 'table', 'group_by' => '']);
 
     $this->put(route('notes.bases.update', $base), ['name' => 'Books', 'definition' => [
         'query' => 'tag:book',
@@ -189,6 +228,8 @@ it('creates, updates and deletes a base', function () {
         'formulas' => [['name' => 'age', 'expression' => 'days_between(published, today())']],
         'filters' => [['column' => 'author', 'operator' => 'not_empty', 'value' => null]],
         'sort' => [['column' => 'author', 'direction' => 'desc']],
+        'view' => 'cards',
+        'group_by' => 'genre',
     ]])->assertSessionHasNoErrors()->assertRedirect();
 
     expect($base->fresh()->definition)->toBe([
@@ -198,6 +239,8 @@ it('creates, updates and deletes a base', function () {
         'filters' => [['column' => 'author', 'operator' => 'not_empty', 'value' => '']],
         'where' => '',
         'sort' => [['column' => 'author', 'direction' => 'desc']],
+        'view' => 'cards',
+        'group_by' => 'genre',
     ]);
 
     $this->delete(route('notes.bases.destroy', $base))->assertRedirect(route('notes.bases.index'));
@@ -212,6 +255,7 @@ it('rejects a definition it cannot use', function (array $definition, string $fi
     'duplicate formula names' => [['formulas' => [['name' => 'x', 'expression' => '1'], ['name' => 'X', 'expression' => '2']]], 'definition.formulas.0.name', 'Two formulas have this name.'],
     'unknown operator' => [['filters' => [['column' => 'a', 'operator' => 'like', 'value' => 'x']]], 'definition.filters.0.operator', 'The selected definition.filters.0.operator is invalid.'],
     'unreadable where' => [['where' => 'a ==='], 'definition.where', 'Unexpected "=".'],
+    'unknown view' => [['view' => 'kanban'], 'definition.view', 'The selected definition.view is invalid.'],
     'too many sorts' => [['sort' => array_fill(0, 4, ['column' => 'a', 'direction' => 'asc'])], 'definition.sort', 'Sort by at most 3 columns.'],
 ]);
 

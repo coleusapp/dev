@@ -8,6 +8,8 @@ use Coleus\Notes\Models\Note;
 use Coleus\Notes\Models\NoteProperty;
 use Coleus\Notes\Models\Tag;
 use Coleus\Notes\Search\SearchQuery;
+use Coleus\Notes\Services\NoteThumbnails;
+use Coleus\Notes\Support\NoteText;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,11 +21,16 @@ use Illuminate\Support\Collection;
  * per row, loops reported) and otherwise properties by name in any case.
  * A formula that fails leaves its cell empty with the error beside it.
  *
+ * Grouped (O11.2), rows come group by group, groups in ascending order of
+ * their value with the empty group last; each group's rows keep the sort.
+ * The cards view adds each note's picture or, failing that, its snippet.
+ *
  * @phpstan-import-type Definition from BaseDefinition
  *
  * @phpstan-type Column array{id: string, label: string, kind: string}
- * @phpstan-type Row array{id: int, title: string, locked: bool, cells: array<string, mixed>, errors: array<string, string>}
- * @phpstan-type Table array{columns: list<Column>, rows: list<Row>, total: int, errors: array<string, string>}
+ * @phpstan-type Row array{id: int, title: string, locked: bool, cells: array<string, mixed>, errors: array<string, string>, thumbnail?: string|null, snippet?: string}
+ * @phpstan-type Group array{value: mixed, total: int, count: int}
+ * @phpstan-type Table array{columns: list<Column>, rows: list<Row>, total: int, groups: list<Group>|null, errors: array<string, string>}
  */
 final class BaseTable
 {
@@ -91,6 +98,14 @@ final class BaseTable
             });
 
         $rows = self::sort($rows, $definition['sort']);
+        $groups = null;
+
+        if ($definition['group_by'] !== '') {
+            [$rows, $groups] = self::group($rows, $definition['group_by']);
+        }
+
+        $sent = $rows->take(self::MAX_ROWS)->values();
+        $thumbnails = $definition['view'] === 'cards' ? app(NoteThumbnails::class)->for($sent->pluck('note')) : null;
 
         return [
             'columns' => array_map(fn (string $column) => [
@@ -98,8 +113,15 @@ final class BaseTable
                 'label' => BaseDefinition::label($column),
                 'kind' => BaseDefinition::kind($column),
             ], $definition['columns']),
-            'rows' => $rows->take(self::MAX_ROWS)->map(fn (array $row) => $table->row($row['note'], $row['resolve'], $definition['columns']))->values()->all(),
+            'rows' => $sent->map(fn (array $row) => [
+                ...$table->row($row['note'], $row['resolve'], $definition['columns']),
+                ...($thumbnails === null ? [] : [
+                    'thumbnail' => $thumbnails[$row['note']->id] ?? null,
+                    'snippet' => $row['note']->isLocked() ? '' : NoteText::snippet($row['note']->body),
+                ]),
+            ])->all(),
             'total' => $rows->count(),
+            'groups' => $groups,
             'errors' => $errors,
         ];
     }
@@ -261,6 +283,47 @@ final class BaseTable
         });
 
         return collect($keyed)->map(fn (array $row) => ['note' => $row['note'], 'resolve' => $row['resolve']]);
+    }
+
+    /**
+     * Rows reordered group by group, and the groups in that order with how
+     * many rows each has and how many of those are sent (MAX_ROWS). A list
+     * value groups as its items joined; text groups without case.
+     *
+     * @param  Collection<int, array{note: Note, resolve: Closure(string): mixed}>  $rows
+     * @return array{0: Collection<int, array{note: Note, resolve: Closure(string): mixed}>, 1: list<Group>}
+     */
+    private static function group(Collection $rows, string $column): array
+    {
+        $buckets = [];
+
+        foreach ($rows as $row) {
+            $value = self::value($row['resolve'], $column);
+            $value = is_array($value) ? ($value === [] ? null : Formula::text($value)) : ($value === '' ? null : $value);
+            $key = $value === null ? "\0" : mb_strtolower(Formula::text($value));
+            $buckets[$key] ??= ['value' => $value, 'rows' => []];
+            $buckets[$key]['rows'][] = $row;
+        }
+
+        uasort($buckets, fn (array $a, array $b) => match (true) {
+            $a['value'] === null => 1,
+            $b['value'] === null => -1,
+            default => FormulaEvaluator::compare($a['value'], $b['value']),
+        });
+
+        $groups = [];
+        $left = self::MAX_ROWS;
+
+        foreach ($buckets as $bucket) {
+            $count = min(count($bucket['rows']), $left);
+            $left -= $count;
+
+            if ($count > 0) {
+                $groups[] = ['value' => $bucket['value'], 'total' => count($bucket['rows']), 'count' => $count];
+            }
+        }
+
+        return [collect($buckets)->flatMap(fn (array $bucket) => $bucket['rows'])->values(), $groups];
     }
 
     /**
