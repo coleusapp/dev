@@ -47,6 +47,7 @@ import { useNoteHistory } from '@/composables/useNoteHistory';
 import { cachedKey, currentKeyParams, keyParams, setPassword, unlockWithPassword } from '@/composables/useNoteKeys';
 import { useSearchScope } from '@/composables/useSearchScope';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import { COPY_FORMATS, type CopyFormat } from '@/lib/copyAs';
 import { dailyBody, dailyTemplate } from '@/lib/daily';
 import { isoDate } from '@/lib/dates';
 import { jsonHeaders } from '@/lib/http';
@@ -691,9 +692,26 @@ const noteMenuItems = computed<DropdownMenuItem[][]>(() => {
                 },
             },
         ],
+        COPY_FORMATS.map(({ format, label, icon }) => ({
+            label,
+            icon,
+            disabled: Boolean(props.note?.data.locked),
+            onSelect: () => void copyNote(format),
+        })),
         [{ label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', onSelect: deleteNote }],
     ];
 });
+
+const toast = useToast();
+
+/**
+ * Copy as (A8.6). Locked notes aren't offered it; their text stays in
+ * the locked editor.
+ */
+const copyNote = async (format: CopyFormat): Promise<void> => {
+    const copied = (await editor.value?.copyAs(format)) ?? false;
+    toast.add(copied ? { title: 'Copied', icon: 'i-lucide-clipboard-check' } : { title: "Couldn't copy to the clipboard", color: 'error' });
+};
 
 const editor = useTemplateRef<InstanceType<typeof NoteEditor>>('editor');
 const lockedEditor = useTemplateRef<InstanceType<typeof LockedNote>>('lockedEditor');

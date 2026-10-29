@@ -171,7 +171,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] A7.3 Locked notes are left out of search content, snippets, backlinks and exports until unlocked
 
 ## A8. Copy as (Apple Notes)
-- [ ] A8.6 Copy a note as Markdown / plain text / HTML
+- [x] A8.6 Copy a note as Markdown / plain text / HTML
 
 ## A9. Capture from anywhere (Apple Notes)
 - [x] A9.1 Quick Note: global shortcut / floating button anywhere in Coleus opens a small note composer saved to a "Quick Notes" folder

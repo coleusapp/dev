@@ -42,6 +42,7 @@ import type { TagMenuState } from '@/editor/TagMenu';
 import { tagQuery } from '@/editor/tagQuery';
 import { autoPair, deletePair } from '@/lib/autoPair';
 import { textareaCaretPosition } from '@/lib/caret';
+import { clipboardContent, writeClipboard, type CopyFormat } from '@/lib/copyAs';
 import { dateQuery } from '@/lib/dates';
 import { renderDiagrams } from '@/lib/diagrams';
 import { jsonHeaders } from '@/lib/http';
@@ -1520,7 +1521,23 @@ const paletteCommands = computed<PaletteCommand[]>(() => {
     ];
 });
 
-defineExpose({ paletteCommands, flush, currentBody: () => body.value });
+/**
+ * Copy as Markdown, plain text or HTML (A8.6), once the latest text is
+ * saved, so the HTML matches it. False when the browser refused.
+ */
+const copyAs = async (format: CopyFormat): Promise<boolean> => {
+    await flush();
+
+    try {
+        await writeClipboard(clipboardContent(format, body.value, html.value));
+
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+defineExpose({ paletteCommands, flush, copyAs, currentBody: () => body.value });
 </script>
 
 <template>
