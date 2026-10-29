@@ -176,7 +176,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 ## A9. Capture from anywhere (Apple Notes)
 - [x] A9.1 Quick Note: global shortcut / floating button anywhere in Coleus opens a small note composer saved to a "Quick Notes" folder
 - [x] A9.2 Quick Note with context: when started from another Coleus page, store and show a link back to that page
-- [ ] A9.3 Home dashboard widget: pinned/recent notes and a "new note" button (coleus/widgets package)
+- [ ] A9.3 Home dashboard widget: pinned/recent notes and a "new note" button (coleus/widgets package) — blocked: no dashboard renders widgets yet (coleus/widgets only has an empty ChartWidget base); Notes side done: Coleus\Notes\Widgets\NotesWidget::getData()
 - [x] A9.4 Voice dictation into the editor (browser speech recognition, where supported)
 
 ## A10. Search (Apple Notes)
@@ -201,8 +201,8 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 
 ## B6. Embeds and integrations (Box Notes)
 - [x] B6.1 Smart embeds via an oEmbed allow-list: YouTube, Vimeo, Loom, Figma, Miro, Google Maps, rendered in sandboxed iframes 🧩
-- [ ] B6.2 Embed other Coleus items: calendar events, files, health entries, as live cards
-- [ ] B6.3 Meeting notes: create a note from a Calendar event (title, date, attendees pre-filled; linked both ways)
+- [ ] B6.2 Embed other Coleus items: calendar events, files, health entries, as live cards — blocked: Calendar has no events backend and there is no files package; health entries alone don't make the feature
+- [ ] B6.3 Meeting notes: create a note from a Calendar event (title, date, attendees pre-filled; linked both ways) — blocked: Calendar has no events backend
 
 ## B7. Recents (Box Notes)
 - [x] B7.4 Recents: notes recently opened by me (view tracking), separate from recently edited
