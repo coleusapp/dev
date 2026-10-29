@@ -34,6 +34,7 @@ import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import NotePicker from '@/components/notes/NotePicker.vue';
 import PasswordModal from '@/components/notes/PasswordModal.vue';
+import QuickNoteModal from '@/components/notes/QuickNoteModal.vue';
 import QuickSwitcher from '@/components/notes/QuickSwitcher.vue';
 import SaveSearchModal from '@/components/notes/SaveSearchModal.vue';
 import SearchTips from '@/components/notes/SearchTips.vue';
@@ -374,6 +375,7 @@ const pageShortcuts: [ShortcutId, () => void][] = [
     ['next-note', () => stepNote(1)],
     ['previous-note', () => stepNote(-1)],
     ['today', () => void openDailyNote()],
+    ['quick-note', () => (quickNoteOpen.value = true)],
     ['back', noteHistory.back],
     ['forward', noteHistory.forward],
     ['shortcuts', () => (showingShortcuts.value = true)],
@@ -719,6 +721,19 @@ const editorProps = computed(() => ({
 const keepAliveGeneration = ref(0);
 
 /**
+ * Quick Note (A9.1 / A9.2): the floating button, Cmd/Ctrl+Alt+Q, or a link
+ * from anywhere in Coleus (/notes/quick?from=…&title=…, which arrives here
+ * as ?quick=1&from=…&from_title=…).
+ */
+const quickNoteFrom = (() => {
+    const params = new URL(page.url, window.location.origin).searchParams;
+    const path = params.get('from');
+
+    return { open: params.get('quick') === '1', from: path ? { path, title: params.get('from_title') } : null };
+})();
+const quickNoteOpen = ref(quickNoteFrom.open);
+
+/**
  * Merging the open note into another (O9.5): its text is added to the end
  * of the other note, it goes to the trash, and links to it follow.
  */
@@ -809,6 +824,13 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         label: 'Create',
         commands: [
             { id: 'note.new', label: 'New note', icon: 'i-lucide-file-plus', kbds: shortcutKeys('new-note'), run: createNote },
+            {
+                id: 'note.quick',
+                label: 'Quick note',
+                icon: 'i-lucide-zap',
+                kbds: shortcutKeys('quick-note'),
+                run: () => (quickNoteOpen.value = true),
+            },
             {
                 id: 'note.today',
                 label: "Open today's note",
@@ -1280,6 +1302,16 @@ const commandGroups = computed<PaletteGroup[]>(() => [
         <QuickSwitcher v-model:open="switching" :filters="filters" />
         <CommandPalette v-model:open="showingCommands" :groups="commandGroups" />
         <ShortcutsModal v-model:open="showingShortcuts" />
+        <QuickNoteModal v-model:open="quickNoteOpen" :from="quickNoteFrom.from" />
+        <UiTooltip text="Quick note" :kbds="shortcutKeys('quick-note')">
+            <UiButton
+                icon="i-lucide-zap"
+                size="lg"
+                class="fixed end-4 bottom-4 z-40 rounded-full shadow-lg"
+                aria-label="Quick note"
+                @click="quickNoteOpen = true"
+            />
+        </UiTooltip>
         <NotePicker
             v-model:open="merging"
             title="Merge into another note"

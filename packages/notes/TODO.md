@@ -174,8 +174,8 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [ ] A8.6 Copy a note as Markdown / plain text / HTML
 
 ## A9. Capture from anywhere (Apple Notes)
-- [ ] A9.1 Quick Note: global shortcut / floating button anywhere in Coleus opens a small note composer saved to a "Quick Notes" folder
-- [ ] A9.2 Quick Note with context: when started from another Coleus page, store and show a link back to that page
+- [x] A9.1 Quick Note: global shortcut / floating button anywhere in Coleus opens a small note composer saved to a "Quick Notes" folder
+- [x] A9.2 Quick Note with context: when started from another Coleus page, store and show a link back to that page
 - [ ] A9.3 Home dashboard widget: pinned/recent notes and a "new note" button (coleus/widgets package)
 - [x] A9.4 Voice dictation into the editor (browser speech recognition, where supported)
 

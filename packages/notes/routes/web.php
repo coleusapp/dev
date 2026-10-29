@@ -16,6 +16,7 @@ use Coleus\Notes\Http\Controllers\NoteController;
 use Coleus\Notes\Http\Controllers\NoteLockController;
 use Coleus\Notes\Http\Controllers\PinController;
 use Coleus\Notes\Http\Controllers\PropertyController;
+use Coleus\Notes\Http\Controllers\QuickNoteController;
 use Coleus\Notes\Http\Controllers\ReadOnlyController;
 use Coleus\Notes\Http\Controllers\RelinkController;
 use Coleus\Notes\Http\Controllers\SettingsController;
@@ -69,6 +70,8 @@ Route::middleware(['web', 'auth'])
         Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
         Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
         Route::post('/daily', [DailyNoteController::class, 'store'])->name('daily.store');
+        Route::get('/quick', [QuickNoteController::class, 'create'])->name('quick.create');
+        Route::post('/quick', [QuickNoteController::class, 'store'])->name('quick.store');
         Route::get('/{note}/headings', [WikiLinkController::class, 'headings'])->name('headings')->whereNumber('note');
         Route::get('/{note}/relink', [RelinkController::class, 'show'])->name('relink.show')->whereNumber('note');
         Route::post('/{note}/relink', [RelinkController::class, 'store'])->name('relink.store')->whereNumber('note');
