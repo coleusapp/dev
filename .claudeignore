@@ -1,0 +1,57 @@
+
+# --- coe app-dev plugin defaults (auto-added) ---
+# Environment files (DB credentials, API keys, secrets) - wherever found
+.env
+.env.*
+**/.env
+**/.env.*
+../.env
+../.env.*
+../../.env
+../../.env.*
+../../../.env
+../../../.env.*
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Host App Engine root - this package lives at vendor/coe-apps/<name>/,
+# so ../../../ reaches the app root (storage has uploaded files/logs/cache)
+../../../storage/
+
+# Private keys / certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+.ssh/
+**/.ssh/
+
+# Cloud / service credentials
+.aws/
+**/.aws/
+credentials.json
+**/credentials.json
+secrets.json
+**/secrets.json
+secrets.yml
+**/secrets.yml
+secrets.yaml
+**/secrets.yaml
+
+# Composer / npm auth tokens
+auth.json
+**/auth.json
+.npmrc
+**/.npmrc
+
+# Logs - may contain PII, stack traces, or request data
+*.log
+**/*.log
+# --- end coe app-dev plugin defaults ---
