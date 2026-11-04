@@ -527,7 +527,6 @@ const tagFilterItems = computed<DropdownMenuItem[]>(() => [
     { label: 'Attachments', icon: 'i-lucide-paperclip', to: route('notes.attachments.index') },
     { label: 'Tasks', icon: 'i-lucide-list-checks', to: route('notes.tasks.index') },
     { label: 'Bases', icon: 'i-lucide-table-2', to: route('notes.bases.index') },
-    { label: 'Canvases', icon: 'i-lucide-layout-dashboard', to: route('notes.canvases.index') },
     { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit') },
     ...props.smartFolders.map((smart) => ({
         label: `${smart.name} (${smart.count})`,
@@ -920,7 +919,6 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                 : { id: 'list.layout', label: 'Show as gallery', icon: 'i-lucide-layout-grid', run: () => setLayout('gallery') },
             { id: 'go.tasks', label: 'Tasks', icon: 'i-lucide-list-checks', run: () => router.visit(route('notes.tasks.index')) },
             { id: 'go.bases', label: 'Bases', icon: 'i-lucide-table-2', run: () => router.visit(route('notes.bases.index')) },
-            { id: 'go.canvases', label: 'Canvases', icon: 'i-lucide-layout-dashboard', run: () => router.visit(route('notes.canvases.index')) },
             { id: 'go.attachments', label: 'Attachments', icon: 'i-lucide-paperclip', run: () => router.visit(route('notes.attachments.index')) },
             { id: 'go.settings', label: 'Settings', icon: 'i-lucide-settings', run: () => router.visit(route('notes.settings.edit')) },
             {
@@ -1108,10 +1106,6 @@ const commandGroups = computed<PaletteGroup[]>(() => [
                         <Link :href="route('notes.bases.index')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
                             <UiIcon name="i-lucide-table-2" class="text-dimmed size-4" />
                             Bases
-                        </Link>
-                        <Link :href="route('notes.canvases.index')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
-                            <UiIcon name="i-lucide-layout-dashboard" class="text-dimmed size-4" />
-                            Canvases
                         </Link>
                         <Link :href="route('notes.settings.edit')" class="hover:bg-elevated flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
                             <UiIcon name="i-lucide-settings" class="text-dimmed size-4" />
