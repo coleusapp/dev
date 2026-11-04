@@ -3,7 +3,6 @@
 namespace Coleus\Notes\Markdown;
 
 use Coleus\Notes\Markdown\Attachments\AttachmentEmbedExtension;
-use Coleus\Notes\Markdown\Bases\BaseEmbedExtension;
 use Coleus\Notes\Markdown\Callouts\CalloutExtension;
 use Coleus\Notes\Markdown\Dates\DateChipExtension;
 use Coleus\Notes\Markdown\Math\MathExtension;
@@ -114,7 +113,6 @@ class NoteMarkdown
         $converter->getEnvironment()->addExtension(new DateChipExtension);
         $converter->getEnvironment()->addExtension(new MathExtension);
         $converter->getEnvironment()->addExtension(new AttachmentEmbedExtension);
-        $converter->getEnvironment()->addExtension(new BaseEmbedExtension);
         $converter->getEnvironment()->addExtension(new LinkPreviewMarker);
         $converter->getEnvironment()->addExtension(new SmartEmbeds);
         $converter->getEnvironment()->addRenderer(Image::class, new AttachmentImageRenderer, 10);

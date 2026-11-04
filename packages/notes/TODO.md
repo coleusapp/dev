@@ -99,11 +99,6 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - [x] O9.6 Tasks view: all open/done checklist items across notes, filters by tag/folder/note, toggle from the list
 - [x] O9.8 Due dates and reminders on checklist items (e.g. `- [ ] pay rent @2026-11-01`): shown in the Tasks view (O9.6), reminder notification before the due date (Box)
 
-## O11. Bases (database views)
-- [x] O11.1 Bases: table view over notes with columns from properties, filters, sorting, formulas 🧩
-- [x] O11.2 Cards view and group-by
-- [x] O11.3 Embed a base inside a note
-
 ## O12. History and safety
 - [x] O12.1 Version history: snapshots on save (throttled), view a diff, restore (Bear 8.1) (Box: named versions, compare any two) 📦
 - [x] O12.5 Lock / encrypt individual notes (password; client-side encryption) 🧩 (Apple: encrypted at rest, list shows title only, auto-relock; details in A7) 🍎
@@ -234,6 +229,7 @@ duplicate note, sort options, version history, global shortcuts. They're folded 
 - CodeMirror editor: live preview, syntax highlighting, multiple cursors, Vim mode (was O4.1, O4.2, O4.9, O4.10, B5.5)
 - Graph views (was O2.11, O2.12)
 - Canvas boards and .canvas files (was O10.1, O10.2)
+- Bases (database views over notes, formulas, base embeds) (was O11.1, O11.1a, O11.2, O11.3)
 - Anything for other people: publishing, comments, presence, assigned tasks, notifications and activity feeds, governance
   (audit log, retention, legal hold, labels, watermarks, admin settings), emailing a copy, automations (was O13.1, B1, B2,
   B4.1/.2/.4, B6.4, B6.5, B7.1–.3, B7.5, B8.1–.6, B9.5, A8.6 email part)
