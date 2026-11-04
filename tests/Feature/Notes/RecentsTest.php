@@ -20,51 +20,30 @@ $recentIds = function (): array {
     return $ids;
 };
 
-it('records when a note is opened without touching updated_at', function () {
-    $note = Note::factory()->create(['updated_at' => now()->subWeek()]);
-    $updatedAt = $note->refresh()->updated_at;
+it('lists notes by when they were last edited, pinned or not, without archived ones', function () use ($recentIds) {
+    $older = Note::factory()->create(['updated_at' => now()->subDays(2)]);
+    $newer = Note::factory()->create(['updated_at' => now()->subDay()]);
+    $pinned = Note::factory()->pinned()->create(['updated_at' => now()->subDays(3)]);
+    Note::factory()->archived()->create();
 
-    $this->get(route('notes.show', ['note' => $note]))->assertOk();
-
-    expect($note->refresh()->opened_at)->not->toBeNull()
-        ->and($note->updated_at->equalTo($updatedAt))->toBeTrue()
-        ->and($note->versions()->count())->toBe(1);
-});
-
-it('lists opened notes, most recently opened first, including archived ones', function () use ($recentIds) {
-    [$a, $b] = Note::factory()->count(2)->create();
-    $archived = Note::factory()->create(['archived_at' => now()]);
-    Note::factory()->create();
-
-    $this->get(route('notes.show', ['note' => $a]));
-    $this->travel(1)->minutes();
-    $this->get(route('notes.show', ['note' => $archived]));
-    $this->travel(1)->minutes();
-    $this->get(route('notes.show', ['note' => $b]));
-    $this->travel(1)->minutes();
-    $this->get(route('notes.show', ['note' => $a]));
-
-    expect($recentIds->call($this))->toBe([$a->id, $b->id, $archived->id]);
+    expect($recentIds->call($this))->toBe([$newer->id, $older->id, $pinned->id]);
 });
 
 it('ignores the sort setting and keeps the list short', function () use ($recentIds) {
-    $notes = Note::factory()->count(NoteView::RECENT_LIMIT + 2)->create();
-    foreach ($notes as $index => $note) {
-        $note->forceFill(['opened_at' => now()->addMinutes($index)])->saveQuietly();
-    }
-    $this->put(route('notes.sort.update'), ['sort' => 'title', 'direction' => 'asc']);
+    $this->put(route('notes.sort.update'), ['sort' => 'created', 'direction' => 'asc']);
+    Note::factory()->count(NoteView::RECENT_LIMIT + 2)->create();
+    $newest = Note::factory()->create(['updated_at' => now()->addMinute()]);
 
     $ids = $recentIds->call($this);
 
-    expect($ids)->toHaveCount(NoteView::RECENT_LIMIT)
-        ->and($ids[0])->toBe($notes->last()->id);
+    expect($ids)->toHaveCount(NoteView::RECENT_LIMIT)->and($ids[0])->toBe($newest->id);
 });
 
-it('does not record opening a trashed note and leaves it out', function () use ($recentIds) {
-    $note = Note::factory()->trashed()->create();
+it('does not touch updated_at when a note is opened', function () {
+    $note = Note::factory()->create(['updated_at' => now()->subWeek()]);
+    $updatedAt = $note->refresh()->updated_at;
 
-    $this->get(route('notes.show', ['note' => $note, 'view' => 'trash']));
+    $this->get(route('notes.show', $note))->assertOk();
 
-    expect($note->refresh()->opened_at)->toBeNull()
-        ->and($recentIds->call($this))->toBe([]);
+    expect($note->refresh()->updated_at->equalTo($updatedAt))->toBeTrue();
 });

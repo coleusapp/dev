@@ -10,27 +10,21 @@ use Illuminate\Support\Facades\Gate;
 
 class ArchiveController extends Controller
 {
-    /**
-     * Archiving takes the note out of the main list, so the main list is shown next.
-     */
     public function store(Note $note): RedirectResponse
     {
         Gate::authorize('update', $note);
 
-        Notes::note()->archive($note);
+        Notes::note()->mark($note, 'archived_at', true);
 
-        return to_route('notes.index');
+        return back();
     }
 
-    /**
-     * Unarchiving brings the note back into the main list, opened.
-     */
     public function destroy(Note $note): RedirectResponse
     {
         Gate::authorize('update', $note);
 
-        Notes::note()->unarchive($note);
+        Notes::note()->mark($note, 'archived_at', false);
 
-        return to_route('notes.show', ['note' => $note]);
+        return back();
     }
 }

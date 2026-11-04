@@ -31,10 +31,10 @@ $ids = fn (string $terms): array => Note::query()->search($terms)->orderBy('id')
 it('uses the FULLTEXT index for regular words', function () {
     $sql = Note::query()->search('lisbon')->toSql();
 
-    expect($sql)->toContain('match (`title`, `body`) against (? in boolean mode)');
+    expect($sql)->toContain('match (`body`) against (? in boolean mode)');
 });
 
-it('matches words in the title or the body', function () use ($ids) {
+it('matches words in the first line or the rest of the body', function () use ($ids) {
     $title = Note::factory()->create(['body' => "# Trip to Lisbon\nflights"]);
     $body = Note::factory()->create(['body' => "# Packing\nsunscreen for lisbon"]);
     Note::factory()->create(['body' => '# Groceries']);
@@ -122,43 +122,15 @@ it('splits search words and strips operators', function () {
         ->and(NoteSearch::words(implode(' ', range('a', 'z'))))->toHaveCount(NoteSearch::MAX_WORDS);
 });
 
-it('combines search with the tag filter', function () {
-    $both = Note::factory()->create(['body' => "# Lisbon flights\n#travel"]);
-    Note::factory()->create(['body' => "# Lisbon office\n#work"]);
-    Note::factory()->create(['body' => "# Porto\n#travel"]);
-
-    $this->get(route('notes.index', ['tag' => 'travel', 'q' => 'lisbon']))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('filters', ['tag' => 'travel', 'q' => 'lisbon', 'view' => 'notes', 'folder' => null, 'smart' => null, 'prop' => null, 'value' => null])
-            ->has('notes.data', 1)
-            ->where('notes.data.0.id', $both->id));
-});
-
-it('includes nested tags when combining search and tag', function () {
-    $nested = Note::factory()->create(['body' => "# Lisbon\n#travel/2026"]);
-
-    $this->get(route('notes.index', ['tag' => 'travel', 'q' => 'lisbon']))
-        ->assertInertia(fn (Assert $page) => $page->has('notes.data', 1)->where('notes.data.0.id', $nested->id));
-});
-
-it('highlights matches in titles and snippets', function () {
-    Note::factory()->create(['body' => "# Trip to Lisbon\n".str_repeat('filler ', 30).'book the lisbon hotel']);
+it('carries the search in the filters', function () {
+    $both = Note::factory()->create(['body' => '# Lisbon flights']);
+    Note::factory()->create(['body' => '# Porto']);
 
     $this->get(route('notes.index', ['q' => 'lisbon']))
         ->assertInertia(fn (Assert $page) => $page
-            ->where('notes.data.0.highlights.title', [
-                ['text' => 'Trip to ', 'match' => false],
-                ['text' => 'Lisbon', 'match' => true],
-            ])
-            ->where('notes.data.0.snippet', fn (string $snippet) => str_starts_with($snippet, '...') && str_contains($snippet, 'lisbon hotel'))
-            ->where('notes.data.0.highlights.snippet', fn ($parts) => collect($parts)->contains(['text' => 'lisbon', 'match' => true])));
-});
-
-it('sends no highlights without a search', function () {
-    Note::factory()->create(['body' => 'Lisbon']);
-
-    $this->get(route('notes.index'))
-        ->assertInertia(fn (Assert $page) => $page->where('notes.data.0.highlights', null));
+            ->where('filters', ['q' => 'lisbon', 'view' => 'notes'])
+            ->has('notes.data', 1)
+            ->where('notes.data.0.id', $both->id));
 });
 
 it('keeps the search on the open note page', function () {

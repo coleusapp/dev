@@ -4,346 +4,66 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-.note-preview {
+/* The note in the editor (components/notes/VisualEditor.vue). */
+.note-content {
     @apply text-sm leading-relaxed break-words;
 }
 
-.note-preview h1 {
+.note-content h1 {
     @apply mt-4 mb-2 text-lg font-bold first:mt-0;
 }
 
-.note-preview h2 {
+.note-content h2 {
     @apply mt-4 mb-2 font-bold first:mt-0;
 }
 
-.note-preview h3,
-.note-preview h4,
-.note-preview h5,
-.note-preview h6 {
+.note-content h3,
+.note-content h4,
+.note-content h5,
+.note-content h6 {
     @apply mt-4 mb-2 font-semibold first:mt-0;
 }
 
-.note-preview p {
+.note-content p {
     @apply mb-2;
 }
 
-.note-preview a {
+.note-content a {
     @apply text-primary underline underline-offset-2;
 }
 
-.note-preview ul {
+.note-content ul {
     @apply mb-2 list-disc ps-6;
 }
 
-.note-preview ol {
+.note-content ol {
     @apply mb-2 list-decimal ps-6;
 }
 
-.note-preview li:has(> input[type='checkbox']) {
-    @apply -ms-6 list-none;
-}
-
-.note-preview li > input[type='checkbox'] {
-    @apply me-2 align-middle;
-}
-
-.note-preview blockquote {
+.note-content blockquote {
     @apply border-default text-dimmed mb-2 border-s-2 ps-4;
 }
 
-.note-preview code {
+.note-content code {
     @apply bg-elevated rounded px-1 py-0.5 font-mono text-xs;
 }
 
-.note-preview pre {
+.note-content pre {
     @apply bg-elevated mb-2 overflow-x-auto rounded-md p-3 font-mono text-xs;
 }
 
-.note-preview pre code {
+.note-content pre code {
     @apply bg-transparent p-0;
 }
 
-.note-preview mark,
-.mark-default {
-    @apply rounded-sm bg-yellow-200 px-0.5 dark:bg-yellow-700;
-}
-
-.note-preview mark.mark-pink,
-.mark-pink {
-    @apply bg-pink-200 dark:bg-pink-800;
-}
-
-.note-preview mark.mark-purple,
-.mark-purple {
-    @apply bg-purple-200 dark:bg-purple-800;
-}
-
-.note-preview mark.mark-orange,
-.mark-orange {
-    @apply bg-orange-200 dark:bg-orange-800;
-}
-
-.note-preview mark.mark-mint,
-.mark-mint {
-    @apply bg-emerald-200 dark:bg-emerald-800;
-}
-
-.note-preview mark.mark-blue,
-.mark-blue {
-    @apply bg-sky-200 dark:bg-sky-800;
-}
-
-.note-preview hr {
+.note-content hr {
     @apply border-default my-4;
 }
 
-.note-preview img {
-    @apply max-w-full cursor-zoom-in rounded-md;
-}
-
-.note-preview .attachment-video,
-.tiptap .attachment-video {
-    @apply mb-2 max-w-full rounded-md;
-}
-
-.note-preview .attachment-audio,
-.tiptap .attachment-audio {
-    @apply mb-2 w-full max-w-md;
-}
-
-.note-preview .attachment-pdf,
-.tiptap .attachment-pdf {
-    @apply border-default mb-2 h-[36rem] w-full rounded-md border;
-}
-
-.note-preview .smart-embed {
-    @apply border-default mb-2 aspect-video w-full max-w-2xl rounded-md border;
-}
-
-.note-preview .smart-embed-figma,
-.note-preview .smart-embed-miro,
-.note-preview .smart-embed-maps {
-    @apply aspect-[4/3];
-}
-
-.note-preview a.link-card {
-    @apply border-default hover:bg-elevated mb-2 flex max-w-xl overflow-hidden rounded-md border no-underline;
-}
-
-.note-preview .link-card-image {
-    @apply m-0 h-24 w-32 shrink-0 cursor-pointer rounded-none object-cover;
-}
-
-.note-preview .link-card-text {
-    @apply flex min-w-0 flex-col gap-0.5 p-2;
-}
-
-.note-preview .link-card-title {
-    @apply text-default truncate text-sm font-semibold;
-}
-
-.note-preview .link-card-description {
-    @apply text-muted line-clamp-2 text-xs;
-}
-
-.note-preview .link-card-site {
-    @apply text-dimmed text-xs;
-}
-
-.note-preview .attachment-missing {
-    @apply text-muted rounded border border-dashed px-1 text-xs;
-}
-
-.note-preview table {
-    @apply mb-2 border-collapse text-left;
-}
-
-.note-preview th,
-.note-preview td {
-    @apply border-default border px-2 py-1;
-}
-
-.note-preview .heading-anchor {
-    @apply text-dimmed ms-2 no-underline opacity-0 transition-opacity;
-}
-
-.note-preview .heading-anchor::before {
-    content: '#';
-}
-
-.note-preview :is(h1, h2, h3, h4, h5, h6):hover > .heading-anchor,
-.note-preview .heading-anchor:focus-visible {
-    @apply opacity-100;
-}
-
-.note-preview ul.table-of-contents {
-    @apply bg-elevated mb-4 list-none rounded-md p-3 ps-3;
-}
-
-.note-preview ul.table-of-contents ul {
-    @apply mb-0 list-none ps-4;
-}
-
-.tiptap .table-of-contents-placeholder {
-    @apply bg-elevated text-muted mb-2 rounded-md px-3 py-2 text-xs;
-}
-
-.tiptap .table-of-contents-placeholder.ProseMirror-selectednode {
-    @apply ring-primary ring-2;
-}
-
-.note-preview .note-embed {
-    @apply border-default mb-2 rounded-md border-y border-s-4 border-e;
-}
-
-.note-preview .note-embed-title {
-    @apply border-default bg-elevated border-b px-3 py-1 text-xs font-semibold;
-}
-
-.note-preview .note-embed-body {
-    @apply max-h-96 overflow-y-auto px-3 py-2;
-}
-
-.note-preview .note-embed-missing,
-.note-preview .note-embed-skipped {
-    @apply text-muted text-xs;
-}
-
-.note-preview .callout {
-    --callout: var(--color-sky-500);
-    @apply mb-2 rounded-md border-s-4 px-3 py-2;
-    border-color: var(--callout);
-    background: color-mix(in oklab, var(--callout) 10%, transparent);
-}
-
-.note-preview .callout-title {
-    @apply font-semibold;
-    color: var(--callout);
-}
-
-.note-preview summary.callout-title {
-    @apply cursor-pointer;
-}
-
-.note-preview .callout-body {
-    @apply mt-1;
-}
-
-.note-preview .callout-body > :last-child {
-    @apply mb-0;
-}
-
-.note-preview .callout-abstract,
-.note-preview .callout-tip {
-    --callout: var(--color-teal-500);
-}
-
-.note-preview .callout-todo,
-.note-preview .callout-info {
-    --callout: var(--color-blue-500);
-}
-
-.note-preview .callout-success {
-    --callout: var(--color-green-500);
-}
-
-.note-preview .callout-question,
-.note-preview .callout-warning {
-    --callout: var(--color-amber-500);
-}
-
-.note-preview .callout-failure,
-.note-preview .callout-danger,
-.note-preview .callout-bug {
-    --callout: var(--color-red-500);
-}
-
-.note-preview .callout-example {
-    --callout: var(--color-violet-500);
-}
-
-.note-preview .callout-quote {
-    --callout: var(--color-neutral-500);
-}
-
-.note-preview .footnotes {
-    @apply text-muted mt-4 text-xs;
-}
-
-.note-preview .footnotes hr {
-    @apply my-2;
-}
-
-.tiptap .footnote-definition::before {
-    @apply text-primary me-1 text-xs;
-    content: '[' attr(data-footnote-definition) ']:';
-}
-
-.tiptap .footnote-marker {
-    @apply text-primary px-0.5 text-xs;
-}
-
-.note-preview .date-chip,
-.tiptap .date-chip {
-    @apply bg-elevated text-primary rounded px-1 py-0.5 text-xs font-medium whitespace-nowrap;
-}
-
-.note-preview a.date-chip-link {
-    @apply no-underline;
-}
-
-.note-preview .mermaid-diagram {
-    @apply mb-2 flex justify-center overflow-x-auto;
-}
-
-.note-preview .mermaid-error {
-    @apply text-error mb-2 text-xs;
-}
-
-.tiptap .math-source {
-    @apply bg-elevated rounded px-1 font-mono text-xs;
-}
-
-.tiptap pre.math-source-block {
-    @apply mb-2 block p-3 text-center whitespace-pre-wrap;
-}
-
-.note-preview .math-block {
-    @apply mb-2 overflow-x-auto;
-}
-
-.tiptap .callout-marker {
-    @apply bg-elevated text-primary rounded px-1.5 py-0.5 text-xs font-semibold;
-}
-
-.note-preview kbd {
-    @apply border-default bg-elevated rounded border px-1 font-mono text-xs;
-}
-
-.note-preview details:not(.callout) {
-    @apply mb-2;
-}
-
-.note-preview details:not(.callout) > summary {
-    @apply cursor-pointer font-medium;
-}
-
-.note-preview a.wiki-link-missing {
-    @apply text-muted decoration-dashed;
-}
-
-.tiptap p.is-editor-empty:first-child::before {
+.tiptap p.is-editor-empty:first-child::before,
+.tiptap h1.is-empty:first-child::before {
     @apply text-dimmed pointer-events-none float-left h-0;
     content: attr(data-placeholder);
-}
-
-.tiptap .wiki-link {
-    @apply text-primary cursor-pointer underline underline-offset-2;
-}
-
-.tiptap .hashtag,
-.note-preview .hashtag {
-    @apply text-primary;
 }
 
 .tiptap ul[data-type='taskList'] {
@@ -370,82 +90,15 @@
     @apply mt-1 ps-6;
 }
 
-.tiptap .selectedCell {
-    @apply bg-primary/10;
-}
-
-.note-preview li[draggable='true'] {
-    @apply cursor-grab;
-}
-
-.note-preview li.drop-before {
-    @apply shadow-[inset_0_2px_0_var(--ui-primary)];
-}
-
-.note-preview li.drop-after {
-    @apply shadow-[inset_0_-2px_0_var(--ui-primary)];
-}
-
-.find-match {
-    @apply rounded-sm bg-amber-200/70 dark:bg-amber-600/50;
-}
-
-.find-current {
-    @apply bg-orange-400 dark:bg-orange-500;
-}
-
-/* Automatic direction: each paragraph, item and the textarea's lines take
-   their direction from their own first strong letters. */
-.note-preview[dir='auto'] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th),
-textarea[dir='auto'] {
+/* Automatic direction: each paragraph and item takes its direction from
+   its own first strong letters. */
+.tiptap[dir='auto'] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote) {
     unicode-bidi: plaintext;
     text-align: start;
 }
 
-/* Folding (editor/Folding.ts, composables/usePreviewFolding.ts). */
-.fold-toggle {
-    @apply text-dimmed hover:text-default -ms-5 me-1 inline-flex size-4 cursor-pointer items-center justify-center align-middle opacity-0 transition-opacity;
-}
-
-.fold-toggle::before {
-    content: '▾';
-    @apply text-xs transition-transform;
-}
-
-.fold-toggle.is-folded::before {
-    @apply -rotate-90 rtl:rotate-90;
-}
-
-:is(h1, h2, h3, h4, h5, h6, li):hover > .fold-toggle,
-.fold-toggle.is-folded,
-.fold-toggle:focus-visible {
-    @apply opacity-100;
-}
-
-.folded-hidden,
-li.is-folded > :is(ul, ol) {
-    @apply hidden;
-}
-
-h1.is-folded::after,
-h2.is-folded::after,
-h3.is-folded::after,
-h4.is-folded::after,
-h5.is-folded::after,
-h6.is-folded::after,
-li.is-folded::after {
-    content: ' …';
-    @apply text-dimmed font-normal;
-}
-
-/* Readable line length (setting): text stays about 46rem wide, centred. */
-.readable-width .tiptap,
-.readable-width > textarea,
-.readable-width > .note-preview > * {
+/* Readable line length (setting): text stays about 46rem wide, centred,
+   and the formatting toolbar lines up with it. */
+.readable-width :is(.tiptap, .note-toolbar) {
     @apply mx-auto w-full max-w-[46rem];
-}
-
-/* Reading view: a little more air than the editor. */
-.readable-width > .note-preview {
-    @apply text-base leading-7;
 }

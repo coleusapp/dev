@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import HighlightedText from '@/components/notes/HighlightedText.vue';
-import { describeProperty, describeTags, filterQuery, NOTE_DRAG_TYPE, type NoteData, type NoteFilters } from '@/components/notes/note';
-import { groupNotesByDate } from '@/lib/dateGroups';
+import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes/note';
 import { Link } from '@inertiajs/vue3';
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, useTemplateRef, watch } from 'vue';
 
 const props = withDefaults(
     defineProps<{
@@ -12,10 +10,8 @@ const props = withDefaults(
         filters: NoteFilters;
         relativeDates?: boolean;
         showSnippets?: boolean;
-        groupBy?: 'updated_at' | 'created_at' | null;
-        layout?: 'list' | 'gallery';
     }>(),
-    { relativeDates: true, showSnippets: true, groupBy: null, layout: 'list' },
+    { relativeDates: true, showSnippets: true },
 );
 
 defineEmits<{
@@ -28,78 +24,28 @@ const absoluteDate = (iso: string): string => dateFormat.format(new Date(iso));
 
 const query = computed(() => filterQuery(props.filters));
 
-/**
- * Date sections when grouping is on, otherwise one unlabeled section.
- */
-const groups = computed(() => (props.groupBy ? groupNotesByDate(props.notes, props.groupBy) : [{ label: '', notes: props.notes }]));
-
 const list = useTemplateRef<HTMLElement>('list');
 
 /**
- * Keeps the open note's row in view when it changes from elsewhere (the
- * next / previous note shortcuts, the quick switcher).
+ * Keeps the open note's row in view when it changes.
  */
 watch(
     () => props.selectedId,
     (id) => void nextTick(() => list.value?.querySelector(`[data-note-id="${id}"]`)?.scrollIntoView({ block: 'nearest' })),
 );
 
-/**
- * Matching lines shown per search result before "Show more".
- */
-const COLLAPSED_MATCHES = 3;
-
-const expanded = ref(new Set<number>());
-
-const toggleExpanded = (id: number): void => {
-    const next = new Set(expanded.value);
-
-    if (!next.delete(id)) {
-        next.add(id);
-    }
-
-    expanded.value = next;
-};
-
-const visibleMatches = (note: NoteData) => (note.matches?.lines ?? []).slice(0, expanded.value.has(note.id) ? undefined : COLLAPSED_MATCHES);
-
-/**
- * "4 notes · 9 matching lines" above search results.
- */
-const resultSummary = computed(() => {
-    const lines = props.notes.reduce((sum, note) => sum + (note.matches?.total ?? 0), 0);
-    const notes = `${props.notes.length} ${props.notes.length === 1 ? 'note' : 'notes'}`;
-
-    return lines ? `${notes} · ${lines} matching ${lines === 1 ? 'line' : 'lines'}` : notes;
-});
-
-watch(
-    () => props.filters.q,
-    () => (expanded.value = new Set()),
-);
-
 const emptyMessage = computed(() => {
     if (props.filters.q) {
-        return `No notes match “${props.filters.q}”${props.filters.tag ? ` in ${describeTags(props.filters.tag)}` : ''}.`;
+        return `No notes match “${props.filters.q}”.`;
     }
 
-    if (props.filters.view === 'trash') {
-        return 'The trash is empty.';
-    }
-
-    if (props.filters.view === 'recent') {
-        return 'Notes you open show up here.';
-    }
-
-    if (props.filters.view === 'archive') {
-        return props.filters.tag ? `No archived notes tagged ${describeTags(props.filters.tag)}.` : 'The archive is empty.';
-    }
-
-    if (props.filters.prop) {
-        return `No notes with ${describeProperty(props.filters)}.`;
-    }
-
-    return props.filters.tag ? `No notes tagged ${describeTags(props.filters.tag)}.` : 'No notes yet.';
+    return {
+        notes: 'No notes yet.',
+        bookmarks: 'No bookmarked notes.',
+        recent: 'Notes you edit show up here.',
+        archive: 'The archive is empty.',
+        trash: 'The trash is empty.',
+    }[props.filters.view];
 });
 </script>
 
@@ -107,88 +53,36 @@ const emptyMessage = computed(() => {
     <div v-if="notes.length === 0" class="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
         <UiIcon name="i-lucide-notebook-pen" class="text-dimmed size-8" />
         <p class="text-dimmed text-sm">{{ emptyMessage }}</p>
-        <UiButton v-if="filters.view === 'notes'" icon="i-lucide-file-plus" color="neutral" variant="subtle" size="sm" @click="$emit('create')">{{
-            filters.tag ? 'New note with this tag' : 'Create your first note'
-        }}</UiButton>
-    </div>
-    <nav v-else ref="list" class="flex flex-col">
-        <p v-if="filters.q" class="text-dimmed px-3 pb-1 text-xs" role="status">{{ resultSummary }}</p>
-        <section
-            v-for="group in groups"
-            :key="group.label"
-            :class="layout === 'gallery' ? 'grid grid-cols-2 gap-2 p-2' : 'divide-default flex flex-col divide-y'"
-            :aria-label="group.label || undefined"
+        <UiButton
+            v-if="filters.view === 'notes' && !filters.q"
+            icon="i-lucide-file-plus"
+            color="neutral"
+            variant="subtle"
+            size="sm"
+            @click="$emit('create')"
+            >Create your first note</UiButton
         >
-            <h3
-                v-if="group.label"
-                class="bg-default text-dimmed sticky top-0 z-10 px-3 pt-3 pb-1 text-xs font-semibold"
-                :class="{ 'col-span-2 px-1': layout === 'gallery' }"
-            >
-                {{ group.label }}
-            </h3>
-            <div
-                v-for="note in group.notes"
-                :key="note.id"
-                class="flex flex-col"
-                :class="[{ 'bg-elevated': note.id === selectedId }, layout === 'gallery' ? 'border-default overflow-hidden rounded-md border' : '']"
-            >
-                <Link
-                    :data-note-id="note.id"
-                    :href="route('notes.show', { note: note.id, ...query })"
-                    preserve-state
-                    preserve-scroll
-                    draggable="true"
-                    @dragstart="(event: DragEvent) => event.dataTransfer?.setData(NOTE_DRAG_TYPE, String(note.id))"
-                    class="hover:bg-elevated flex flex-col gap-1"
-                    :class="layout === 'gallery' ? 'p-2' : 'px-3 py-3'"
-                >
-                    <!-- Gallery card (A1.4): the note's first picture, or its text. -->
-                    <div v-if="layout === 'gallery'" class="bg-elevated aspect-[4/3] overflow-hidden rounded">
-                        <img v-if="note.thumbnail" :src="note.thumbnail" alt="" class="size-full object-cover" loading="lazy" draggable="false" />
-                        <p v-else-if="note.locked" class="text-dimmed flex size-full items-center justify-center">
-                            <UiIcon name="i-lucide-lock" class="size-6" />
-                        </p>
-                        <p v-else class="text-muted line-clamp-6 p-2 text-[0.65rem] leading-snug">{{ note.snippet }}</p>
-                    </div>
-                    <span class="flex items-center gap-1">
-                        <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">
-                            <HighlightedText v-if="note.highlights && note.title" :parts="note.highlights.title" />
-                            <template v-else>{{ note.title || 'Empty note' }}</template>
-                        </span>
-                        <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
-                        <UiIcon v-if="note.read_only" name="i-lucide-lock" class="text-dimmed size-3 shrink-0" aria-label="Read-only" />
-                    </span>
-                    <ul v-if="layout === 'list' && note.matches?.lines.length" class="flex flex-col gap-0.5" aria-label="Matching lines">
-                        <li
-                            v-for="match in visibleMatches(note)"
-                            :key="match.line"
-                            class="text-muted border-default line-clamp-1 border-s-2 ps-2 text-xs"
-                        >
-                            <HighlightedText :parts="match.parts" />
-                        </li>
-                    </ul>
-                    <span v-else-if="layout === 'list' && showSnippets && note.snippet" class="text-muted line-clamp-2 text-xs">
-                        <HighlightedText v-if="note.highlights" :parts="note.highlights.snippet" />
-                        <template v-else>{{ note.snippet }}</template>
-                    </span>
-                    <time class="text-dimmed text-xs" :datetime="note.updated_at">{{
-                        relativeDates ? note.updated_at_for_humans : absoluteDate(note.updated_at)
-                    }}</time>
-                </Link>
-                <button
-                    v-if="layout === 'list' && note.matches && note.matches.total > COLLAPSED_MATCHES"
-                    type="button"
-                    class="text-dimmed hover:text-default -mt-2 px-3 pb-2 text-start text-xs"
-                    :aria-expanded="expanded.has(note.id)"
-                    @click="toggleExpanded(note.id)"
-                >
-                    <template v-if="!expanded.has(note.id)">Show {{ note.matches.total - COLLAPSED_MATCHES }} more</template>
-                    <template v-else-if="note.matches.total > note.matches.lines.length">
-                        Show fewer ({{ note.matches.total - note.matches.lines.length }} more in the note)
-                    </template>
-                    <template v-else>Show fewer</template>
-                </button>
-            </div>
-        </section>
+    </div>
+    <nav v-else ref="list" class="divide-default flex flex-col divide-y" aria-label="Notes">
+        <Link
+            v-for="note in notes"
+            :key="note.id"
+            :data-note-id="note.id"
+            :href="route('notes.show', { note: note.id, ...query })"
+            preserve-state
+            preserve-scroll
+            class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
+            :class="{ 'bg-elevated': note.id === selectedId }"
+        >
+            <span class="flex items-center gap-1">
+                <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">{{ note.title || 'Empty note' }}</span>
+                <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
+                <UiIcon v-if="note.bookmarked" name="i-lucide-bookmark" class="text-dimmed size-3 shrink-0" aria-label="Bookmarked" />
+            </span>
+            <span v-if="showSnippets && note.snippet" class="text-muted line-clamp-2 text-xs">{{ note.snippet }}</span>
+            <time class="text-dimmed text-xs" :datetime="note.updated_at">{{
+                relativeDates ? note.updated_at_for_humans : absoluteDate(note.updated_at)
+            }}</time>
+        </Link>
     </nav>
 </template>

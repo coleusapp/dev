@@ -10,15 +10,6 @@ export type AutosaveStatus = 'saved' | 'unsaved' | 'saving' | 'error';
 export const DEFAULT_AUTOSAVE_DELAY_MS = 750;
 
 /**
- * Where and how a body is saved, when not as plain text to notes.update:
- * a locked note sends its text encrypted (O12.5).
- */
-export type AutosaveTransport = {
-    url: () => string;
-    payload: (body: string) => Promise<Record<string, unknown>>;
-};
-
-/**
  * Debounced, serialized saving of a note body.
  *
  * Only one request is in flight at a time; edits made while it runs are sent
@@ -32,16 +23,9 @@ export const useAutosave = (
     body: Ref<string>,
     onSaved: (note: NoteDetailData) => void,
     delay: number = DEFAULT_AUTOSAVE_DELAY_MS,
-    transport: AutosaveTransport | null = null,
 ) => {
-    const url = (): string => transport?.url() ?? route('notes.update', { note: note.id });
-    const encode = async (text: string): Promise<Record<string, unknown>> => (transport ? transport.payload(text) : { body: text });
+    const url = (): string => route('notes.update', { note: note.id });
 
-    /**
-     * The last body already encoded, for the keepalive save on closing the
-     * tab: that one can't wait for encryption to finish.
-     */
-    let prepared: Record<string, unknown> | null = null;
     const savedBody = ref(note.body);
     const inFlight = ref(false);
     const failed = ref(false);
@@ -71,7 +55,7 @@ export const useAutosave = (
                 method: 'PUT',
                 headers: jsonHeaders(),
                 credentials: 'same-origin',
-                body: JSON.stringify(await encode(sending)),
+                body: JSON.stringify({ body: sending }),
             });
 
             if (!response.ok) {
@@ -116,23 +100,13 @@ export const useAutosave = (
 
     const debouncedFlush = useDebounceFn(flush, delay);
 
-    watch(body, (text) => {
+    watch(body, () => {
         failed.value = false;
         debouncedFlush();
-
-        if (transport) {
-            void encode(text).then((payload) => {
-                if (body.value === text) {
-                    prepared = payload;
-                }
-            });
-        }
     });
 
     const flushWithKeepalive = (): void => {
-        const payload = transport ? prepared : { body: body.value };
-
-        if (!isDirty.value || !payload) {
+        if (!isDirty.value) {
             return;
         }
 
@@ -141,7 +115,7 @@ export const useAutosave = (
             headers: jsonHeaders(),
             credentials: 'same-origin',
             keepalive: true,
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ body: body.value }),
         });
     };
 

@@ -2,11 +2,13 @@
 
 namespace Coleus\Notes\Preferences;
 
-use Coleus\Notes\Models\Preferences;
+use Coleus\Notes\Facades\Settings;
 use Illuminate\Validation\Rule;
 
 /**
- * The signed-in user's Notes preferences.
+ * The signed-in user's Notes preferences, kept in coleus/settings (the
+ * shared settings table, scoped to the Notes app and the user) under
+ * "notes.<key>".
  *
  * DEFINITIONS is the single list of preference keys: each has a default and
  * either a list of allowed options or a "boolean" type. Validation rules,
@@ -19,22 +21,13 @@ class NotePreferences
      * @var array<string, array{default: string|int|bool, options?: list<string|int>, type?: 'boolean'}>
      */
     public const array DEFINITIONS = [
-        'editor.default_mode' => ['default' => 'edit', 'options' => ['edit', 'source', 'split', 'preview']],
         'editor.autosave_delay' => ['default' => 750, 'options' => [500, 750, 1500, 3000]],
         'editor.readable_width' => ['default' => true, 'type' => 'boolean'],
-        'editor.spellcheck' => ['default' => true, 'type' => 'boolean'],
         'editor.text_direction' => ['default' => 'auto', 'options' => ['auto', 'ltr', 'rtl']],
-        'editor.first_line_style' => ['default' => 'body', 'options' => ['title', 'heading', 'subheading', 'body']],
-        'checklists.checked_to_bottom' => ['default' => false, 'type' => 'boolean'],
-        'list.sort' => ['default' => 'modified', 'options' => ['modified', 'created', 'title']],
+        'list.sort' => ['default' => 'modified', 'options' => ['modified', 'created']],
         'list.sort_direction' => ['default' => 'desc', 'options' => ['desc', 'asc']],
-        'list.group_by_date' => ['default' => false, 'type' => 'boolean'],
         'list.relative_dates' => ['default' => true, 'type' => 'boolean'],
         'list.show_snippets' => ['default' => true, 'type' => 'boolean'],
-        'list.layout' => ['default' => 'list', 'options' => ['list', 'gallery']],
-        'search.sort' => ['default' => 'relevance', 'options' => ['relevance', 'list']],
-        'reading.line_breaks' => ['default' => 'soft', 'options' => ['soft', 'hard']],
-        'daily.title_format' => ['default' => 'YYYY-MM-DD', 'options' => ['YYYY-MM-DD', 'dddd, MMMM D, YYYY', 'D MMMM YYYY', 'MMMM D, YYYY', 'DD/MM/YYYY', 'MM/DD/YYYY']],
     ];
 
     /**
@@ -44,12 +37,14 @@ class NotePreferences
      */
     public static function all(): array
     {
-        $stored = self::row()?->values ?? [];
+        $stored = auth()->id() === null ? [] : Settings::forUser()->all();
 
         return collect(self::DEFINITIONS)
-            ->mapWithKeys(fn (array $definition, string $key) => [
-                $key => self::isValid($key, $stored[$key] ?? null) ? $stored[$key] : $definition['default'],
-            ])
+            ->mapWithKeys(function (array $definition, string $key) use ($stored) {
+                $value = $stored[self::settingName($key)] ?? null;
+
+                return [$key => self::isValid($key, $value) ? $value : $definition['default']];
+            })
             ->all();
     }
 
@@ -65,12 +60,9 @@ class NotePreferences
      */
     public static function save(array $values): void
     {
-        $known = array_intersect_key($values, self::DEFINITIONS);
-
-        Preferences::query()->updateOrCreate(
-            ['user_id' => auth()->id()],
-            ['values' => [...self::all(), ...$known]],
-        );
+        foreach (array_intersect_key($values, self::DEFINITIONS) as $key => $value) {
+            Settings::forUser()->set(self::settingName($key), $value);
+        }
     }
 
     /**
@@ -90,12 +82,20 @@ class NotePreferences
     }
 
     /**
-     * Request field names use underscores: "editor.default_mode" is sent as
-     * "editor_default_mode", because dots mean nesting in Laravel validation.
+     * Request field names use underscores: "editor.autosave_delay" is sent as
+     * "editor_autosave_delay", because dots mean nesting in Laravel validation.
      */
     public static function inputName(string $key): string
     {
         return str_replace('.', '_', $key);
+    }
+
+    /**
+     * The name in the settings table: "notes.editor.autosave_delay".
+     */
+    public static function settingName(string $key): string
+    {
+        return config('notes.settings_prefix').'.'.$key;
     }
 
     private static function isValid(string $key, mixed $value): bool
@@ -107,12 +107,5 @@ class NotePreferences
         }
 
         return in_array($value, $definition['options'] ?? [], true);
-    }
-
-    private static function row(): ?Preferences
-    {
-        $userId = auth()->id();
-
-        return $userId === null ? null : Preferences::query()->where('user_id', $userId)->first();
     }
 }

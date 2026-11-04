@@ -10,7 +10,6 @@ use Coleus\Notes\Http\Requests\NoteListRequest;
 use Coleus\Notes\Http\Requests\NoteRequest;
 use Coleus\Notes\Http\Resources\NoteDetailResource;
 use Coleus\Notes\Models\Note;
-use Coleus\Notes\Services\FolderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,10 +23,6 @@ class NoteController extends Controller
     {
         Gate::authorize('view', $note);
 
-        if (! $note->trashed()) {
-            Notes::note()->markOpened($note);
-        }
-
         return $this->notesPage($request, $note);
     }
 
@@ -36,10 +31,6 @@ class NoteController extends Controller
         Gate::authorize('create', Note::class);
 
         $note = Notes::note()->store($request->noteData());
-
-        if ($folder = $request->folder()) {
-            app(FolderService::class)->moveNote($note, $folder);
-        }
 
         return to_route('notes.show', ['note' => $note, ...$this->listQuery($request)]);
     }
@@ -50,8 +41,7 @@ class NoteController extends Controller
      */
     public function update(NoteRequest $request, Note $note): RedirectResponse|NoteDetailResource
     {
-        Gate::authorize('edit', $note);
-        abort_if($note->isLocked(), 409, 'This note is locked; unlock it to change it.');
+        Gate::authorize('update', $note);
 
         Notes::note()->update($note, $request->noteData());
 
@@ -71,16 +61,6 @@ class NoteController extends Controller
         return to_route('notes.index', $this->listQuery($request));
     }
 
-    public function duplicate(Request $request, Note $note): RedirectResponse
-    {
-        Gate::authorize('update', $note);
-        Gate::authorize('create', Note::class);
-
-        $copy = Notes::note()->duplicate($note);
-
-        return to_route('notes.show', ['note' => $copy, ...$this->listQuery($request)]);
-    }
-
     /**
      * Keeps the list filters from the query string across a redirect; the
      * page it lands on validates them.
@@ -89,7 +69,7 @@ class NoteController extends Controller
      */
     private function listQuery(Request $request): array
     {
-        return collect(['tag', 'q', 'view', 'folder', 'smart', 'prop', 'value'])
+        return collect(['q', 'view'])
             ->mapWithKeys(fn (string $key) => [$key => $request->query($key)])
             ->filter(fn (mixed $value, string $key) => is_string($value) && $value !== '' && ! ($key === 'view' && $value === NoteView::Notes->value))
             ->all();

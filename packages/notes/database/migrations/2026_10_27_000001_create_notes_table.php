@@ -14,7 +14,19 @@ return new class extends Migration
         Schema::create(config('notes.table_prefix').'notes', function (Blueprint $table) {
             $table->id();
             $table->longText('body');
+            $table->timestamp('pinned_at')->nullable()->index();
+            $table->timestamp('archived_at')->nullable()->index();
+            $table->timestamp('bookmarked_at')->nullable()->index();
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('created_at');
+            $table->index('updated_at');
+            $table->index('deleted_at');
+
+            if (in_array(Schema::getConnection()->getDriverName(), ['mariadb', 'mysql'], true)) {
+                $table->fullText('body');
+            }
         });
     }
 

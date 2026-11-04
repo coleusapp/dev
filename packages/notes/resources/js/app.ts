@@ -1,13 +1,13 @@
 import '../css/app.css';
 
+import { plugin as formkitPlugin } from '@formkit/vue';
 import { createInertiaApp } from '@inertiajs/vue3';
+import ui from '@nuxt/ui/vue-plugin';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
-import ui from '@nuxt/ui/vue-plugin';
-import { plugin as formkitPlugin } from '@formkit/vue';
-import formkitConfig from "../../formkit.config";
+import formkitConfig from '../../formkit.config';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

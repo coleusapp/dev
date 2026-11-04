@@ -14,16 +14,16 @@ it('archives a note without touching updated_at', function () {
     $note = Note::factory()->create(['updated_at' => now()->subWeek()]);
     $updatedAt = $note->refresh()->updated_at;
 
-    $this->post(route('notes.archive', ['note' => $note]))->assertRedirect(route('notes.index'));
+    $this->from(route('notes.show', $note))->post(route('notes.archive', ['note' => $note]))->assertRedirect(route('notes.show', $note));
 
     expect($note->refresh()->archived_at)->not->toBeNull()
         ->and($note->updated_at->equalTo($updatedAt))->toBeTrue();
 });
 
-it('unarchives a note and opens it in the main list', function () {
+it('unarchives a note', function () {
     $note = Note::factory()->create(['archived_at' => now()]);
 
-    $this->delete(route('notes.unarchive', ['note' => $note]))->assertRedirect(route('notes.show', ['note' => $note]));
+    $this->from(route('notes.show', $note))->delete(route('notes.unarchive', ['note' => $note]))->assertRedirect(route('notes.show', $note));
 
     expect($note->refresh()->archived_at)->toBeNull();
 });
@@ -49,25 +49,6 @@ it('shows only archived notes in the archive view', function () {
             ->has('notes.data', 1)
             ->where('notes.data.0.id', $archived->id)
             ->where('notes.data.0.archived', true));
-});
-
-it('filters the archive by tag', function () {
-    $tagged = Note::factory()->create(['body' => '#old', 'archived_at' => now()]);
-    Note::factory()->create(['body' => '#other', 'archived_at' => now()]);
-
-    $this->get(route('notes.index', ['view' => 'archive', 'tag' => 'old']))
-        ->assertInertia(fn (Assert $page) => $page->has('notes.data', 1)->where('notes.data.0.id', $tagged->id));
-});
-
-it('leaves archived notes out of the tag counts', function () {
-    Note::factory()->create(['body' => '#work']);
-    Note::factory()->create(['body' => '#work', 'archived_at' => now()]);
-    Note::factory()->create(['body' => '#archived-only', 'archived_at' => now()]);
-
-    $this->get(route('notes.index'))
-        ->assertInertia(fn (Assert $page) => $page->where('tags', [
-            ['name' => 'work', 'path' => 'work', 'count' => 1, 'children' => []],
-        ]));
 });
 
 it('opens an archived note', function () {

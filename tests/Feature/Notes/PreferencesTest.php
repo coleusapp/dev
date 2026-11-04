@@ -1,7 +1,8 @@
 <?php
 
-use Coleus\Notes\Models\Preferences;
+use Coleus\Notes\Facades\Settings;
 use Coleus\Notes\Preferences\NotePreferences;
+use Coleus\Settings\Models\Settings as SettingsRow;
 use Coleus\Users\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -23,35 +24,19 @@ it('renders the settings page', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Settings', false)
-            ->where('definitions', fn ($definitions) => count($definitions['editor.default_mode']['options']) === 4)
-            ->where('preferences', fn ($preferences) => $preferences['editor.default_mode'] === 'edit'));
+            ->where('definitions', fn ($definitions) => count($definitions['list.sort']['options']) === 2)
+            ->where('preferences', fn ($preferences) => $preferences['list.sort'] === 'modified'));
 });
 
-it('saves preferences for the current user only', function () use ($defaults) {
+it('saves preferences in coleus/settings for the current user only', function () use ($defaults) {
     $this->from(route('notes.settings.edit'))->put(route('notes.settings.update'), [
-        'editor_default_mode' => 'split',
         'editor_autosave_delay' => '1500',
         'list_relative_dates' => false,
     ])->assertRedirect(route('notes.settings.edit'));
 
-    expect(NotePreferences::all())->toBe([
-        'editor.default_mode' => 'split',
-        'editor.autosave_delay' => 1500,
-        'editor.readable_width' => true,
-        'editor.spellcheck' => true,
-        'editor.text_direction' => 'auto',
-        'editor.first_line_style' => 'body',
-        'checklists.checked_to_bottom' => false,
-        'list.sort' => 'modified',
-        'list.sort_direction' => 'desc',
-        'list.group_by_date' => false,
-        'list.relative_dates' => false,
-        'list.show_snippets' => true,
-        'list.layout' => 'list',
-        'search.sort' => 'relevance',
-        'reading.line_breaks' => 'soft',
-        'daily.title_format' => 'YYYY-MM-DD',
-    ]);
+    expect(NotePreferences::all())->toBe([...$defaults(), 'editor.autosave_delay' => 1500, 'list.relative_dates' => false])
+        ->and(Settings::forUser()->get('notes.editor.autosave_delay'))->toBe(1500)
+        ->and(Settings::get('notes.editor.autosave_delay'))->toBe(1500);
 
     $this->actingAs(User::factory()->create());
     expect(NotePreferences::all())->toBe($defaults());
@@ -59,32 +44,32 @@ it('saves preferences for the current user only', function () use ($defaults) {
 
 it('keeps unspecified preferences when saving some', function () {
     $this->put(route('notes.settings.update'), ['list_show_snippets' => false]);
-    $this->put(route('notes.settings.update'), ['editor_default_mode' => 'preview']);
+    $this->put(route('notes.settings.update'), ['list_sort' => 'created']);
 
     expect(NotePreferences::get('list.show_snippets'))->toBeFalse()
-        ->and(NotePreferences::get('editor.default_mode'))->toBe('preview');
+        ->and(NotePreferences::get('list.sort'))->toBe('created');
 });
 
 it('rejects values outside the allowed options', function (array $payload, string $field) {
     $this->put(route('notes.settings.update'), $payload)->assertSessionHasErrors($field);
 
-    expect(Preferences::query()->count())->toBe(0);
+    expect(SettingsRow::query()->count())->toBe(0);
 })->with([
-    'unknown mode' => [['editor_default_mode' => 'fullscreen'], 'editor_default_mode'],
+    'unknown sort' => [['list_sort' => 'title'], 'list_sort'],
     'unlisted delay' => [['editor_autosave_delay' => 10], 'editor_autosave_delay'],
     'not a boolean' => [['list_relative_dates' => 'maybe'], 'list_relative_dates'],
 ]);
 
 it('ignores unknown keys', function () {
-    $this->put(route('notes.settings.update'), ['theme' => 'neon', 'editor_default_mode' => 'split']);
+    $this->put(route('notes.settings.update'), ['theme' => 'neon', 'list_sort' => 'created']);
 
-    expect(Preferences::query()->sole()->values)->not->toHaveKey('theme');
+    expect(SettingsRow::query()->pluck('name')->all())->toBe(['notes.list.sort']);
 });
 
 it('falls back to defaults for stored values that are no longer valid', function () {
-    Preferences::query()->create(['user_id' => $this->user->id, 'values' => ['editor.default_mode' => 'retired-mode']]);
+    Settings::forUser()->set('notes.list.sort', 'title');
 
-    expect(NotePreferences::get('editor.default_mode'))->toBe('edit');
+    expect(NotePreferences::get('list.sort'))->toBe('modified');
 });
 
 it('requires authentication', function () {

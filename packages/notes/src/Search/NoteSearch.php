@@ -6,14 +6,13 @@ use Coleus\Notes\Services\NoteService;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Full-text search over note titles and bodies. A search box query is
- * parsed by SearchQuery (operators and "phrases"); the plain words land here.
+ * Full-text search over note bodies (a note's title is its first line).
  *
- * On MariaDB/MySQL words go through the FULLTEXT(title, body) index in
+ * On MariaDB/MySQL words go through the FULLTEXT(body) index in
  * boolean mode as required prefix terms ("+word*"). InnoDB skips words
  * shorter than innodb_ft_min_token_size and its default stopwords, and
  * splits words on punctuation, so such words (and every word on other
- * databases, like SQLite) fall back to LIKE on title and body.
+ * databases, like SQLite) fall back to LIKE on the body.
  * All words must match.
  */
 class NoteSearch
@@ -35,15 +34,8 @@ class NoteSearch
      */
     public static function apply(Builder $query, string $terms): void
     {
-        SearchQuery::parse($terms)->apply($query);
-    }
+        $words = self::words($terms);
 
-    /**
-     * @param  Builder<\Coleus\Notes\Models\Note>  $query
-     * @param  list<string>  $words  from words()
-     */
-    public static function applyWords(Builder $query, array $words): void
-    {
         if ($words === []) {
             return;
         }
@@ -59,13 +51,11 @@ class NoteSearch
             }
 
             $pattern = '%'.NoteService::escapeLike($word).'%';
-            $query->where(fn (Builder $either) => $either
-                ->whereRaw("lower(title) like ? escape '!'", [$pattern])
-                ->orWhereRaw("lower(body) like ? escape '!'", [$pattern]));
+            $query->whereRaw("lower(body) like ? escape '!'", [$pattern]);
         }
 
         if ($fullText !== []) {
-            $query->whereFullText(['title', 'body'], implode(' ', $fullText), ['mode' => 'boolean']);
+            $query->whereFullText('body', implode(' ', $fullText), ['mode' => 'boolean']);
         }
     }
 

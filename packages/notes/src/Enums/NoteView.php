@@ -11,9 +11,10 @@ use Illuminate\Database\Eloquent\Builder;
 enum NoteView: string
 {
     case Notes = 'notes';
+    case Bookmarks = 'bookmarks';
+    case Recent = 'recent';
     case Archive = 'archive';
     case Trash = 'trash';
-    case Recent = 'recent';
 
     /**
      * How many notes the Recents list shows.
@@ -28,9 +29,10 @@ enum NoteView: string
     {
         return match ($this) {
             self::Notes => $query->whereNull('archived_at'),
+            self::Bookmarks => $query->whereNotNull('bookmarked_at'),
+            self::Recent => $query->whereNull('archived_at')->reorder()->orderByDesc('updated_at')->orderByDesc('id')->limit(self::RECENT_LIMIT),
             self::Archive => $query->whereNotNull('archived_at'),
             self::Trash => $query->onlyTrashed(),
-            self::Recent => $query->whereNotNull('opened_at')->reorder()->orderByDesc('opened_at')->orderByDesc('id')->limit(self::RECENT_LIMIT),
         };
     }
 }

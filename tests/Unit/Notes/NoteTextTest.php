@@ -11,8 +11,8 @@ it('builds a snippet from the lines after the title', function (string $body, st
     'empty' => ['', ''],
     'headings and quotes' => ["T\n## Sub\n> quoted", 'Sub quoted'],
     'lists and checklists' => ["T\n- one\n* [ ] two\n- [x] three\n1. four", 'one two three four'],
-    'inline formatting' => ["T\n**bold** _it_ *em* ~~gone~~ ==mark== `code`", 'bold it em gone mark code'],
-    'links' => ["T\n[site](https://x.test) and [[Other note]] ![img](a.png)", 'site and Other note img'],
+    'inline formatting' => ["T\n**bold** _it_ *em* ~~gone~~ `code`", 'bold it em gone code'],
+    'links' => ["T\n[site](https://x.test) and ![img](a.png)", 'site and img'],
     'code fences dropped' => ["T\n```php\necho 1;\n```", 'echo 1;'],
     'windows newlines' => ["T\r\nline", 'line'],
     'snake_case kept' => ["T\nsome_snake_case word", 'some_snake_case word'],
@@ -55,10 +55,14 @@ it('shows backslash-escaped characters plainly', function () {
         ->and(NoteText::snippet("T\nprice \\*not\\* bold"))->toBe('price *not* bold');
 });
 
-it('strips underline markers from titles', function () {
-    expect(NoteText::title('++Important++ plan'))->toBe('Important plan');
+it('keeps inline code text in titles', function () {
+    expect(NoteText::title('Hot topic `code`'))->toBe('Hot topic code');
 });
 
-it('strips highlight colours from titles and keeps inline code', function () {
-    expect(NoteText::title('==Hot=={pink} topic `code`'))->toBe('Hot topic code');
+it('skips the editor\'s empty paragraphs and trims non-breaking spaces', function () {
+    $body = "&nbsp;\n\n# Trip&nbsp;\n\n&nbsp;\n\n&nbsp; pack bags &amp; go\u{00A0}\n\n&nbsp;";
+
+    expect(NoteText::title($body))->toBe('Trip')
+        ->and(NoteText::snippet($body))->toBe('pack bags & go')
+        ->and(NoteText::snippet("# Title\n\n&nbsp;"))->toBe('');
 });

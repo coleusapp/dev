@@ -29,6 +29,21 @@ class NoteFactory extends Factory
         ];
     }
 
+    public function pinned(): static
+    {
+        return $this->state(fn () => ['pinned_at' => now()]);
+    }
+
+    public function archived(): static
+    {
+        return $this->state(fn () => ['archived_at' => now()]);
+    }
+
+    public function bookmarked(): static
+    {
+        return $this->state(fn () => ['bookmarked_at' => now()]);
+    }
+
     public function trashed(): static
     {
         return $this->state(fn () => ['deleted_at' => now()]);

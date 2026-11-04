@@ -14,7 +14,7 @@ class PinController extends Controller
     {
         Gate::authorize('update', $note);
 
-        Notes::note()->pin($note);
+        Notes::note()->mark($note, 'pinned_at', true);
 
         return back();
     }
@@ -23,7 +23,7 @@ class PinController extends Controller
     {
         Gate::authorize('update', $note);
 
-        Notes::note()->unpin($note);
+        Notes::note()->mark($note, 'pinned_at', false);
 
         return back();
     }
