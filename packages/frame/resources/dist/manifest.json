@@ -1,60 +1,60 @@
 {
   "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/CommandPalette.vue": {
-    "file": "assets/CommandPalette-VI-645SP.js",
+    "file": "assets/CommandPalette-DQGUw-Jv.js",
     "name": "CommandPalette",
     "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/CommandPalette.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
-      "_VisuallyHiddenInput-DOgJ2Inl.js"
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
+      "_VisuallyHiddenInput-CB9cTFJ-.js"
     ]
   },
   "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Drawer.vue": {
-    "file": "assets/Drawer-Dg7NTKVw.js",
+    "file": "assets/Drawer-CUiKVxHP.js",
     "name": "Drawer",
     "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Drawer.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_DialogTrigger-DyPxsIR2.js",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+      "_DialogTrigger-t-ZhHWFo.js",
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
       "resources/js/app.ts"
     ]
   },
   "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Modal.vue": {
-    "file": "assets/Modal-_YzDPKs1.js",
+    "file": "assets/Modal-BFGrEV11.js",
     "name": "Modal",
     "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Modal.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_DialogTrigger-DyPxsIR2.js",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+      "_DialogTrigger-t-ZhHWFo.js",
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
       "resources/js/app.ts"
     ]
   },
   "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Slideover.vue": {
-    "file": "assets/Slideover-Cya92pJk.js",
+    "file": "assets/Slideover-D9e7PWb3.js",
     "name": "Slideover",
     "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Slideover.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_DialogTrigger-DyPxsIR2.js",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+      "_DialogTrigger-t-ZhHWFo.js",
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
       "resources/js/app.ts"
     ]
   },
   "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue": {
-    "file": "assets/Toast-FjQjTwSl.js",
+    "file": "assets/Toast-DGkw-vL7.js",
     "name": "Toast",
     "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js"
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js"
     ]
   },
-  "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js": {
-    "file": "assets/AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+  "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js": {
+    "file": "assets/AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
     "name": "AppLayout.vue_vue_type_script_setup_true_lang",
     "imports": [
       "resources/js/app.ts"
@@ -67,24 +67,24 @@
       "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/CommandPalette.vue"
     ]
   },
-  "_DialogTrigger-DyPxsIR2.js": {
-    "file": "assets/DialogTrigger-DyPxsIR2.js",
+  "_DialogTrigger-t-ZhHWFo.js": {
+    "file": "assets/DialogTrigger-t-ZhHWFo.js",
     "name": "DialogTrigger",
     "imports": [
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
       "resources/js/app.ts"
     ]
   },
-  "_VisuallyHiddenInput-DOgJ2Inl.js": {
-    "file": "assets/VisuallyHiddenInput-DOgJ2Inl.js",
+  "_VisuallyHiddenInput-CB9cTFJ-.js": {
+    "file": "assets/VisuallyHiddenInput-CB9cTFJ-.js",
     "name": "VisuallyHiddenInput",
     "imports": [
       "resources/js/app.ts",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js"
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-D2ZGQFap.js",
+    "file": "assets/app-DVzd1OX7.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -97,25 +97,25 @@
     ]
   },
   "resources/js/pages/Edit.vue": {
-    "file": "assets/Edit-DJ_4fZRG.js",
+    "file": "assets/Edit-BXn2brur.js",
     "name": "Edit",
     "src": "resources/js/pages/Edit.vue",
     "isDynamicEntry": true,
     "imports": [
       "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Modal.vue",
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
       "resources/js/app.ts",
-      "_VisuallyHiddenInput-DOgJ2Inl.js",
-      "_DialogTrigger-DyPxsIR2.js"
+      "_VisuallyHiddenInput-CB9cTFJ-.js",
+      "_DialogTrigger-t-ZhHWFo.js"
     ]
   },
   "resources/js/pages/Index.vue": {
-    "file": "assets/Index-CgR1_rr1.js",
+    "file": "assets/Index-Drmh62G3.js",
     "name": "Index",
     "src": "resources/js/pages/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_AppLayout.vue_vue_type_script_setup_true_lang-qZDaXT5e.js",
+      "_AppLayout.vue_vue_type_script_setup_true_lang-BafxGHhp.js",
       "resources/js/app.ts"
     ]
   }

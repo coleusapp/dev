@@ -2,6 +2,7 @@
 
 namespace Coleus\Frame\Database\Factories;
 
+use Coleus\Frame\Facades\Frames;
 use Coleus\Frame\Models\Frame;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -13,8 +14,9 @@ class FrameFactory extends Factory
     {
         return [
             'name' => $this->faker->randomElement(['Living room', 'Office', 'Hallway', 'Studio']),
-            'token_hash' => Frame::hashToken(Frame::generateToken()),
+            'token_hash' => Frames::kiosk()->hashToken(Frames::kiosk()->generateToken()),
             'search_query' => null,
+            'sources' => ['aic'],
             'interval_seconds' => 60,
             'is_active' => true,
         ];
@@ -27,6 +29,6 @@ class FrameFactory extends Factory
 
     public function withToken(string $token): static
     {
-        return $this->state(fn () => ['token_hash' => Frame::hashToken($token)]);
+        return $this->state(fn () => ['token_hash' => Frames::kiosk()->hashToken($token)]);
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
-use Coleus\Frame\Http\Controllers\KioskController;
+use Coleus\Frame\Facades\Frames;
 use Coleus\Frame\Models\Frame;
 use Coleus\Frame\Models\FrameArtwork;
+use Coleus\Frame\Services\KioskService;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     Storage::fake(config('frame.disk'));
-    $this->token = Frame::generateToken();
+    $this->token = Frames::kiosk()->generateToken();
     $this->frame = Frame::factory()->withToken($this->token)->create(['interval_seconds' => 90]);
 });
 
@@ -24,9 +25,9 @@ it('serves the kiosk page for a valid token with private headers and no session'
 
 it('returns a plain 404 for an unknown, hashed or inactive token', function (string $route, string $kind) {
     $token = match ($kind) {
-        'unknown' => Frame::generateToken(),
+        'unknown' => Frames::kiosk()->generateToken(),
         'hash instead of token' => substr($this->frame->token_hash, 0, 48),
-        'inactive' => tap(Frame::generateToken(), fn (string $token) => Frame::factory()->inactive()->withToken($token)->create()),
+        'inactive' => tap(Frames::kiosk()->generateToken(), fn (string $token) => Frame::factory()->inactive()->withToken($token)->create()),
     };
 
     $this->get(route($route, ['token' => $token, 'artwork' => 1]))
@@ -68,7 +69,7 @@ it('returns 204 when the frame has no artworks', function () {
 });
 
 it('shows never-shown artworks before shown ones', function () {
-    $neverShown = FrameArtwork::factory()->for($this->frame)->count(KioskController::ROTATION_WINDOW)->create();
+    $neverShown = FrameArtwork::factory()->for($this->frame)->count(KioskService::RotationWindow)->create();
     FrameArtwork::factory()->for($this->frame)->shownAt(now()->subYear())->create();
 
     $next = $this->getJson(route('frame.kiosk.next', ['token' => $this->token]))->json('id');
@@ -77,13 +78,13 @@ it('shows never-shown artworks before shown ones', function () {
 })->repeat(5);
 
 it('picks among the least recently shown artworks only', function () {
-    $artworks = FrameArtwork::factory()->for($this->frame)->count(KioskController::ROTATION_WINDOW + 5)
+    $artworks = FrameArtwork::factory()->for($this->frame)->count(KioskService::RotationWindow + 5)
         ->sequence(fn ($sequence) => ['last_shown_at' => now()->subHours(100 - $sequence->index)])
         ->create();
 
     $next = $this->getJson(route('frame.kiosk.next', ['token' => $this->token]))->json('id');
 
-    expect($artworks->take(KioskController::ROTATION_WINDOW)->pluck('id'))->toContain($next);
+    expect($artworks->take(KioskService::RotationWindow)->pluck('id'))->toContain($next);
 })->repeat(5);
 
 it('does not repeat the current artwork when another is available', function () {

@@ -1,5 +1,6 @@
 <?php
 
+use Coleus\Frame\Facades\Frames;
 use Coleus\Frame\Http\Controllers\FrameController;
 use Coleus\Frame\Jobs\FetchFrameArtworks;
 use Coleus\Frame\Models\Frame;
@@ -17,7 +18,7 @@ beforeEach(function () {
 
 function frameFormData(array $overrides = []): array
 {
-    return ['name' => 'Living room', 'search_query' => 'monet', 'interval_seconds' => 120, 'is_active' => true, ...$overrides];
+    return ['name' => 'Living room', 'search_query' => 'monet', 'sources' => ['aic', 'met'], 'interval_seconds' => 120, 'is_active' => true, ...$overrides];
 }
 
 function kioskTokenFrom(string $kioskUrl): string
@@ -56,10 +57,18 @@ it('lists only the current user frames with their artwork counts', function () {
             ->where('frames.0', ['id' => $mine->id, 'name' => 'Office', 'is_active' => true, 'artworks_count' => 2]));
 });
 
-it('shows the create form', function () {
+it('shows the create form with every configured source to choose from', function () {
     $this->get(route('frame.create'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('Edit', false)->where('frame', null)->where('kioskUrl', null));
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Edit', false)
+            ->where('frame', null)
+            ->where('kioskUrl', null)
+            ->where('sources', [
+                ['value' => 'aic', 'label' => 'Art Institute of Chicago'],
+                ['value' => 'met', 'label' => 'The Metropolitan Museum of Art'],
+                ['value' => 'cleveland', 'label' => 'Cleveland Museum of Art'],
+            ]));
 });
 
 it('creates a frame owned by the user and shows the kiosk URL exactly once', function () {
@@ -67,9 +76,9 @@ it('creates a frame owned by the user and shows the kiosk URL exactly once', fun
 
     $frame = Frame::query()->sole();
     $response->assertRedirect(route('frame.edit', ['frame' => $frame]));
-    expect($frame->only('name', 'search_query', 'interval_seconds', 'is_active'))->toBe([
-        'name' => 'Living room', 'search_query' => 'monet', 'interval_seconds' => 120, 'is_active' => true,
-    ])->and($frame->isOwnedBy($this->user->id))->toBeTrue();
+    expect($frame->only('name', 'search_query', 'sources', 'interval_seconds', 'is_active'))->toBe([
+        'name' => 'Living room', 'search_query' => 'monet', 'sources' => ['aic', 'met'], 'interval_seconds' => 120, 'is_active' => true,
+    ])->and($frame->users->modelKeys())->toContain($this->user->id);
 
     $kioskUrl = null;
     $this->get(route('frame.edit', ['frame' => $frame]))
@@ -80,7 +89,7 @@ it('creates a frame owned by the user and shows the kiosk URL exactly once', fun
 
     $token = kioskTokenFrom($kioskUrl);
     expect($kioskUrl)->toBe(route('frame.kiosk.show', ['token' => $token]))
-        ->and($frame->token_hash)->toBe(Frame::hashToken($token))
+        ->and($frame->token_hash)->toBe(Frames::kiosk()->hashToken($token))
         ->and($frame->token_hash)->not->toBe($token);
 
     $this->get(route('frame.edit', ['frame' => $frame]))
@@ -108,6 +117,11 @@ it('validates the frame', function (array $data, string $error) {
     'interval too long' => [['interval_seconds' => 86_401], 'interval_seconds'],
     'interval not a number' => [['interval_seconds' => 'soon'], 'interval_seconds'],
     'active not boolean' => [['is_active' => 'maybe'], 'is_active'],
+    'missing sources' => [['sources' => null], 'sources'],
+    'no sources' => [['sources' => []], 'sources'],
+    'sources not a list' => [['sources' => 'aic'], 'sources'],
+    'unknown source' => [['sources' => ['aic', 'louvre']], 'sources.1'],
+    'repeated source' => [['sources' => ['aic', 'aic']], 'sources.0'],
 ]);
 
 it('edits and updates a frame without exposing the token', function () {
@@ -119,20 +133,23 @@ it('edits and updates a frame without exposing the token', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('Edit', false)
             ->where('frame.id', $frame->id)
+            ->where('frame.sources', ['aic'])
+            ->has('sources', 3)
             ->missing('frame.token_hash')
             ->where('kioskUrl', null));
 
-    $this->put(route('frame.update', ['frame' => $frame]), frameFormData(['name' => 'Hallway', 'is_active' => false]))
+    $this->put(route('frame.update', ['frame' => $frame]), frameFormData(['name' => 'Hallway', 'sources' => ['cleveland'], 'is_active' => false]))
         ->assertRedirect(route('frame.edit', ['frame' => $frame]));
 
     $frame->refresh();
     expect($frame->name)->toBe('Hallway')
+        ->and($frame->sources)->toBe(['cleveland'])
         ->and($frame->is_active)->toBeFalse()
         ->and($frame->token_hash)->toBe($tokenHash);
 });
 
 it('regenerates the token, invalidating the old kiosk URL', function () {
-    $oldToken = Frame::generateToken();
+    $oldToken = Frames::kiosk()->generateToken();
     $frame = Frame::factory()->withToken($oldToken)->create();
 
     $this->post(route('frame.token.regenerate', ['frame' => $frame]))
@@ -140,9 +157,9 @@ it('regenerates the token, invalidating the old kiosk URL', function () {
         ->assertSessionHas(FrameController::TOKEN_FLASH_KEY);
 
     $newToken = session(FrameController::TOKEN_FLASH_KEY);
-    expect($frame->refresh()->token_hash)->toBe(Frame::hashToken($newToken))
+    expect($frame->refresh()->token_hash)->toBe(Frames::kiosk()->hashToken($newToken))
         ->and($newToken)->not->toBe($oldToken)
-        ->and($frame->isOwnedBy($this->user->id))->toBeTrue();
+        ->and($frame->users->modelKeys())->toContain($this->user->id);
 
     auth()->logout();
     $this->get(route('frame.kiosk.show', ['token' => $oldToken]))->assertNotFound();

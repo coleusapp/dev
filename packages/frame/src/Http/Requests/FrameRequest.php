@@ -2,7 +2,10 @@
 
 namespace Coleus\Frame\Http\Requests;
 
+use Coleus\Frame\Facades\Frames;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class FrameRequest extends FormRequest
 {
@@ -16,13 +19,15 @@ class FrameRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
             'search_query' => ['nullable', 'string', 'max:255'],
+            'sources' => ['required', 'array', 'min:1'],
+            'sources.*' => ['required', 'string', 'distinct', Rule::in(Frames::artwork()->sourceKeys())],
             'interval_seconds' => ['required', 'integer', 'min:'.self::MIN_INTERVAL_SECONDS, 'max:'.self::MAX_INTERVAL_SECONDS],
             'is_active' => ['required', 'boolean'],
         ];
@@ -35,21 +40,11 @@ class FrameRequest extends FormRequest
     {
         return [
             'name.required' => 'Give the frame a name.',
+            'sources.required' => 'Pick at least one source.',
+            'sources.min' => 'Pick at least one source.',
+            'sources.*.in' => 'Pick sources from the list.',
             'interval_seconds.min' => 'Show each artwork for at least '.self::MIN_INTERVAL_SECONDS.' seconds.',
             'interval_seconds.max' => 'Show each artwork for at most a day ('.self::MAX_INTERVAL_SECONDS.' seconds).',
-        ];
-    }
-
-    /**
-     * @return array{name: string, search_query: ?string, interval_seconds: int, is_active: bool}
-     */
-    public function frameData(): array
-    {
-        return [
-            'name' => (string) $this->validated('name'),
-            'search_query' => filled($this->validated('search_query')) ? trim($this->validated('search_query')) : null,
-            'interval_seconds' => (int) $this->validated('interval_seconds'),
-            'is_active' => $this->boolean('is_active'),
         ];
     }
 }

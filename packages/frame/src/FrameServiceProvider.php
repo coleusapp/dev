@@ -4,10 +4,10 @@ namespace Coleus\Frame;
 
 use Coleus\Frame\Commands\FetchFrameArtworksCommand;
 use Coleus\Frame\Http\Middleware\HandleInertiaRequests;
-use Coleus\Frame\Models\Frame;
-use Coleus\Frame\Policies\FramePolicy;
+use Coleus\Frame\Services\ArtworkService;
+use Coleus\Frame\Services\FrameService;
+use Coleus\Frame\Services\KioskService;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -18,8 +18,10 @@ class FrameServiceProvider extends PackageServiceProvider
     {
         $package->name('frame')
             ->hasConfigFile()
-            ->discoversMigrations()
-            ->runsMigrations()
+            ->hasMigrations([
+                'frame/create_frames_table',
+                'frame/create_frame_artworks_table',
+            ])
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews()
@@ -28,7 +30,7 @@ class FrameServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
-        Gate::policy(Frame::class, FramePolicy::class);
+        $this->loadMigrationsFrom(database_path('migrations/frame'));
 
         if (Str::of(request()?->path())->startsWith(config('frame.route_prefix'))) {
             app('router')
@@ -40,5 +42,17 @@ class FrameServiceProvider extends PackageServiceProvider
                 ->everySixHours()
                 ->withoutOverlapping();
         });
+    }
+
+    public function packageRegistered(): void
+    {
+        $this->app->singleton('frames', fn () => new Frames);
+        $this->app->singleton(FrameService::class);
+        $this->app->singleton(KioskService::class);
+        $this->app->singleton(ArtworkService::class);
+
+        foreach (config('frame.sources') as $source) {
+            $this->app->singleton($source);
+        }
     }
 }

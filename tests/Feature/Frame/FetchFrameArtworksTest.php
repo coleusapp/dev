@@ -1,9 +1,16 @@
 <?php
 
+use Coleus\Frame\Contracts\ArtworkSource;
+use Coleus\Frame\Data\ArtworkData;
+use Coleus\Frame\Facades\Frames;
 use Coleus\Frame\Jobs\FetchFrameArtworks;
 use Coleus\Frame\Models\Frame;
 use Coleus\Frame\Models\FrameArtwork;
+use Coleus\Frame\Sources\ArtInstituteOfChicagoSource;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Http\Client\Request;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -51,9 +58,41 @@ function aicArtwork(int $id, array $overrides = []): array
     ];
 }
 
+class FirstFakeArtworkSource implements ArtworkSource
+{
+    public function key(): string
+    {
+        return 'first';
+    }
+
+    public function name(): string
+    {
+        return ucfirst($this->key());
+    }
+
+    public function search(?string $query, int $count): Collection
+    {
+        return collect([new ArtworkData(1, "{$this->key()} 1", null, null, "https://{$this->key()}.test/1.jpg")]);
+    }
+
+    public function image(ArtworkData $artwork): string
+    {
+        return frameJpeg(100, 100);
+    }
+}
+
+class SecondFakeArtworkSource extends FirstFakeArtworkSource
+{
+    public function key(): string
+    {
+        return 'second';
+    }
+}
+
 beforeEach(function () {
     Storage::fake(config('frame.disk'));
     Sleep::fake();
+    config(['frame.sources' => [ArtInstituteOfChicagoSource::class]]);
 });
 
 it('stores resized artworks with their metadata', function () {
@@ -68,11 +107,11 @@ it('stores resized artworks with their metadata', function () {
             'title' => 'Painting 1',
             'artist_display' => 'Artist 1',
             'date_display' => '1890',
-            'path' => "frame/{$frame->id}/1.jpg",
+            'path' => "frame/{$frame->id}/aic/1.jpg",
         ]);
 
-    $landscape = getimagesizefromstring(Storage::disk(config('frame.disk'))->get("frame/{$frame->id}/1.jpg"));
-    $portrait = getimagesizefromstring(Storage::disk(config('frame.disk'))->get("frame/{$frame->id}/2.jpg"));
+    $landscape = getimagesizefromstring(Storage::disk(config('frame.disk'))->get("frame/{$frame->id}/aic/1.jpg"));
+    $portrait = getimagesizefromstring(Storage::disk(config('frame.disk'))->get("frame/{$frame->id}/aic/2.jpg"));
 
     expect([$landscape[0], $landscape[1], $landscape['mime']])->toBe([1620, 1080, 'image/jpeg'])
         ->and([$portrait[0], $portrait[1]])->toBe([360, 1080]);
@@ -86,7 +125,7 @@ it('never upscales small images', function () {
 
     FetchFrameArtworks::dispatchSync($frame);
 
-    $size = getimagesizefromstring(Storage::disk(config('frame.disk'))->get("frame/{$frame->id}/1.jpg"));
+    $size = getimagesizefromstring(Storage::disk(config('frame.disk'))->get("frame/{$frame->id}/aic/1.jpg"));
     expect([$size[0], $size[1]])->toBe([800, 600]);
 });
 
@@ -113,7 +152,7 @@ it('omits the search text when the frame has no query', function () {
 
     FetchFrameArtworks::dispatchSync($frame);
 
-    Http::assertSent(fn (Request $request) => str_contains($request->url(), '/artworks/search') && ! isset($request['q']));
+    Http::assertSent(fn (Request $request) => str_contains($request->url(), '/artworks/search') && !isset($request['q']));
 });
 
 it('keeps the random page inside the 10,000 result window', function () {
@@ -166,7 +205,7 @@ it('logs and skips an image that fails to download or decode', function (string|
     FetchFrameArtworks::dispatchSync($frame);
 
     expect($frame->artworks()->pluck('source_id')->all())->toBe([2]);
-    Storage::disk(config('frame.disk'))->assertMissing("frame/{$frame->id}/1.jpg");
+    Storage::disk(config('frame.disk'))->assertMissing("frame/{$frame->id}/aic/1.jpg");
     Log::shouldHaveReceived('warning')->once()->withArgs(fn (string $message, array $context) => $context['source_id'] === 1);
 })->with([
     'server error' => 500,
@@ -174,12 +213,30 @@ it('logs and skips an image that fails to download or decode', function (string|
     'not an image' => 'not a jpeg',
 ]);
 
+it('logs and skips an image too large to decode in the available memory', function () {
+    Log::spy();
+    $frame = Frame::factory()->create();
+    fakeAic([aicArtwork(1), aicArtwork(2)], ['img-1' => frameJpeg(3000, 3000)]);
+    $memoryLimit = ini_get('memory_limit');
+    ini_set('memory_limit', (string) (memory_get_usage() + 32 * 1024 * 1024));
+
+    try {
+        FetchFrameArtworks::dispatchSync($frame);
+    } finally {
+        ini_set('memory_limit', $memoryLimit);
+    }
+
+    expect($frame->artworks()->pluck('source_id')->all())->toBe([2]);
+    Log::shouldHaveReceived('warning')->once()->withArgs(fn (string $message, array $context) => $context['source_id'] === 1
+        && str_contains($context['error'], '3000x3000'));
+});
+
 it('fails the job when the search request fails', function () {
     $frame = Frame::factory()->create();
     Http::fake(['*' => Http::response('', 503)]);
 
     FetchFrameArtworks::dispatchSync($frame);
-})->throws(Illuminate\Http\Client\RequestException::class);
+})->throws(RequestException::class);
 
 it('prunes the oldest artworks and their files beyond the pool size', function () {
     config(['frame.pool_size' => 3]);
@@ -205,11 +262,42 @@ it('prunes the oldest artworks and their files beyond the pool size', function (
     $disk->assertExists($old[1]->path);
 });
 
+it('stores artworks from every configured source, each under its own key', function () {
+    config(['frame.sources' => [FirstFakeArtworkSource::class, SecondFakeArtworkSource::class]]);
+    $frame = Frame::factory()->create(['sources' => ['first', 'second']]);
+
+    FetchFrameArtworks::dispatchSync($frame);
+
+    expect($frame->artworks()->orderBy('source')->get(['source', 'source_id', 'title', 'path'])->toArray())->toBe([
+        ['source' => 'first', 'source_id' => 1, 'title' => 'first 1', 'path' => "frame/{$frame->id}/first/1.jpg"],
+        ['source' => 'second', 'source_id' => 1, 'title' => 'second 1', 'path' => "frame/{$frame->id}/second/1.jpg"],
+    ]);
+});
+
+it('skips an artwork only when the frame has it from the same source', function () {
+    config(['frame.sources' => [FirstFakeArtworkSource::class, SecondFakeArtworkSource::class]]);
+    $frame = Frame::factory()->create(['sources' => ['first', 'second']]);
+    FrameArtwork::factory()->for($frame)->create(['source' => 'first', 'source_id' => 1, 'title' => 'Kept']);
+
+    FetchFrameArtworks::dispatchSync($frame);
+
+    expect($frame->artworks()->orderBy('source')->pluck('title', 'source')->all())->toBe(['first' => 'Kept', 'second' => 'second 1']);
+});
+
+it('fetches only from the sources the frame has selected', function () {
+    config(['frame.sources' => [FirstFakeArtworkSource::class, SecondFakeArtworkSource::class]]);
+    $frame = Frame::factory()->create(['sources' => ['second', 'removed']]);
+
+    FetchFrameArtworks::dispatchSync($frame);
+
+    expect($frame->artworks()->pluck('source')->all())->toBe(['second']);
+});
+
 it('is unique per frame', function () {
     $frame = Frame::factory()->create();
     $job = new FetchFrameArtworks($frame);
 
-    expect($job)->toBeInstanceOf(Illuminate\Contracts\Queue\ShouldBeUnique::class)
+    expect($job)->toBeInstanceOf(ShouldBeUnique::class)
         ->and($job->uniqueId())->toBe((string) $frame->id)
         ->and($job->timeout)->toBeGreaterThan(0);
 });
@@ -221,7 +309,7 @@ it('removes the frame folder when the frame is deleted', function () {
     $disk->put("frame/{$frame->id}/1.jpg", 'x');
     $disk->put("frame/{$other->id}/1.jpg", 'x');
 
-    $frame->delete();
+    Frames::frame()->destroy($frame);
 
     $disk->assertMissing("frame/{$frame->id}");
     $disk->assertExists("frame/{$other->id}/1.jpg");

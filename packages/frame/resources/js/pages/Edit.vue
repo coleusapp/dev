@@ -3,10 +3,16 @@ import AppLayout from '@coleus/support/layouts/AppLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
+type SourceOption = {
+    value: string;
+    label: string;
+};
+
 type Frame = {
     id: number;
     name: string;
     search_query: string | null;
+    sources: string[];
     interval_seconds: number;
     is_active: boolean;
     artworks_count: number;
@@ -16,6 +22,7 @@ const props = defineProps<{
     frame: Frame | null;
     /** Only present right after create or token regeneration: the plain token is never stored. */
     kioskUrl: string | null;
+    sources: SourceOption[];
 }>();
 
 const toast = useToast();
@@ -24,8 +31,16 @@ const title = computed(() => props.frame?.name ?? 'New frame');
 const form = useForm({
     name: props.frame?.name ?? '',
     search_query: props.frame?.search_query ?? '',
+    sources: props.frame?.sources ?? props.sources.map(({ value }) => value),
     interval_seconds: props.frame?.interval_seconds ?? 60,
     is_active: props.frame?.is_active ?? true,
+});
+
+// Laravel reports a bad entry as `sources.0`, which no field is bound to.
+const sourcesError = computed(() => {
+    const errors: Record<string, string> = form.errors;
+
+    return errors.sources ?? Object.entries(errors).find(([key]) => key.startsWith('sources.'))?.[1];
 });
 
 const save = (): void => {
@@ -108,6 +123,10 @@ const fetchNow = (): void => {
                     :error="form.errors.search_query"
                 >
                     <UiInput v-model="form.search_query" class="w-full" />
+                </UiFormField>
+
+                <UiFormField label="Sources" description="Museums new artworks are fetched from." :error="sourcesError" required>
+                    <UiCheckboxGroup v-model="form.sources" :items="sources" />
                 </UiFormField>
 
                 <UiFormField label="Show each artwork for" description="In seconds." :error="form.errors.interval_seconds">

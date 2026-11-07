@@ -2,22 +2,17 @@
 
 namespace Coleus\Frame\Commands;
 
-use Coleus\Frame\Jobs\FetchFrameArtworks;
+use Coleus\Frame\Facades\Frames;
 use Coleus\Frame\Models\Frame;
-use Coleus\Users\Models\Scopes\UserScope;
 use Illuminate\Console\Command;
 
-/**
- * Queues an artwork fetch for one frame (any state) or for every active frame.
- * Runs without an authenticated user, so the per-user scope is bypassed.
- */
 class FetchFrameArtworksCommand extends Command
 {
     protected $signature = 'frame:fetch
                             {frame? : Frame id (defaults to every active frame)}
                             {--count=20 : Artworks to request per frame}';
 
-    protected $description = 'Queue new artworks from the Art Institute of Chicago for frames';
+    protected $description = 'Queue new artworks from the configured artwork source for frames';
 
     public function handle(): int
     {
@@ -29,21 +24,17 @@ class FetchFrameArtworksCommand extends Command
             return self::FAILURE;
         }
 
-        $query = Frame::query()->withoutGlobalScope(UserScope::class);
+        $frameId = (int) $this->argument('frame') ?: null;
 
-        if ($this->argument('frame') !== null) {
-            $frames = $query->whereKey($this->argument('frame'))->get();
+        $frames = Frames::frame()->fetchable($frameId);
 
-            if ($frames->isEmpty()) {
-                $this->error("Frame [{$this->argument('frame')}] not found.");
+        if ($frameId && $frames->isEmpty()) {
+            $this->error("Frame [{$this->argument('frame')}] not found.");
 
-                return self::FAILURE;
-            }
-        } else {
-            $frames = $query->where('is_active', true)->get();
+            return self::FAILURE;
         }
 
-        $frames->each(fn (Frame $frame) => FetchFrameArtworks::dispatch($frame, $count));
+        $frames->each(fn (Frame $frame) => Frames::artwork()->queueFetch($frame, $count));
 
         $this->info("Queued artwork fetches for {$frames->count()} frame(s).");
 

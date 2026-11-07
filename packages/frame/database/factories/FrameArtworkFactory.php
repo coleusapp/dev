@@ -16,6 +16,7 @@ class FrameArtworkFactory extends Factory
 
         return [
             'frame_id' => Frame::factory(),
+            'source' => 'aic',
             'source_id' => $sourceId,
             'title' => $this->faker->randomElement(['Water Lilies', 'The Bedroom', 'A Sunday on La Grande Jatte', 'Nighthawks']),
             'artist_display' => $this->faker->randomElement(['Claude Monet', 'Vincent van Gogh', 'Georges Seurat', 'Edward Hopper']),
