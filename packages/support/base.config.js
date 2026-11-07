@@ -25,7 +25,6 @@ export default defineConfig({
         ui({
             prefix: 'Ui',
             dts: false,
-            components: false,
             inertia: true,
             ui: {
                 colors: {

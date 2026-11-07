@@ -1,23 +1,68 @@
 {
+  "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/CommandPalette.vue": {
+    "file": "assets/CommandPalette-dGutftFU.js",
+    "name": "CommandPalette",
+    "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/CommandPalette.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_Index-W6BFfZxT.js"
+    ]
+  },
+  "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Drawer.vue": {
+    "file": "assets/Drawer-C5CC3pfO.js",
+    "name": "Drawer",
+    "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Drawer.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_Index-W6BFfZxT.js",
+      "resources/js/app.ts"
+    ]
+  },
+  "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Slideover.vue": {
+    "file": "assets/Slideover-CxaoUHpn.js",
+    "name": "Slideover",
+    "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Slideover.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_Index-W6BFfZxT.js",
+      "resources/js/app.ts"
+    ]
+  },
+  "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue": {
+    "file": "assets/Toast-BcILBsKM.js",
+    "name": "Toast",
+    "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts",
+      "_Index-W6BFfZxT.js"
+    ]
+  },
+  "_Index-W6BFfZxT.js": {
+    "file": "assets/Index-W6BFfZxT.js",
+    "name": "Index",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "dynamicImports": [
+      "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue",
+      "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Slideover.vue",
+      "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Drawer.vue",
+      "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/CommandPalette.vue"
+    ]
+  },
   "resources/js/app.ts": {
-    "file": "assets/app-Dfy9he2W.js",
+    "file": "assets/app-D05KLEUd.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "dynamicImports": [
-      "resources/js/pages/Index.vue"
+      "_Index-W6BFfZxT.js"
     ],
     "css": [
-      "assets/app-DWBwqwxH.css"
-    ]
-  },
-  "resources/js/pages/Index.vue": {
-    "file": "assets/Index-CHzlWdQf.js",
-    "name": "Index",
-    "src": "resources/js/pages/Index.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.ts"
+      "assets/app-Z6bPFLh4.css"
     ]
   }
 }

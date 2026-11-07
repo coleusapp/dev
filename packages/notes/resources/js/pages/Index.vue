@@ -1,306 +1,274 @@
 <script setup lang="ts">
+import {
+    filterQuery,
+    type NoteCollection,
+    type NoteCounts,
+    type NoteFilters,
+    type NoteResource,
+    type NoteView,
+    type Resource,
+} from '@/components/notes/note';
+import NoteEditor from '@/components/notes/NoteEditor.vue';
+import NoteList from '@/components/notes/NoteList.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import type { DropdownMenuItem } from '@nuxt/ui';
-import Highlight from '@tiptap/extension-highlight';
-import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
-import StarterKit from '@tiptap/starter-kit';
-import { EditorContent, useEditor } from '@tiptap/vue-3';
-import { computed, ref } from 'vue';
+import ConfirmModal from '@coleus/support/components/ui/modal/ConfirmModal.vue';
+import { Head, router } from '@inertiajs/vue3';
+import type { NavigationMenuItem } from '@nuxt/ui';
+import { watchDebounced } from '@vueuse/core';
+import { computed, ref, watch } from 'vue';
 
-const editor = useEditor({
-    extensions: [StarterKit, Underline, Highlight.configure({ multicolor: true }), Placeholder.configure({ placeholder: 'Start writing...' })],
-    autofocus: true,
-    editorProps: {
-        attributes: {
-            class: 'tiptap h-full focus:outline-none',
-        },
-    },
+const props = defineProps<{
+    notes: NoteCollection;
+    note: NoteResource | null;
+    counts: Resource<NoteCounts>;
+    filters: Resource<NoteFilters>;
+}>();
+
+const listQuery = computed(() => filterQuery(props.filters.data));
+
+const views: { view: NoteView; label: string; icon: string; count?: keyof NoteCounts }[] = [
+    { view: 'notes', label: 'All notes', icon: 'i-lucide-notebook', count: 'notes' },
+    { view: 'trash', label: 'Trash', icon: 'i-lucide-trash-2', count: 'trash' },
+];
+
+const listTitle = computed(() => views.find(({ view }) => view === props.filters.data.view)?.label ?? 'Notes');
+
+const viewItem = (item: (typeof views)[number]): NavigationMenuItem => ({
+    label: item.label,
+    icon: item.icon,
+    to: route('notes.index', filterQuery({ view: item.view, q: props.filters.data.q }), false),
+    active: props.filters.data.view === item.view,
+    badge: item.count ? props.counts.data[item.count] : undefined,
 });
 
-const groupByDate = ref(false);
+const listItems = computed<NavigationMenuItem[]>(() => views.filter((item) => item.view !== 'trash').map(viewItem));
 
-const menuItems = computed<DropdownMenuItem[][]>(() => [
-    [
-        {
-            label: 'Sort By',
-            icon: 'i-lucide-arrow-up-down',
-            children: [
-                { label: 'Name', icon: 'i-lucide-case-sensitive' },
-                { label: 'Date created', icon: 'i-lucide-calendar-plus' },
-                { label: 'Date modified', icon: 'i-lucide-calendar-clock' },
-            ],
-        },
-        {
-            label: 'Group by Date',
-            icon: 'i-lucide-calendar-days',
-            type: 'checkbox',
-            checked: groupByDate.value,
-            onUpdateChecked: (checked: boolean) => {
-                groupByDate.value = checked;
-            },
-        },
-    ],
-    [
-        {
-            label: 'Export',
-            icon: 'i-lucide-download',
-        },
-    ],
-]);
+const bottomItems = computed<NavigationMenuItem[]>(() => [...views.filter((item) => item.view === 'trash').map(viewItem)]);
 
-type TextStyleKey = 'title' | 'heading' | 'subheading' | 'body' | 'monostyled' | 'bulletList' | 'dashedList' | 'orderedList' | 'blockQuote';
+const search = ref(props.filters.data.q ?? '');
 
-const textStyleConfig: Record<TextStyleKey, { label: string; ui?: DropdownMenuItem['ui'] }> = {
-    title: { label: 'Title', ui: { itemLabel: 'text-lg font-bold' } },
-    heading: { label: 'Heading', ui: { itemLabel: 'font-bold' } },
-    subheading: { label: 'Subheading', ui: { itemLabel: 'font-semibold' } },
-    body: { label: 'Body' },
-    monostyled: { label: 'Monostyled', ui: { itemLabel: 'font-mono' } },
-    bulletList: { label: '•  Bulleted List' },
-    dashedList: { label: '–  Dashed List' },
-    orderedList: { label: '1. Numbered List' },
-    blockQuote: { label: 'Block Quote' },
+watch(
+    () => props.filters.data.q,
+    (q) => {
+        if ((q ?? '') !== search.value.trim()) {
+            search.value = q ?? '';
+        }
+    },
+);
+
+watchDebounced(
+    search,
+    (value) => {
+        const q = value.trim();
+
+        if (q === (props.filters.data.q ?? '')) {
+            return;
+        }
+
+        const url = props.note ? route('notes.show', { note: props.note.data.id }) : route('notes.index');
+
+        router.get(url, filterQuery({ ...props.filters.data, q }), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            only: ['notes', 'filters'],
+        });
+    },
+    { debounce: 300 },
+);
+
+const onNoteSaved = (): void => {
+    router.reload({ only: ['notes'] });
 };
 
-const isTextStyleActive = (style: TextStyleKey): boolean => {
-    if (!editor.value) {
-        return false;
-    }
-
-    switch (style) {
-        case 'title':
-            return editor.value.isActive('heading', { level: 1 });
-        case 'heading':
-            return editor.value.isActive('heading', { level: 2 });
-        case 'subheading':
-            return editor.value.isActive('heading', { level: 3 });
-        case 'body':
-            return editor.value.isActive('paragraph') && !editor.value.isActive('bulletList') && !editor.value.isActive('orderedList');
-        case 'monostyled':
-            return editor.value.isActive('codeBlock');
-        case 'bulletList':
-        case 'dashedList':
-            return editor.value.isActive('bulletList');
-        case 'orderedList':
-            return editor.value.isActive('orderedList');
-        case 'blockQuote':
-            return editor.value.isActive('blockquote');
-    }
+const createNote = (): void => {
+    router.post(route('notes.store'), { body: '' });
 };
 
-const applyTextStyle = (style: TextStyleKey): void => {
-    if (!editor.value) {
+const togglePin = (on: boolean): void => {
+    if (!props.note) {
         return;
     }
 
-    const chain = editor.value.chain().focus();
+    const url = route(on ? 'notes.pin' : 'notes.unpin', { note: props.note.data.id });
+    const options = { preserveScroll: true, preserveState: true };
 
-    switch (style) {
-        case 'title':
-            chain.setHeading({ level: 1 }).run();
-            break;
-        case 'heading':
-            chain.setHeading({ level: 2 }).run();
-            break;
-        case 'subheading':
-            chain.setHeading({ level: 3 }).run();
-            break;
-        case 'body':
-            chain.setParagraph().run();
-            break;
-        case 'monostyled':
-            chain.toggleCodeBlock().run();
-            break;
-        case 'bulletList':
-        case 'dashedList':
-            chain.toggleBulletList().run();
-            break;
-        case 'orderedList':
-            chain.toggleOrderedList().run();
-            break;
-        case 'blockQuote':
-            chain.toggleBlockquote().run();
-            break;
+    if (on) {
+        router.post(url, {}, options);
+    } else {
+        router.delete(url, options);
     }
 };
 
-const textStyleItem = (style: TextStyleKey): DropdownMenuItem => {
-    const { label, ui } = textStyleConfig[style];
-
-    return {
-        label,
-        type: 'checkbox',
-        checked: isTextStyleActive(style),
-        onUpdateChecked: () => applyTextStyle(style),
-        ui,
-    };
+const deleteNote = (): void => {
+    if (props.note) {
+        router.delete(route('notes.destroy', { note: props.note.data.id, ...listQuery.value }));
+    }
 };
 
-const textStyleItems = computed<DropdownMenuItem[][]>(() => [
-    [
-        textStyleItem('title'),
-        textStyleItem('heading'),
-        textStyleItem('subheading'),
-        textStyleItem('body'),
-        textStyleItem('monostyled'),
-        textStyleItem('bulletList'),
-        textStyleItem('dashedList'),
-        textStyleItem('orderedList'),
-    ],
-    [textStyleItem('blockQuote')],
-]);
-
-const colorOptions = [
-    { label: 'Red', value: 'red', hex: '#ef4444', swatchClass: 'bg-red-500', textClass: 'text-red-500' },
-    { label: 'Orange', value: 'orange', hex: '#f97316', swatchClass: 'bg-orange-500', textClass: 'text-orange-500' },
-    { label: 'Yellow', value: 'yellow', hex: '#eab308', swatchClass: 'bg-yellow-500', textClass: 'text-yellow-500' },
-    { label: 'Green', value: 'green', hex: '#22c55e', swatchClass: 'bg-green-500', textClass: 'text-green-500' },
-    { label: 'Blue', value: 'blue', hex: '#3b82f6', swatchClass: 'bg-blue-500', textClass: 'text-blue-500' },
-    { label: 'Purple', value: 'purple', hex: '#a855f7', swatchClass: 'bg-purple-500', textClass: 'text-purple-500' },
-] as const;
-
-const selectedColor = ref<(typeof colorOptions)[number]['value']>('red');
-
-const selectedColorHex = computed(() => colorOptions.find((option) => option.value === selectedColor.value)?.hex ?? colorOptions[0].hex);
-
-const selectedColorSwatchClass = computed(() => colorOptions.find((option) => option.value === selectedColor.value)?.swatchClass);
-
-const toggleHighlight = (): void => {
-    editor.value?.chain().focus().toggleHighlight({ color: selectedColorHex.value }).run();
+const restoreNote = (): void => {
+    if (props.note) {
+        router.post(route('notes.restore', { note: props.note.data.id }));
+    }
 };
 
-const colorItems = computed<DropdownMenuItem[]>(() =>
-    colorOptions.map((option) => ({
-        label: option.label,
-        type: 'checkbox',
-        checked: selectedColor.value === option.value,
-        onUpdateChecked: () => {
-            selectedColor.value = option.value;
+const confirmingForceDelete = ref(false);
 
-            if (editor.value?.isActive('highlight')) {
-                editor.value.chain().focus().setHighlight({ color: option.hex }).run();
-            }
-        },
-        swatchClass: option.swatchClass,
-        ui: { itemLabel: option.textClass },
-    })),
-);
+const forceDeleteNote = (): void => {
+    if (props.note) {
+        router.delete(route('notes.force-delete', { note: props.note.data.id }));
+    }
+};
 
-const noteMenuItems = computed<DropdownMenuItem[][]>(() => [
-    [
-        { label: 'Duplicate', icon: 'i-lucide-copy' },
-        { label: 'Lock note', icon: 'i-lucide-lock' },
-    ],
-    [{ label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error' }],
-]);
+const confirmingEmptyTrash = ref(false);
+
+const emptyTrash = (): void => {
+    router.delete(route('notes.trash.empty'));
+};
+
+type NoteAction = { label: string; icon: string; pressed?: boolean; color?: 'neutral' | 'error'; run: () => void };
+
+const noteActions = computed<NoteAction[]>(() => {
+    const note = props.note?.data;
+
+    if (!note) {
+        return [];
+    }
+
+    if (note.trashed) {
+        return [
+            { label: 'Restore', icon: 'i-lucide-undo-2', run: restoreNote },
+            { label: 'Delete forever', icon: 'i-lucide-trash', color: 'error', run: () => (confirmingForceDelete.value = true) },
+        ];
+    }
+
+    return [
+        { label: note.pinned ? 'Unpin' : 'Pin', icon: 'i-lucide-pin', pressed: note.pinned, run: () => togglePin(!note.pinned) },
+        { label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', run: deleteNote },
+    ];
+});
 </script>
 
 <template>
-    <Head title="Notes" />
+    <Head :title="note?.data.title || listTitle" />
 
     <NotesLayout>
         <template #panels>
-            <UiDashboardPanel id="notes-1" :default-size="18" :min-size="14" :max-size="24" resizable>
+            <UiDashboardPanel id="notes-0" class="hidden lg:flex" :default-size="14" :min-size="10" :max-size="20" resizable>
                 <template #header>
-                    <UiDashboardNavbar>
+                    <UiDashboardNavbar title="Notes">
                         <template #leading>
                             <UiDashboardSidebarCollapse variant="ghost" />
                         </template>
-                        <template #title>
-                            <div class="flex flex-col">
-                                <span>Notes</span>
-                                <small class="text-dimmed text-xs font-normal">0 notes</small>
-                            </div>
-                        </template>
-                        <template #right>
-                            <UiDropdownMenu :items="menuItems">
-                                <UiButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" />
-                            </UiDropdownMenu>
-                        </template>
                     </UiDashboardNavbar>
                 </template>
 
                 <template #body>
-                    <div class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">No notes yet.</div>
+                    <UiNavigationMenu :items="listItems" orientation="vertical" />
+                    <UiNavigationMenu :items="bottomItems" orientation="vertical" class="mt-auto" />
                 </template>
             </UiDashboardPanel>
 
-            <UiDashboardPanel id="notes-2" class="hidden lg:flex">
+            <!-- The body spaces its children gap-4 sm:gap-6; the list sits right under the search. -->
+            <UiDashboardPanel
+                id="notes-1"
+                :class="{ 'hidden lg:flex': note }"
+                :default-size="18"
+                :min-size="14"
+                :max-size="24"
+                resizable
+                :ui="{ body: 'gap-2 sm:gap-2' }"
+            >
                 <template #header>
-                    <UiDashboardNavbar :toggle="false">
+                    <UiDashboardNavbar :title="listTitle">
                         <template #leading>
-                            <UiButton icon="i-lucide-file-plus" color="neutral" variant="subtle">New note</UiButton>
+                            <UiDashboardSidebarCollapse variant="ghost" class="lg:hidden" />
                         </template>
-
-                        <div class="flex items-center justify-center gap-2">
-                            <UiDropdownMenu :items="textStyleItems">
-                                <template #content-top>
-                                    <div class="border-default flex items-center gap-1 border-b px-2 py-2">
-                                        <UiButton
-                                            icon="i-lucide-bold"
-                                            :color="editor?.isActive('bold') ? 'primary' : 'neutral'"
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="editor?.chain().focus().toggleBold().run()"
-                                        />
-                                        <UiButton
-                                            icon="i-lucide-italic"
-                                            :color="editor?.isActive('italic') ? 'primary' : 'neutral'"
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="editor?.chain().focus().toggleItalic().run()"
-                                        />
-                                        <UiButton
-                                            icon="i-lucide-underline"
-                                            :color="editor?.isActive('underline') ? 'primary' : 'neutral'"
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="editor?.chain().focus().toggleUnderline().run()"
-                                        />
-                                        <UiButton
-                                            icon="i-lucide-strikethrough"
-                                            :color="editor?.isActive('strike') ? 'primary' : 'neutral'"
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="editor?.chain().focus().toggleStrike().run()"
-                                        />
-                                        <UiButton
-                                            icon="i-lucide-highlighter"
-                                            :color="editor?.isActive('highlight') ? 'primary' : 'neutral'"
-                                            variant="ghost"
-                                            size="sm"
-                                            @click="toggleHighlight()"
-                                        />
-                                        <UiDropdownMenu :items="colorItems">
-                                            <template #item-leading="{ item }">
-                                                <span class="size-2.5 rounded-full" :class="item.swatchClass" />
-                                            </template>
-                                            <UiButton square color="neutral" variant="ghost" size="sm">
-                                                <span class="size-2.5 rounded-full" :class="selectedColorSwatchClass" />
-                                            </UiButton>
-                                        </UiDropdownMenu>
-                                    </div>
-                                </template>
-                                <UiButton icon="i-lucide-type" color="neutral" variant="ghost" />
-                            </UiDropdownMenu>
-                            <UiButton icon="i-lucide-list-checks" color="neutral" variant="ghost" />
-                            <UiButton icon="i-lucide-table" color="neutral" variant="ghost" />
-                            <UiButton icon="i-lucide-paperclip" color="neutral" variant="ghost" />
-                        </div>
-
                         <template #right>
-                            <UiButton label="Share" icon="i-lucide-share-2" color="neutral" variant="subtle" />
-                            <UiDropdownMenu :items="noteMenuItems">
-                                <UiButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" />
-                            </UiDropdownMenu>
+                            <UiButton
+                                v-if="filters.data.view === 'trash'"
+                                icon="i-lucide-trash"
+                                color="error"
+                                variant="ghost"
+                                aria-label="Empty trash"
+                                :disabled="counts.data.trash === 0"
+                                @click="confirmingEmptyTrash = true"
+                            />
+                            <UiButton icon="i-lucide-file-plus" color="neutral" variant="ghost" aria-label="New note" @click="createNote" />
                         </template>
                     </UiDashboardNavbar>
                 </template>
 
                 <template #body>
-                    <EditorContent :editor="editor" class="h-full w-full flex-1 overflow-y-auto p-4" />
+                    <UiInput
+                        v-model="search"
+                        icon="i-lucide-search"
+                        type="search"
+                        placeholder="Search notes"
+                        aria-label="Search notes"
+                        class="w-full"
+                        size="sm"
+                        :ui="{ trailing: 'pe-1' }"
+                    >
+                        <template v-if="search" #trailing>
+                            <UiButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Clear search" @click="search = ''" />
+                        </template>
+                    </UiInput>
+                    <NoteList :notes="notes.data" :selected-id="note?.data.id ?? null" :filters="filters.data" @create="createNote" />
+                </template>
+            </UiDashboardPanel>
+
+            <UiDashboardPanel id="notes-2" :class="note ? 'flex' : 'hidden lg:flex'">
+                <template #header>
+                    <UiDashboardNavbar :toggle="false">
+                        <template #leading>
+                            <UiButton
+                                v-if="note"
+                                class="lg:hidden"
+                                icon="i-lucide-chevron-left"
+                                color="neutral"
+                                variant="ghost"
+                                aria-label="Back to notes"
+                                :to="route('notes.index', listQuery, false)"
+                            />
+                        </template>
+
+                        <template #right>
+                            <UiTooltip v-for="action in noteActions" :key="action.label" :text="action.label">
+                                <UiButton
+                                    :icon="action.icon"
+                                    :aria-label="action.label"
+                                    :aria-pressed="action.pressed"
+                                    :color="action.color ?? 'neutral'"
+                                    :variant="action.pressed ? 'soft' : 'ghost'"
+                                    @click="action.run"
+                                />
+                            </UiTooltip>
+                        </template>
+                    </UiDashboardNavbar>
+                </template>
+
+                <template #body>
+                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" @saved="onNoteSaved" @restore="restoreNote" />
+                    <div v-else class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
+                        Select a note or create a new one.
+                    </div>
+
+                    <!-- Inside a panel: NotesLayout only renders its panels, not its default slot. -->
+                    <ConfirmModal
+                        v-model:open="confirmingForceDelete"
+                        :title="`Delete “${note?.data.title || 'Untitled note'}” forever?`"
+                        description="It can't be restored afterwards."
+                        confirm-label="Delete forever"
+                        @confirm="forceDeleteNote"
+                    />
+                    <ConfirmModal
+                        v-model:open="confirmingEmptyTrash"
+                        title="Empty the trash?"
+                        :description="`${counts.data.trash} ${counts.data.trash === 1 ? 'note is' : 'notes are'} deleted for good.`"
+                        confirm-label="Empty trash"
+                        @confirm="emptyTrash"
+                    />
                 </template>
             </UiDashboardPanel>
         </template>

@@ -1,0 +1,38 @@
+{
+    "name": "coleus/frame",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "coleus/apps": "^1.0",
+        "coleus/support": "^1.0",
+        "coleus/users": "^1.0",
+        "illuminate/console": "^10.45|^11.0|^12.0",
+        "illuminate/contracts": "^10.45|^11.0|^12.0",
+        "illuminate/database": "^10.45|^11.0|^12.0",
+        "illuminate/support": "^10.45|^11.0|^12.0",
+        "spatie/laravel-package-tools": "^1.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Coleus\\Frame\\": "src/",
+            "Coleus\\Frame\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Coleus\\Frame\\FrameServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-
 /**
  * @template TModel of \Illuminate\Database\Eloquent\Model
  * @template TData of \Spatie\LaravelData\Data
@@ -46,7 +45,6 @@ abstract class Service
     }
 
     /**
-     * @param  mixed  $payload
      * @return ?TModel
      */
     public function store(mixed $payload): ?Model
@@ -58,7 +56,6 @@ abstract class Service
 
     /**
      * @param  TModel  $model
-     * @param  mixed  $payload
      * @return mixed|bool|TModel
      */
     public function update(mixed $model, mixed $payload): mixed
@@ -72,10 +69,34 @@ abstract class Service
 
     /**
      * @param  TModel  $model
-     * @return bool|null
      */
-    public function destroy(mixed $model): bool|null
+    public function destroy(mixed $model): ?bool
     {
         return $model->delete();
+    }
+
+    /**
+     * @param  TModel  $model
+     */
+    public function restore(mixed $model): bool
+    {
+        return $model->restore();
+    }
+
+    /**
+     * @param  TModel  $model
+     */
+    public function forceDelete(mixed $model): ?bool
+    {
+        return $model->forceDelete();
+    }
+
+    /**
+     * For soft-deleting models. toBase() keeps the global scopes (e.g. UserScope);
+     * the builder's forceDelete() would skip them and delete every user's rows.
+     */
+    public function emptyTrash(): int
+    {
+        return $this->model::query()->onlyTrashed()->toBase()->delete();
     }
 }

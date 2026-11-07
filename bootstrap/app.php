@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\LogInFirstUserLocally;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance']);
 
         $middleware->web(append: [
+            LogInFirstUserLocally::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
     })

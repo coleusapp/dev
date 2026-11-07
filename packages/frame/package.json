@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "format": "prettier --write resources/",
+        "format:check": "prettier --check resources/",
+        "lint": "eslint . --fix"
+    },
+    "dependencies": {
+        "@coleus/support": "workspace:*",
+        "@inertiajs/vue3": "catalog:dep",
+        "@nuxt/ui": "catalog:dep",
+        "@tailwindcss/vite": "catalog:dep",
+        "@vitejs/plugin-vue": "catalog:dep",
+        "laravel-vite-plugin": "catalog:dep",
+        "tailwindcss": "catalog:dep",
+        "typescript": "catalog:dep",
+        "vite": "catalog:dep",
+        "vue": "catalog:dep",
+        "ziggy-js": "catalog:dep"
+    }
+}

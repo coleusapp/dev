@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';

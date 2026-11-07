@@ -1,25 +1,18 @@
 <?php
 
 return [
+
     /*
-     * Table prefix to be used when running the migration classes.
+     * Prefix for the Notes tables (notes_notes).
      *
      * Default: notes_
      */
-
     'table_prefix' => 'notes_',
 
     /*
-     * Route prefix for this package. Everything is going to be prefixed by this value.
+     * The URL prefix of the Notes pages.
      *
      * Default: notes
      */
     'route_prefix' => 'notes',
-
-    /*
-     * Settings group prefix.
-     *
-     * Default: notes
-     */
-    'settings_prefix' => 'notes',
 ];

@@ -426,8 +426,101 @@ it('has emails', function (string $email) {
 - Before editing a file you already read earlier in the conversation, re-read it first if there's any chance it changed. Never blindly Write/overwrite a file based on stale content held in context.
 - If a file changed on disk since you last read it, treat that as the user's real, deliberate work — not something to revert or ignore in favor of what you remember.
 
+## Coding Style
+Follow Spatie's guidelines for PHP, Laravel and JavaScript: https://spatie.be/guidelines (pages `/guidelines/php`, `/guidelines/laravel`, `/guidelines/javascript`). Where the user has said otherwise, the user wins; those exceptions are marked **(user)**.
+
+PHP / Laravel:
+- Do it the way Laravel documents it; deviating needs a reason. PSR-1/2/12. No `final`, no `readonly`.
+- Types: `?string`, not `string|null`. `: void` when nothing is returned. Typed properties, never a `@var` docblock for the type. Constructor promotion when every property can be promoted: one parameter per line, trailing comma, `) {}`.
+- Enum cases and class constants are PascalCase (`case Diamonds;`, `const SessionTokenHeader`). Enums have no prefix/suffix.
+- Docblocks only when the signature can't say it (iterable shapes like `array<int, Note>`, `array{a: X}`, `Collection<int,Note>`); one line when possible (`/** @return ... */`); Spatie's "if one param needs a docblock, document all of them" loses to Pint's `no_superfluous_phpdoc_tags`, which strips tags that repeat the signature — document only what the signature can't say. Imported short class names in docblocks. Descriptions only when they add context, as full sentences.
+- One `use` per trait, each on its own line.
+- String interpolation (`"Hi, I am {$name}."`), not concatenation or `sprintf`.
+- Method chains: once a chain breaks lines, every `->` goes on its own line; never mix.
+- Ternaries: each part on its own line unless very short.
+- `if`: always braces; unhappy path first with an early return, happy path last; avoid `else`; prefer separate early-return `if`s over compound `&&` conditions.
+- Comments: avoid them by extracting a well-named function; `// ` with a space.
+- Whitespace: blank line between statements (except runs of similar one-liners, like `$table->...` in a migration); no blank line right after `{` or before `}`.
+- Config files kebab-case, keys snake_case; `env()` only in config; service credentials in `config/services.php`.
+- Artisan command names kebab-case; `handle()` ends with feedback (`$this->comment(...)`), per-item output plus a summary.
+- Routes: URLs kebab-case without a leading `/`; tuple syntax `[Controller::class, 'index']`; names camelCase; HTTP verb first (`Route::get(...)->name(...)`); parameters camelCase. API resources plural, kebab-case, shallow nesting.
+- Controllers: only the CRUD methods (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`); other actions get their own controller (`PinController@store/destroy`, like Spatie's `FavoritePostsController`). Spatie names resource controllers in the plural (`PostsController`); this repo uses the singular (`NoteController`) — keep matching the existing names.
+- Validation rules as arrays (`['required', 'email']`), never pipe strings. Custom rule names snake_case.
+- Views camelCase. Blade: 4 spaces, `@if($condition)` with no space.
+- Authorization abilities camelCase CRUD words (`view` instead of `show`).
+- Translations with `__()`, not `@lang`.
+- Class names: Jobs = the action (`CreateUser`), Events by tense (`ApprovingLoan`/`LoanApproved`), Listeners `...Listener`, Commands `...Command`, Mailables `...Mail`, Resources plural + `Resource`.
+- Tests: helper classes in the same test file when possible. (This repo uses Pest, so Spatie's `/** @test */` doesn't apply.)
+- **(user)** Negation is `!$value`, no space (Spatie writes `! $value`). `pint.json` turns off the Laravel preset's `not_operator_with_successor_space`, so Pint strips the space. Never `!!$value` (Pint rewrites it to `(bool) $value`).
+- **(user)** Never compare with `=== null` / `!== null` to ask whether something is set; use truthiness (`!$note->{$column}`, `(bool) $this->pinned_at`, `->when($filters->q, ...)`). Use `?->` when calling into a value that may be null (`$this->created_at?->toIso8601String()`).
+- **(user)** Prefer Laravel's idioms over hand-rolled conditions: `??=`, and Eloquent skipping a `save()` when nothing is dirty, instead of guard clauses like `if (! $a === ! $b) return;`. Name methods for the action (`pin()`/`unpin()`), not generic toggles (`mark($note, $column, $on)`).
+
+JavaScript / TypeScript:
+- Prettier decides formatting; 4-space indent, single quotes. Spatie uses `printWidth: 120`; this repo's `.prettierrc` uses 150 — the repo file wins.
+- `const` by default, `let` only when reassigned, never `var`.
+- No abbreviated names, except in one-line arrow callbacks where the context is obvious.
+- `===` always; cast first if types may differ.
+- Named functions use the `function` keyword; short one-liners and higher-order helpers may be arrows; anonymous callbacks are arrows (`function` only when `this` is needed). Keep functions pure, limit `this`. Object methods use shorthand (`handleClick(event) {}`).
+- Prefer object/array destructuring over indexing (`const [hours, minutes] = time.split(':')`), and for options-style parameters.
+
+## No Redundant Comments
+- Don't write comments (inline, PHPDoc/JSDoc, file or block headers) that restate what the code, its names or its types already say. This applies to new code and to code you touch.
+- Only comment a non-obvious *why*: a workaround, a constraint from outside the code, a deliberate trade-off. If nothing like that exists, write no comment.
+- PHPDoc is still fine where it adds type information PHP can't express (array shapes, generics, `@mixin`, `@property`) — as tags only, without a prose line restating the method name. Laravel boilerplate like "Run the migrations." goes too.
+- Tool directives stay (`// @vitest-environment jsdom`, `/** @uses ... */`), and so does the `//` body in spatie Data constructors (the convention in every package).
+
 ## Scope of Replies
 - Do the one task in the prompt. Nothing else.
 - Do not give opinions, suggestions, analysis, or "next steps" unless explicitly asked for them.
 - Do not mention things that weren't asked about, even if noticed while working (e.g. unrelated bugs, inconsistencies). Stay silent on them unless asked.
 - After making a change, don't restate/explain what was changed if it adds no value (the user can read the diff). Keep end-of-turn text minimal or omit it.
+
+## Package Migrations
+- Package migrations are published, not run from the package. Each package keeps undated stubs in `packages/<name>/database/migrations/<name>/create_*_table.php.stub` and lists them in order with `->hasMigrations(['<name>/create_..._table', ...])`.
+- Publishing (`php artisan vendor:publish --tag=<name>-migrations`) copies them into the app's `database/migrations/<name>/` with the publish date, in the listed order. The published files are committed; each package gets its own subfolder so they don't mix in `database/migrations/`.
+- Don't use `->runsMigrations()` with stubs: it calls `loadMigrationsFrom()` on the `.php.stub` path, and Laravel's migrator ignores paths that don't end in `.php`, so nothing runs.
+- Instead, the package's service provider loads the published folder in `bootingPackage()`: `$this->loadMigrationsFrom(database_path('migrations/<name>'));`. Plain `php artisan migrate`, `migrate:fresh` and `RefreshDatabase` then pick them up with no `--path` and no test changes.
+- Don't pass `--path` to `migrate`/`migrate:fresh` to reach a subfolder: it replaces every other registered path, including other packages' `loadMigrationsFrom()` paths.
+- Order matters for foreign keys: the migrator sorts by file name, so it's the published timestamps (from the `hasMigrations()` order) that run a parent table before its children.
+- Moving a package from dated migrations to stubs gives the migration a new name, so an existing database still has the old name in its `migrations` table and will try to create the table again. Renaming that row is a data step to confirm separately.
+- Reference implementations: `packages/notes`, `packages/health`.
+
+## Support Package (`packages/support`)
+`coleus/support` (Composer, `Coleus\Support\`) / `@coleus/support` (pnpm workspace) is the shared base every app package (calendar, frame, health, music, notes, users) builds on. It has no routes, pages, migrations or config of its own; `SupportServiceProvider` only names the package. It holds things that are generic across packages — anything specific to one package stays in that package.
+
+Frontend (imported as `@coleus/support/...`, alias defined in `base.config.js`):
+- `base.config.js` — the shared Vite config each package's `vite.config.ts` merges (`mergeConfig(baseConfig, { base: '/vendor/<name>/', ... })`): Tailwind, laravel-vite-plugin (`resources/js/app.ts`, hot file in the app's `public/hot`), Vue, and Nuxt UI with the `Ui` component prefix, Inertia mode and the shared theme overrides. Build output goes to each package's `resources/dist`. A change here affects every package's build.
+- `formkit.config.ts` / `formkit.theme.ts` — shared FormKit Pro plugin and theme, imported by packages' own `formkit.config.ts`.
+- `layouts/AppLayout.vue` (dashboard shell: sidebar, navigation links, team/user menus) and `layouts/SimpleLayout.vue` (centred guest page).
+- `components/` — generic UI: `card/Header`, `form/Form`, `table/*` (header, pagination, meta info, edit/delete actions), `ui/table/columns/*` (badge/icon columns), `ui/datepicker`, `ui/modal/ConfirmModal`, `TeamMenu`, `UserMenu`, `Calendar`, `Time`, `Weather`.
+- `lib/inertia.ts` — `ToastType` and `onSuccessToast`/`onErrorToast` visit callbacks.
+- `types/resource.ts` — `Resource<T>`, `Collection<T>` (with `Meta`) and `Request<T>` types matching Laravel API resources.
+
+Backend:
+- `ModelWithDefaults` / `PivotWithDefaults` — base models: everything fillable except the primary key, and the table name prefixed from the config key in `static::$tablePrefix` (e.g. `'notes.table_prefix'`).
+- `Services\Service` — base CRUD service (`index`, `defaultQuery`, `store`, `update`, `destroy`, and `restore`/`forceDelete`/`emptyTrash` for soft-deleting models) over a `$model` and a spatie/laravel-data `$data` class; a `save()` method on the subclass overrides store/update. `Services\Concerns\CanBeOption` adds `options()` via `$optionResource`.
+- `Resources\EnumResource` + `Contracts\HasLabel` + `Concerns\NullableResourceCollection` — `{label, value}` option lists, optionally with a leading "-- Select One --" null option.
+- `Http\Middleware\HandleInertiaRequests` — base Inertia middleware sharing `name`, `config.timezone`, `auth.user` and `ziggy`. Each package extends it only to set its own root view (`protected $rootView = '<name>::app';`).
+- `Console\Commands\MakeControllerCommand` — `make:coleus-controller {name?} {package?}`; not registered by any provider, so it isn't available in `artisan`.
+- `PestHelpers.php` (autoloaded) — `registerColeusPestHelpers()`, called in `tests/Pest.php`, defines `assertSuccessfulGet/Post/Put/Delete`.
+
+## Notes Package (`packages/notes`)
+Scope and decisions the user has made; don't reintroduce what's listed as removed.
+- **One table, one editor.** `notes` (`body`, `pinned_at`, timestamps, soft deletes) and a Tiptap editor. Canvas, Bases, archive, bookmarks and Recents were removed on purpose. The list views are `NoteView::Notes` and `NoteView::Trash` only.
+- **The body is HTML, and may be null** (an empty note; `ConvertEmptyStringsToNull` sends `''` as null). The column, `NoteData`, `NoteText` and the TS types all allow null.
+- **HTML details.** The editor loads `body` as HTML (`content: props.modelValue`) and emits `editor.getHTML()`; the server stores it as-is, with no sanitizing (the user's choice) and no Markdown anywhere. Old Markdown notes aren't converted — the user doesn't care about them. Tiptap's trailing node means the HTML often ends in `<p></p>`.
+- **Title and snippet are derived on the server** by `Support\NoteText` from the text of the `p, h1–h6, pre` blocks (PHP 8.4 `Dom\HTMLDocument`): title = first block with text, snippet = the rest. Never stored; never computed on the client.
+- **Search is simple.** `NoteService::search()` (private) is one `whereLike('body', "%{$terms}%")` — the whole search as one phrase. No word splitting, search class, model scope, FULLTEXT index, stopword or wildcard handling — the user removed all of that. It runs on the raw HTML body.
+- **The server owns all ordering.** No client-side sorting; after an autosave the page reloads the list with `router.reload({ only: ['notes'] })`.
+- **Autosave** (`composables/useAutosave.ts`): `save` is a debounced `useHttp().put()` (Inertia v3), triggered from the editor's `onUpdate` via `@update:model-value`. There's no request queue, no navigation guard, no keepalive/tab-close save and no syncing of server-side body changes into an open editor — the user removed each of these. `NoteEditor` is keyed by note id, so switching notes remounts it.
+- **Bulk deletes must keep `UserScope`.** Emptying the trash is the base `Service::emptyTrash()`. `Note::query()->onlyTrashed()->forceDelete()` deletes through `getQuery()`, which skips global scopes and wipes every user's trash. Use `->toBase()->delete()`, which applies them. `HasUser` has no delete hook, so a single query loses nothing over deleting model by model.
+- **No authorization for now.** `Gate::authorize` calls, `NotePolicy` and their tests were removed; the user will design authorization later. Ownership is still enforced by `UserScope` (foreign notes 404). Restore and force-delete no longer check that the note is in the trash.
+- **No settings.** The Settings page, `NotePreferences`, the `Settings` facade, the sort menu (`SortController`/`SortRequest`) and the `NoteSort` enum were removed; every former preference is hard-wired to its default: list ordered pinned first, then last edited (`NoteService::defaultQuery()`), relative dates and snippets always shown, autosave delay 750 ms, text direction `auto`, readable width on.
+- **Things have places (the health pattern).** Form Requests hold only `authorize`, `rules` and `messages`. Controllers pass `$request->validated()` to the service (`Notes::note()`) and return a response or resource — no logic. The service shapes the payload with a Data class (`NoteListData::from($payload)`) and does the work (`list()`, `filters()`, `listQuery()`, `search()`). Never add Form Request helpers like `noteData()`; if input needs adjusting, spatie's `prepareForPipeline()` on the Data class is the place. A controller may type-hint a second Form Request (`store(NoteRequest $request, NoteListRequest $list)`) to get the list filters validated.
+- **Every page prop is an API resource** (`NoteResource`, `NoteDetailResource`, `NoteCountsResource`, `NoteFiltersResource`), never a raw array or Data object, so each arrives wrapped as `prop.data` (TS: `Resource<T>`). Build them with `::make()` / `::collection()`, never `new`.
+- **Inertia v3** across the app (`inertiajs/inertia-laravel` ^3, `@inertiajs/vue3` ^3). Prefer Inertia APIs (`useHttp`, `router`) over raw `fetch`.
+- **Shared UI lives in support** (`@coleus/support/components/...`), e.g. `components/ui/modal/ConfirmModal.vue`; notes-specific UI stays in `resources/js/components/notes`.
+- **After a frontend change**, rebuild and publish: `cd packages/notes && npx vite build`, then `php artisan vendor:publish --tag=notes-assets --force`.
+
+## Keeping This File Current
+- After each change that teaches you something about the project (a decision, a removed feature, a convention, a gotcha), update the relevant section here in the same turn, without being asked.

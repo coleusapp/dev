@@ -47,7 +47,7 @@
         "typescript": "catalog:dep",
         "vite": "catalog:dep",
         "vue": "catalog:dep",
-        "vue-router": "^4.5.1",
+        "vue-router": "catalog:dep",
         "ziggy-js": "catalog:dep"
     },
     "devDependencies": {

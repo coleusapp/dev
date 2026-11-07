@@ -4,55 +4,96 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-.tiptap {
-    @apply h-full text-sm;
+.note-content {
+    @apply text-sm leading-relaxed break-words;
 }
 
-.tiptap h1 {
+.note-content h1 {
     @apply mt-4 mb-2 text-lg font-bold first:mt-0;
 }
 
-.tiptap h2 {
+.note-content h2 {
     @apply mt-4 mb-2 font-bold first:mt-0;
 }
 
-.tiptap h3 {
+.note-content h3,
+.note-content h4,
+.note-content h5,
+.note-content h6 {
     @apply mt-4 mb-2 font-semibold first:mt-0;
 }
 
-.tiptap p {
+.note-content p {
     @apply mb-2;
 }
 
-.tiptap ul {
-    @apply mb-2 list-disc pl-6;
+.note-content a {
+    @apply text-primary underline underline-offset-2;
 }
 
-.tiptap ol {
-    @apply mb-2 list-decimal pl-6;
+.note-content ul {
+    @apply mb-2 list-disc ps-6;
 }
 
-.tiptap blockquote {
-    @apply border-default text-dimmed mb-2 border-l-2 pl-4;
+.note-content ol {
+    @apply mb-2 list-decimal ps-6;
 }
 
-.tiptap code {
+.note-content blockquote {
+    @apply border-default text-dimmed mb-2 border-s-2 ps-4;
+}
+
+.note-content code {
     @apply bg-elevated rounded px-1 py-0.5 font-mono text-xs;
 }
 
-.tiptap pre {
-    @apply bg-elevated mb-2 rounded-md p-3 font-mono text-xs;
+.note-content pre {
+    @apply bg-elevated mb-2 overflow-x-auto rounded-md p-3 font-mono text-xs;
 }
 
-.tiptap pre code {
+.note-content pre code {
     @apply bg-transparent p-0;
 }
 
-.tiptap mark {
-    @apply rounded-sm px-0.5;
+.note-content hr {
+    @apply border-default my-4;
 }
 
-.tiptap p.is-editor-empty:first-child::before {
+.tiptap p.is-editor-empty:first-child::before,
+.tiptap h1.is-empty:first-child::before {
     @apply text-dimmed pointer-events-none float-left h-0;
     content: attr(data-placeholder);
+}
+
+.tiptap ul[data-type='taskList'] {
+    @apply list-none ps-0;
+}
+
+.tiptap ul[data-type='taskList'] li {
+    @apply flex items-start gap-2;
+}
+
+.tiptap ul[data-type='taskList'] li > label {
+    @apply mt-0.5 shrink-0;
+}
+
+.tiptap ul[data-type='taskList'] li > div {
+    @apply min-w-0 flex-1;
+}
+
+.tiptap ul[data-type='taskList'] li[data-checked='true'] > div {
+    @apply text-dimmed line-through;
+}
+
+.tiptap ul[data-type='taskList'] ul[data-type='taskList'] {
+    @apply mt-1 ps-6;
+}
+
+.tiptap[dir='auto'] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote) {
+    unicode-bidi: plaintext;
+    text-align: start;
+}
+
+.readable-width :is(.tiptap, .note-toolbar) {
+    @apply mx-auto w-full max-w-[46rem];
 }

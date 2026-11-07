@@ -10,9 +10,7 @@ class SettingsServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package->name('settings')
-            ->hasMigrations([
-                'settings/create_settings_table',
-            ])
+            ->discoversMigrations()
             ->runsMigrations();
     }
 

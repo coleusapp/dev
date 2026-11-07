@@ -1,0 +1,70 @@
+<script setup lang="ts">
+import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes/note';
+import { Link } from '@inertiajs/vue3';
+import { computed, nextTick, useTemplateRef, watch } from 'vue';
+
+const props = defineProps<{
+    notes: NoteData[];
+    selectedId: number | null;
+    filters: NoteFilters;
+}>();
+
+defineEmits<{
+    create: [];
+}>();
+
+const query = computed(() => filterQuery(props.filters));
+
+const list = useTemplateRef<HTMLElement>('list');
+
+watch(
+    () => props.selectedId,
+    (id) => void nextTick(() => list.value?.querySelector(`[data-note-id="${id}"]`)?.scrollIntoView({ block: 'nearest' })),
+);
+
+const emptyMessage = computed(() => {
+    if (props.filters.q) {
+        return `No notes match “${props.filters.q}”.`;
+    }
+
+    return {
+        notes: 'No notes yet.',
+        trash: 'The trash is empty.',
+    }[props.filters.view];
+});
+</script>
+
+<template>
+    <div v-if="notes.length === 0" class="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
+        <UiIcon name="i-lucide-notebook-pen" class="text-dimmed size-8" />
+        <p class="text-dimmed text-sm">{{ emptyMessage }}</p>
+        <UiButton
+            v-if="filters.view === 'notes' && !filters.q"
+            icon="i-lucide-file-plus"
+            color="neutral"
+            variant="subtle"
+            size="sm"
+            @click="$emit('create')"
+            >Create your first note</UiButton
+        >
+    </div>
+    <nav v-else ref="list" class="divide-default flex flex-col divide-y" aria-label="Notes">
+        <Link
+            v-for="note in notes"
+            :key="note.id"
+            :data-note-id="note.id"
+            :href="route('notes.show', { note: note.id, ...query })"
+            preserve-state
+            preserve-scroll
+            class="hover:bg-elevated flex flex-col gap-1 px-3 py-3"
+            :class="{ 'bg-elevated': note.id === selectedId }"
+        >
+            <span class="flex items-center gap-1">
+                <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">{{ note.title || 'Empty note' }}</span>
+                <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
+            </span>
+            <span v-if="note.snippet" class="text-muted line-clamp-2 text-xs">{{ note.snippet }}</span>
+            <time class="text-dimmed text-xs" :datetime="note.updated_at">{{ note.updated_at_for_humans }}</time>
+        </Link>
+    </nav>
+</template>

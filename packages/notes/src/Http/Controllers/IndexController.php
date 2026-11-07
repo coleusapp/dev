@@ -3,13 +3,16 @@
 namespace Coleus\Notes\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Inertia\Inertia;
+use Coleus\Notes\Http\Controllers\Concerns\RendersNotesPage;
+use Coleus\Notes\Http\Requests\NoteListRequest;
 use Inertia\Response;
 
 class IndexController extends Controller
 {
-    public function __invoke(): Response
+    use RendersNotesPage;
+
+    public function __invoke(NoteListRequest $request): Response
     {
-        return Inertia::render('Index');
+        return $this->notesPage($request);
     }
 }

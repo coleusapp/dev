@@ -14,6 +14,7 @@ class NotesServiceProvider extends PackageServiceProvider
     {
         $package->name('notes')
             ->hasConfigFile()
+            ->hasMigrations(['notes/create_notes_table'])
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews();
@@ -21,6 +22,8 @@ class NotesServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
+        $this->loadMigrationsFrom(database_path('migrations/notes'));
+
         if (Str::of(request()?->path())->startsWith(config('notes.route_prefix'))) {
             app('router')
                 ->pushMiddlewareToGroup('web', HandleInertiaRequests::class);
