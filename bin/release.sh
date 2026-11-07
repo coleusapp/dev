@@ -53,7 +53,7 @@ git tag $VERSION
 git push origin --tags
 
 # Tag Components
-for REMOTE in apps calendar health music notes settings support table users widgets
+for REMOTE in apps calendar frame health music notes settings support table users widgets
 do
     echo ""
     echo ""

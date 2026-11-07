@@ -20,6 +20,7 @@ git pull origin $CURRENT_BRANCH
 
 remote apps git@github.com:coleusapp/apps.git
 remote calendar git@github.com:coleusapp/calendar.git
+remote frame git@github.com:coleusapp/frame.git
 remote health git@github.com:coleusapp/health.git
 remote music git@github.com:coleusapp/music.git
 remote notes git@github.com:coleusapp/notes.git
@@ -31,6 +32,7 @@ remote widgets git@github.com:coleusapp/widgets.git
 
 split 'packages/apps' apps
 split 'packages/calendar' calendar
+split 'packages/frame' frame
 split 'packages/health' health
 split 'packages/music' music
 split 'packages/notes' notes
