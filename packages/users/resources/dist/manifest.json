@@ -1,16 +1,16 @@
 {
   "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue": {
-    "file": "assets/Toast-waRRgDT3.js",
+    "file": "assets/Toast-CUn62oLv.js",
     "name": "Toast",
     "src": "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_Login-x7GE3oBH.js"
+      "_Login-Bu0GNA5B.js"
     ]
   },
-  "_Login-x7GE3oBH.js": {
-    "file": "assets/Login-x7GE3oBH.js",
+  "_Login-Bu0GNA5B.js": {
+    "file": "assets/Login-Bu0GNA5B.js",
     "name": "Login",
     "isDynamicEntry": true,
     "imports": [
@@ -20,78 +20,78 @@
       "../../node_modules/.pnpm/@nuxt+ui@4.12.0_e348a15f5527124c2076710f4e630a08/node_modules/@nuxt/ui/dist/runtime/components/Toast.vue"
     ]
   },
-  "_loader-circle-DcUsttz5.js": {
-    "file": "assets/loader-circle-DcUsttz5.js",
+  "_loader-circle-B6_32JXL.js": {
+    "file": "assets/loader-circle-B6_32JXL.js",
     "name": "loader-circle",
     "imports": [
       "resources/js/app.ts"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-lEA4vYYm.js",
+    "file": "assets/app-Wht8QcWS.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/pages/ConfirmPassword.vue",
       "resources/js/pages/ForgotPassword.vue",
-      "_Login-x7GE3oBH.js",
+      "_Login-Bu0GNA5B.js",
       "resources/js/pages/Register.vue",
       "resources/js/pages/ResetPassword.vue",
       "resources/js/pages/VerifyEmail.vue"
     ],
     "css": [
-      "assets/app-B6YCAECM.css"
+      "assets/app-VWguFU1R.css"
     ]
   },
   "resources/js/pages/ConfirmPassword.vue": {
-    "file": "assets/ConfirmPassword-CE-te_Ff.js",
+    "file": "assets/ConfirmPassword-BHaSEz-J.js",
     "name": "ConfirmPassword",
     "src": "resources/js/pages/ConfirmPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DcUsttz5.js"
+      "_loader-circle-B6_32JXL.js"
     ]
   },
   "resources/js/pages/ForgotPassword.vue": {
-    "file": "assets/ForgotPassword-D6eD_FXV.js",
+    "file": "assets/ForgotPassword-CZ8Z7Yo0.js",
     "name": "ForgotPassword",
     "src": "resources/js/pages/ForgotPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DcUsttz5.js"
+      "_loader-circle-B6_32JXL.js"
     ]
   },
   "resources/js/pages/Register.vue": {
-    "file": "assets/Register-CFaz72cA.js",
+    "file": "assets/Register-BuVs8QAW.js",
     "name": "Register",
     "src": "resources/js/pages/Register.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DcUsttz5.js"
+      "_loader-circle-B6_32JXL.js"
     ]
   },
   "resources/js/pages/ResetPassword.vue": {
-    "file": "assets/ResetPassword-DooR4yqE.js",
+    "file": "assets/ResetPassword-BPPAHNBB.js",
     "name": "ResetPassword",
     "src": "resources/js/pages/ResetPassword.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DcUsttz5.js"
+      "_loader-circle-B6_32JXL.js"
     ]
   },
   "resources/js/pages/VerifyEmail.vue": {
-    "file": "assets/VerifyEmail-C2LIS5vf.js",
+    "file": "assets/VerifyEmail-DIXHYPYX.js",
     "name": "VerifyEmail",
     "src": "resources/js/pages/VerifyEmail.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
-      "_loader-circle-DcUsttz5.js"
+      "_loader-circle-B6_32JXL.js"
     ]
   }
 }

@@ -13,3 +13,13 @@ username: admin@dev.test
 password: 12345678
 
 pnpm --filter ./packages/health dev
+
+## Release
+
+Each package's built assets (`packages/<name>/resources/dist`) are committed, and `bin/split.sh` / `bin/release.sh`
+only push and tag what is committed — neither builds. Build every package and commit `dist` before splitting,
+or the release ships stale assets.
+
+From a clean, pushed `1.x`, this builds every package, commits the assets, pushes, splits and tags (replace the version):
+
+    pnpm -r build && git add . && git commit -m "Compile assets" && git push origin 1.x && ./bin/split.sh && ./bin/release.sh 1.0.xx
