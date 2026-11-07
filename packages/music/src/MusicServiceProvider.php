@@ -15,17 +15,6 @@ class MusicServiceProvider extends PackageServiceProvider
     {
         $package->name('music')
             ->hasConfigFile()
-            ->hasMigrations(array_map(
-                fn ($migration) => config('music.name')."/$migration",
-                [
-                    'create_genres_table',
-                    'create_artists_table',
-                    'create_albums_table',
-                    'create_tracks_table',
-                    'create_playlists_table',
-                    'create_playlist_track_table',
-                ]))
-            ->runsMigrations()
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews()
@@ -36,6 +25,8 @@ class MusicServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
+        $this->loadMigrationsFrom($this->package->basePath('/../database/migrations'));
+
         if (Str::of(request()?->path())->startsWith(config('music.route_prefix'))) {
             app('router')
                 ->pushMiddlewareToGroup('web', HandleInertiaRequests::class);

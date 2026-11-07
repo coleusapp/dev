@@ -15,12 +15,6 @@ class UsersServiceProvider extends PackageServiceProvider
         $package->name('users')
             ->hasConfigFile()
             ->hasCommand(ManageUsers::class)
-            ->hasMigrations([
-                'create_teams_table',
-                'create_model_has_users_table',
-                'create_model_has_teams_table',
-            ])
-            ->runsMigrations()
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews();
@@ -28,6 +22,8 @@ class UsersServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
+        $this->loadMigrationsFrom($this->package->basePath('/../database/migrations'));
+
         if (!class_exists('Coleus\Users\Models\UserAlias')) {
             class_alias($this->getUserAliasClass(), 'Coleus\Users\Models\UserAlias');
         }

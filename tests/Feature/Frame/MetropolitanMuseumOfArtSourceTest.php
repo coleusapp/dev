@@ -111,3 +111,12 @@ it('downloads the image bytes', function () {
     expect(new MetropolitanMuseumOfArtSource()->image(new ArtworkData(1, 'Painting', null, null, 'https://images.metmuseum.org/CRDImages/ep/original/1.jpg')))
         ->toBe('jpeg-bytes');
 });
+
+it('asks the image CDN for an image rather than JSON', function () {
+    Http::preventStrayRequests();
+    Http::fake(['https://images.metmuseum.org/*' => Http::response('jpeg-bytes')]);
+
+    new MetropolitanMuseumOfArtSource()->image(new ArtworkData(1, 'Painting', null, null, 'https://images.metmuseum.org/CRDImages/ep/original/1.jpg'));
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('Accept', 'image/*'));
+});

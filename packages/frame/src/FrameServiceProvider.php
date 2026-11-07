@@ -18,10 +18,6 @@ class FrameServiceProvider extends PackageServiceProvider
     {
         $package->name('frame')
             ->hasConfigFile()
-            ->hasMigrations([
-                'frame/create_frames_table',
-                'frame/create_frame_artworks_table',
-            ])
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews()
@@ -30,7 +26,7 @@ class FrameServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
-        $this->loadMigrationsFrom(database_path('migrations/frame'));
+        $this->loadMigrationsFrom($this->package->basePath('/../database/migrations'));
 
         if (Str::of(request()?->path())->startsWith(config('frame.route_prefix'))) {
             app('router')

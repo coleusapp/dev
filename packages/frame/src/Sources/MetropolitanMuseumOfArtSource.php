@@ -61,12 +61,15 @@ class MetropolitanMuseumOfArtSource implements ArtworkSource
     }
 
     /**
+     * The image CDN answers 406 to the API client's Accept: application/json.
+     *
      * @throws ConnectionException
      * @throws RequestException
      */
     public function image(ArtworkData $artwork): string
     {
         return $this->client()
+            ->accept('image/*')
             ->get($artwork->image_url)
             ->throw()
             ->body();

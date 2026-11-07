@@ -9,9 +9,12 @@ class SettingsServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        $package->name('settings')
-            ->discoversMigrations()
-            ->runsMigrations();
+        $package->name('settings');
+    }
+
+    public function bootingPackage(): void
+    {
+        $this->loadMigrationsFrom($this->package->basePath('/../database/migrations'));
     }
 
     public function packageRegistered(): void

@@ -9,8 +9,11 @@ class AppsServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        $package->name('apps')
-            ->discoversMigrations()
-            ->runsMigrations();
+        $package->name('apps');
+    }
+
+    public function bootingPackage(): void
+    {
+        $this->loadMigrationsFrom($this->package->basePath('/../database/migrations'));
     }
 }
