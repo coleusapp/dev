@@ -7,7 +7,7 @@ use Spatie\LaravelData\Data;
 class NoteData extends Data
 {
     public function __construct(
-        public string $body = '',
+        public ?string $body = null,
     ) {
         //
     }

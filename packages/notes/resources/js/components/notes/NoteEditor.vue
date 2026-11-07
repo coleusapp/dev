@@ -3,16 +3,10 @@ import type { NoteDetailData } from '@/components/notes/note';
 import SaveStatus from '@/components/notes/SaveStatus.vue';
 import VisualEditor from '@/components/notes/VisualEditor.vue';
 import { useAutosave } from '@/composables/useAutosave';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
-/**
- * One note open for editing: the Tiptap editor, saved as you type.
- */
 const props = defineProps<{
     note: NoteDetailData;
-    autosaveDelay?: number;
-    textDirection?: 'auto' | 'ltr' | 'rtl';
-    readableWidth?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -21,33 +15,8 @@ const emit = defineEmits<{
 }>();
 
 const body = ref(props.note.body);
-const updatedAt = ref(props.note.updated_at);
 
-const { status, error, flush, adopt, isDirty } = useAutosave(
-    props.note,
-    body,
-    (saved) => {
-        updatedAt.value = saved.updated_at;
-        emit('saved', saved);
-    },
-    props.autosaveDelay,
-);
-
-/**
- * A newer version of the note from the server (another tab) replaces the
- * text, unless there are unsaved edits here.
- */
-watch(
-    () => props.note,
-    (note) => {
-        if (note.updated_at !== updatedAt.value && !isDirty.value) {
-            adopt(note);
-            updatedAt.value = note.updated_at;
-        }
-    },
-);
-
-defineExpose({ flush });
+const { status, error, save } = useAutosave(props.note, body, (saved) => emit('saved', saved));
 </script>
 
 <template>
@@ -57,11 +26,11 @@ defineExpose({ flush });
             In the trash. Restore it to edit.
             <UiButton size="xs" color="neutral" variant="link" class="p-0" @click="emit('restore')">Restore</UiButton>
         </p>
-        <div class="min-h-0 flex-1" :class="{ 'readable-width': readableWidth }">
-            <VisualEditor v-model="body" :readonly="note.trashed" :text-direction="textDirection" />
+        <div class="readable-width min-h-0 flex-1">
+            <VisualEditor v-model="body" :readonly="note.trashed" @update:model-value="save" />
         </div>
         <div v-if="!note.trashed" class="flex justify-end">
-            <SaveStatus :status="status" :error="error" @retry="flush" />
+            <SaveStatus :status="status" :error="error" @retry="save" />
         </div>
     </div>
 </template>

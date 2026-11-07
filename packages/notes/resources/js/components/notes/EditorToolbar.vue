@@ -2,10 +2,6 @@
 import { TOOLBAR_GROUPS } from '@/editor/toolbar';
 import type { Editor } from '@tiptap/vue-3';
 
-/**
- * Formatting buttons for the note editor (editor/toolbar.ts). Buttons keep
- * the editor's focus and selection: mousedown is prevented.
- */
 defineProps<{
     editor: Editor;
 }>();

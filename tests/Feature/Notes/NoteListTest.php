@@ -32,7 +32,7 @@ it('moves a note to the top after it is edited', function () {
 });
 
 it('includes a plain text snippet of the body', function () {
-    Note::factory()->create(['body' => "# Groceries\n\n- [ ] **milk**\n- eggs"]);
+    Note::factory()->create(['body' => '<h1>Groceries</h1><ul data-type="taskList"><li data-type="taskItem" data-checked="false"><div><p><strong>milk</strong></p></div></li></ul><ul><li><p>eggs</p></li></ul>']);
 
     $this->get(route('notes.index'))
         ->assertInertia(fn (Assert $page) => $page->where('notes.data.0.snippet', 'milk eggs'));

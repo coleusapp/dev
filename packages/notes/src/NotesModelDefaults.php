@@ -3,11 +3,12 @@
 namespace Coleus\Notes;
 
 use Coleus\Support\ModelWithDefaults;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @method static \Illuminate\Database\Eloquent\Builder<static>|NotesModelDefaults newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|NotesModelDefaults newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|NotesModelDefaults query()
+ * @method static Builder<static>|NotesModelDefaults newModelQuery()
+ * @method static Builder<static>|NotesModelDefaults newQuery()
+ * @method static Builder<static>|NotesModelDefaults query()
  *
  * @mixin \Eloquent
  */

@@ -2,18 +2,13 @@
 
 namespace Coleus\Notes\Http\Resources;
 
+use Coleus\Notes\Models\Note;
 use Illuminate\Http\Request;
 
-/**
- * The open note: its list row plus the Markdown the editor loads.
- *
- * @mixin \Coleus\Notes\Models\Note
- */
+/** @mixin Note */
 class NoteDetailResource extends NoteResource
 {
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [

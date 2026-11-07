@@ -4,7 +4,6 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-/* The note in the editor (components/notes/VisualEditor.vue). */
 .note-content {
     @apply text-sm leading-relaxed break-words;
 }
@@ -90,15 +89,11 @@
     @apply mt-1 ps-6;
 }
 
-/* Automatic direction: each paragraph and item takes its direction from
-   its own first strong letters. */
 .tiptap[dir='auto'] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote) {
     unicode-bidi: plaintext;
     text-align: start;
 }
 
-/* Readable line length (setting): text stays about 46rem wide, centred,
-   and the formatting toolbar lines up with it. */
 .readable-width :is(.tiptap, .note-toolbar) {
     @apply mx-auto w-full max-w-[46rem];
 }

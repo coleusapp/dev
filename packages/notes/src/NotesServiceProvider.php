@@ -4,9 +4,6 @@ namespace Coleus\Notes;
 
 use Coleus\Notes\Http\Middleware\HandleInertiaRequests;
 use Coleus\Notes\Models\App as NotesApp;
-use Coleus\Notes\Models\Note;
-use Coleus\Notes\Policies\NotePolicy;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -17,8 +14,7 @@ class NotesServiceProvider extends PackageServiceProvider
     {
         $package->name('notes')
             ->hasConfigFile()
-            ->discoversMigrations()
-            ->runsMigrations()
+            ->hasMigrations(['notes/create_notes_table'])
             ->hasRoute('web')
             ->hasAssets()
             ->hasViews();
@@ -26,7 +22,7 @@ class NotesServiceProvider extends PackageServiceProvider
 
     public function bootingPackage(): void
     {
-        Gate::policy(Note::class, NotePolicy::class);
+        $this->loadMigrationsFrom(database_path('migrations/notes'));
 
         if (Str::of(request()?->path())->startsWith(config('notes.route_prefix'))) {
             app('router')
@@ -40,6 +36,5 @@ class NotesServiceProvider extends PackageServiceProvider
             return new Notes;
         });
         $this->app->singleton('app.notes', fn () => new NotesApp()->get());
-        $this->app->singleton('notes.settings', fn ($app) => $app->make('settings')->forApp($app->make('app.notes')));
     }
 }

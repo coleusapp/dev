@@ -1,76 +1,54 @@
 <script setup lang="ts">
-import ConfirmModal from '@/components/notes/ConfirmModal.vue';
 import {
-    compareNotes,
     filterQuery,
-    type ListSort,
     type NoteCollection,
-    type NoteData,
-    type NoteDetailData,
+    type NoteCounts,
     type NoteFilters,
-    type NotePreferences,
     type NoteResource,
     type NoteView,
-    type SortField,
+    type Resource,
 } from '@/components/notes/note';
 import NoteEditor from '@/components/notes/NoteEditor.vue';
 import NoteList from '@/components/notes/NoteList.vue';
 import NotesLayout from '@/layouts/NotesLayout.vue';
+import ConfirmModal from '@coleus/support/components/ui/modal/ConfirmModal.vue';
 import { Head, router } from '@inertiajs/vue3';
-import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
+import type { NavigationMenuItem } from '@nuxt/ui';
 import { watchDebounced } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     notes: NoteCollection;
     note: NoteResource | null;
-    counts: { notes: number; bookmarks: number; archive: number; trash: number };
-    filters: NoteFilters;
-    preferences: NotePreferences;
-    sort: ListSort;
+    counts: Resource<NoteCounts>;
+    filters: Resource<NoteFilters>;
 }>();
 
-/**
- * Query parameters that keep the current list filter on every link and redirect.
- */
-const listQuery = computed(() => filterQuery(props.filters));
+const listQuery = computed(() => filterQuery(props.filters.data));
 
-const views: { view: NoteView; label: string; icon: string; count?: keyof typeof props.counts }[] = [
+const views: { view: NoteView; label: string; icon: string; count?: keyof NoteCounts }[] = [
     { view: 'notes', label: 'All notes', icon: 'i-lucide-notebook', count: 'notes' },
-    { view: 'bookmarks', label: 'Bookmarks', icon: 'i-lucide-bookmark', count: 'bookmarks' },
-    { view: 'recent', label: 'Recents', icon: 'i-lucide-clock' },
-    { view: 'archive', label: 'Archive', icon: 'i-lucide-archive', count: 'archive' },
     { view: 'trash', label: 'Trash', icon: 'i-lucide-trash-2', count: 'trash' },
 ];
 
-const listTitle = computed(() => views.find(({ view }) => view === props.filters.view)?.label ?? 'Notes');
+const listTitle = computed(() => views.find(({ view }) => view === props.filters.data.view)?.label ?? 'Notes');
 
-/**
- * Nuxt UI treats absolute URLs as external links (opening a new tab), so its
- * links get relative ones: route(…, …, false), like the app sidebar's.
- */
 const viewItem = (item: (typeof views)[number]): NavigationMenuItem => ({
     label: item.label,
     icon: item.icon,
-    to: route('notes.index', filterQuery({ view: item.view, q: props.filters.q }), false),
-    active: props.filters.view === item.view,
-    badge: item.count ? props.counts[item.count] : undefined,
+    to: route('notes.index', filterQuery({ view: item.view, q: props.filters.data.q }), false),
+    active: props.filters.data.view === item.view,
+    badge: item.count ? props.counts.data[item.count] : undefined,
 });
 
-/**
- * The lists at the top of the sidebar; Trash and Settings sit at the bottom.
- */
 const listItems = computed<NavigationMenuItem[]>(() => views.filter((item) => item.view !== 'trash').map(viewItem));
 
-const bottomItems = computed<NavigationMenuItem[]>(() => [
-    ...views.filter((item) => item.view === 'trash').map(viewItem),
-    { label: 'Settings', icon: 'i-lucide-settings', to: route('notes.settings.edit', {}, false) },
-]);
+const bottomItems = computed<NavigationMenuItem[]>(() => [...views.filter((item) => item.view === 'trash').map(viewItem)]);
 
-const search = ref(props.filters.q ?? '');
+const search = ref(props.filters.data.q ?? '');
 
 watch(
-    () => props.filters.q,
+    () => props.filters.data.q,
     (q) => {
         if ((q ?? '') !== search.value.trim()) {
             search.value = q ?? '';
@@ -78,21 +56,18 @@ watch(
     },
 );
 
-/**
- * Typing in the search box filters the list in place; the open note stays open.
- */
 watchDebounced(
     search,
     (value) => {
         const q = value.trim();
 
-        if (q === (props.filters.q ?? '')) {
+        if (q === (props.filters.data.q ?? '')) {
             return;
         }
 
         const url = props.note ? route('notes.show', { note: props.note.data.id }) : route('notes.index');
 
-        router.get(url, filterQuery({ ...props.filters, q }), {
+        router.get(url, filterQuery({ ...props.filters.data, q }), {
             preserveState: true,
             preserveScroll: true,
             replace: true,
@@ -102,67 +77,20 @@ watchDebounced(
     { debounce: 300 },
 );
 
-const listedNotes = ref<NoteData[]>(props.notes.data);
-
-watch(
-    () => props.notes,
-    (notes) => (listedNotes.value = notes.data),
-);
-
-/**
- * Autosave doesn't reload the page, so the saved note's row is refreshed in
- * place and re-sorted the way the server orders the list (Recents keeps
- * its own order: most recently edited first).
- */
-const onNoteSaved = (saved: NoteDetailData): void => {
-    const others = listedNotes.value.filter((listed) => listed.id !== saved.id);
-
-    listedNotes.value = props.filters.view === 'recent' ? [saved, ...others] : [saved, ...others].sort(compareNotes(props.sort));
+const onNoteSaved = (): void => {
+    router.reload({ only: ['notes'] });
 };
 
 const createNote = (): void => {
     router.post(route('notes.store'), { body: '' });
 };
 
-const setSort = (sort: SortField, direction: 'asc' | 'desc'): void => {
-    router.put(route('notes.sort.update'), { sort, direction }, { preserveScroll: true, preserveState: true });
-};
-
-const sortFields: [SortField, string][] = [
-    ['modified', 'Date edited'],
-    ['created', 'Date created'],
-];
-
-const sortDirections: ['desc' | 'asc', string][] = [
-    ['desc', 'Newest first'],
-    ['asc', 'Oldest first'],
-];
-
-const sortItems = computed<DropdownMenuItem[][]>(() => [
-    [{ type: 'label', label: 'Sort by' }],
-    sortFields.map(([value, label]) => ({
-        label,
-        type: 'checkbox' as const,
-        checked: props.sort.sort === value,
-        onUpdateChecked: () => setSort(value, props.sort.direction),
-    })),
-    sortDirections.map(([value, label]) => ({
-        label,
-        type: 'checkbox' as const,
-        checked: props.sort.direction === value,
-        onUpdateChecked: () => setSort(props.sort.sort, value),
-    })),
-]);
-
-/**
- * Pin, bookmark and archive turn a timestamp on the note on or off.
- */
-const toggle = (action: 'pin' | 'bookmark' | 'archive', on: boolean): void => {
+const togglePin = (on: boolean): void => {
     if (!props.note) {
         return;
     }
 
-    const url = route(`notes.${on ? action : `un${action}`}`, { note: props.note.data.id });
+    const url = route(on ? 'notes.pin' : 'notes.unpin', { note: props.note.data.id });
     const options = { preserveScroll: true, preserveState: true };
 
     if (on) {
@@ -172,9 +100,6 @@ const toggle = (action: 'pin' | 'bookmark' | 'archive', on: boolean): void => {
     }
 };
 
-/**
- * Delete moves a note to the trash; there it can be restored or deleted for good.
- */
 const deleteNote = (): void => {
     if (props.note) {
         router.delete(route('notes.destroy', { note: props.note.data.id, ...listQuery.value }));
@@ -203,11 +128,6 @@ const emptyTrash = (): void => {
 
 type NoteAction = { label: string; icon: string; pressed?: boolean; color?: 'neutral' | 'error'; run: () => void };
 
-/**
- * The open note's actions, as buttons in its header. Pin, bookmark and
- * archive show as pressed while on; a trashed note offers restore and
- * delete forever instead.
- */
 const noteActions = computed<NoteAction[]>(() => {
     const note = props.note?.data;
 
@@ -223,19 +143,7 @@ const noteActions = computed<NoteAction[]>(() => {
     }
 
     return [
-        { label: note.pinned ? 'Unpin' : 'Pin', icon: 'i-lucide-pin', pressed: note.pinned, run: () => toggle('pin', !note.pinned) },
-        {
-            label: note.bookmarked ? 'Remove bookmark' : 'Bookmark',
-            icon: 'i-lucide-bookmark',
-            pressed: note.bookmarked,
-            run: () => toggle('bookmark', !note.bookmarked),
-        },
-        {
-            label: note.archived ? 'Unarchive' : 'Archive',
-            icon: 'i-lucide-archive',
-            pressed: note.archived,
-            run: () => toggle('archive', !note.archived),
-        },
+        { label: note.pinned ? 'Unpin' : 'Pin', icon: 'i-lucide-pin', pressed: note.pinned, run: () => togglePin(!note.pinned) },
         { label: 'Move to trash', icon: 'i-lucide-trash-2', color: 'error', run: deleteNote },
     ];
 });
@@ -278,17 +186,14 @@ const noteActions = computed<NoteAction[]>(() => {
                         </template>
                         <template #right>
                             <UiButton
-                                v-if="filters.view === 'trash'"
+                                v-if="filters.data.view === 'trash'"
                                 icon="i-lucide-trash"
                                 color="error"
                                 variant="ghost"
                                 aria-label="Empty trash"
-                                :disabled="counts.trash === 0"
+                                :disabled="counts.data.trash === 0"
                                 @click="confirmingEmptyTrash = true"
                             />
-                            <UiDropdownMenu v-if="filters.view !== 'recent'" :items="sortItems">
-                                <UiButton icon="i-lucide-arrow-up-down" color="neutral" variant="ghost" aria-label="Sort notes" />
-                            </UiDropdownMenu>
                             <UiButton icon="i-lucide-file-plus" color="neutral" variant="ghost" aria-label="New note" @click="createNote" />
                         </template>
                     </UiDashboardNavbar>
@@ -309,14 +214,7 @@ const noteActions = computed<NoteAction[]>(() => {
                             <UiButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Clear search" @click="search = ''" />
                         </template>
                     </UiInput>
-                    <NoteList
-                        :notes="listedNotes"
-                        :selected-id="note?.data.id ?? null"
-                        :filters="filters"
-                        :relative-dates="preferences['list.relative_dates']"
-                        :show-snippets="preferences['list.show_snippets']"
-                        @create="createNote"
-                    />
+                    <NoteList :notes="notes.data" :selected-id="note?.data.id ?? null" :filters="filters.data" @create="createNote" />
                 </template>
             </UiDashboardPanel>
 
@@ -351,16 +249,7 @@ const noteActions = computed<NoteAction[]>(() => {
                 </template>
 
                 <template #body>
-                    <NoteEditor
-                        v-if="note"
-                        :key="note.data.id"
-                        :note="note.data"
-                        :autosave-delay="preferences['editor.autosave_delay']"
-                        :text-direction="preferences['editor.text_direction']"
-                        :readable-width="preferences['editor.readable_width']"
-                        @saved="onNoteSaved"
-                        @restore="restoreNote"
-                    />
+                    <NoteEditor v-if="note" :key="note.data.id" :note="note.data" @saved="onNoteSaved" @restore="restoreNote" />
                     <div v-else class="text-dimmed flex h-full items-center justify-center p-4 text-center text-sm">
                         Select a note or create a new one.
                     </div>
@@ -376,7 +265,7 @@ const noteActions = computed<NoteAction[]>(() => {
                     <ConfirmModal
                         v-model:open="confirmingEmptyTrash"
                         title="Empty the trash?"
-                        :description="`${counts.trash} ${counts.trash === 1 ? 'note is' : 'notes are'} deleted for good.`"
+                        :description="`${counts.data.trash} ${counts.data.trash === 1 ? 'note is' : 'notes are'} deleted for good.`"
                         confirm-label="Empty trash"
                         @confirm="emptyTrash"
                     />

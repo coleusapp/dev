@@ -3,124 +3,91 @@
 namespace Coleus\Notes\Services;
 
 use Coleus\Notes\Data\NoteData;
-use Coleus\Notes\Enums\NoteSort;
+use Coleus\Notes\Data\NoteListData;
 use Coleus\Notes\Enums\NoteView;
 use Coleus\Notes\Models\Note;
-use Coleus\Notes\Preferences\NotePreferences;
 use Coleus\Support\Services\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-/**
- * @extends Service<Note, NoteData>
- */
+/** @extends Service<Note, NoteData> */
 class NoteService extends Service
 {
     protected $model = Note::class;
 
     protected $data = NoteData::class;
 
-    /**
-     * @return Builder<Note>
-     */
+    /** @return Builder<Note> */
     public function defaultQuery(): Builder
     {
-        return NoteSort::Modified->apply(Note::query(), 'desc');
+        return Note::query()
+            ->orderByRaw('case when pinned_at is null then 1 else 0 end')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id');
     }
 
-    /**
-     * The order the list uses (Settings / sort menu).
-     *
-     * @return array{sort: NoteSort, direction: string}
-     */
-    public function sort(): array
+    /** @param  array<string, mixed>  $payload */
+    public function filters(array $payload): NoteListData
     {
-        return [
-            'sort' => NoteSort::tryFrom((string) NotePreferences::get('list.sort')) ?? NoteSort::Modified,
-            'direction' => NotePreferences::get('list.sort_direction') === 'asc' ? 'asc' : 'desc',
-        ];
+        return NoteListData::from($payload);
     }
 
     /**
+     * @param  array<string, mixed>  $payload
+     * @return array{q?: string, view?: string}
+     */
+    public function listQuery(array $payload): array
+    {
+        $filters = $this->filters($payload);
+
+        return array_filter([
+            'q' => $filters->q,
+            'view' => $filters->view === NoteView::Notes ? null : $filters->view->value,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
      * @return Collection<int, Note>
      */
-    public function list(?string $search = null, NoteView $view = NoteView::Notes): Collection
+    public function list(array $payload): Collection
     {
-        $order = $this->sort();
+        $filters = $this->filters($payload);
 
-        return $view->scope($order['sort']->apply(Note::query(), $order['direction']))
-            ->when($search !== null, fn (Builder $query) => $query->search((string) $search))
+        return $filters->view->scope($this->defaultQuery())
+            ->when($filters->q, fn (Builder $query) => $this->search($query, $filters->q))
             ->get();
     }
 
     /**
-     * How many notes each sidebar list holds.
-     *
-     * @return array{notes: int, bookmarks: int, archive: int, trash: int}
+     * @param  Builder<Note>  $query
+     * @return Builder<Note>
      */
+    private function search(Builder $query, string $terms): Builder
+    {
+        return $query->whereLike('body', "%$terms%");
+    }
+
+    /** @return array{notes: int, trash: int} */
     public function counts(): array
     {
         return [
             'notes' => NoteView::Notes->scope(Note::query())->count(),
-            'bookmarks' => NoteView::Bookmarks->scope(Note::query())->count(),
-            'archive' => NoteView::Archive->scope(Note::query())->count(),
             'trash' => NoteView::Trash->scope(Note::query())->count(),
         ];
     }
 
-    /**
-     * Moves a note to the trash.
-     *
-     * @param  Note  $model
-     */
-    public function destroy(mixed $model): ?bool
+    public function pin(Note $note): void
     {
-        return $model->delete();
+        $note->pinned_at ??= now();
+
+        Note::withoutTimestamps(fn () => $note->save());
     }
 
-    public function restore(Note $note): void
+    public function unpin(Note $note): void
     {
-        $note->restore();
-    }
+        $note->pinned_at = null;
 
-    public function forceDelete(Note $note): void
-    {
-        $note->forceDelete();
-    }
-
-    /**
-     * Deletes every note in the current user's trash for good.
-     *
-     * @return int how many notes were deleted
-     */
-    public function emptyTrash(): int
-    {
-        $trashed = Note::query()->onlyTrashed()->get();
-
-        $trashed->each(fn (Note $note) => $note->forceDelete());
-
-        return $trashed->count();
-    }
-
-    /**
-     * Pinning, bookmarking and archiving file a note without counting as an
-     * edit, so they leave updated_at (and the list order) alone.
-     */
-    public function mark(Note $note, string $column, bool $on): void
-    {
-        if (($note->{$column} !== null) === $on) {
-            return;
-        }
-
-        Note::withoutTimestamps(fn () => $note->forceFill([$column => $on ? now() : null])->save());
-    }
-
-    /**
-     * Escapes LIKE wildcards with "!", which needs no quoting on MariaDB or SQLite
-     * (unlike a backslash).
-     */
-    public static function escapeLike(string $value): string
-    {
-        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
+        Note::withoutTimestamps(fn () => $note->save());
     }
 }

@@ -23,13 +23,12 @@
         "@nuxt/ui": "catalog:dep",
         "@tailwindcss/vite": "catalog:dep",
         "@tiptap/extension-highlight": "catalog:dep",
-        "@tiptap/extension-image": "3.30.1",
-        "@tiptap/extension-link": "3.30.1",
-        "@tiptap/extension-list": "3.30.1",
+        "@tiptap/extension-image": "catalog:dep",
+        "@tiptap/extension-link": "catalog:dep",
+        "@tiptap/extension-list": "catalog:dep",
         "@tiptap/extension-placeholder": "catalog:dep",
-        "@tiptap/extension-table": "3.30.1",
+        "@tiptap/extension-table": "catalog:dep",
         "@tiptap/extension-underline": "catalog:dep",
-        "@tiptap/markdown": "3.30.1",
         "@tiptap/pm": "catalog:dep",
         "@tiptap/starter-kit": "catalog:dep",
         "@tiptap/vue-3": "catalog:dep",
@@ -39,12 +38,12 @@
         "class-variance-authority": "catalog:dep",
         "clsx": "catalog:dep",
         "concurrently": "catalog:dep",
-        "katex": "0.19.0",
+        "katex": "catalog:dep",
         "laravel-vite-plugin": "catalog:dep",
         "lodash": "catalog:dep",
         "lucide": "catalog:dep",
         "lucide-vue-next": "catalog:dep",
-        "mermaid": "12.1.0",
+        "mermaid": "catalog:dep",
         "reka-ui": "catalog:dep",
         "tailwind-merge": "catalog:dep",
         "tailwindcss": "catalog:dep",
@@ -55,7 +54,7 @@
         "ziggy-js": "catalog:dep"
     },
     "devDependencies": {
-        "jsdom": "26.1.0",
-        "vitest": "3.2.4"
+        "jsdom": "catalog:dep",
+        "vitest": "catalog:dep"
     }
 }

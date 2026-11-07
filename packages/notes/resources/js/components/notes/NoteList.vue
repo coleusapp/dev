@@ -3,32 +3,20 @@ import { filterQuery, type NoteData, type NoteFilters } from '@/components/notes
 import { Link } from '@inertiajs/vue3';
 import { computed, nextTick, useTemplateRef, watch } from 'vue';
 
-const props = withDefaults(
-    defineProps<{
-        notes: NoteData[];
-        selectedId: number | null;
-        filters: NoteFilters;
-        relativeDates?: boolean;
-        showSnippets?: boolean;
-    }>(),
-    { relativeDates: true, showSnippets: true },
-);
+const props = defineProps<{
+    notes: NoteData[];
+    selectedId: number | null;
+    filters: NoteFilters;
+}>();
 
 defineEmits<{
     create: [];
 }>();
 
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-
-const absoluteDate = (iso: string): string => dateFormat.format(new Date(iso));
-
 const query = computed(() => filterQuery(props.filters));
 
 const list = useTemplateRef<HTMLElement>('list');
 
-/**
- * Keeps the open note's row in view when it changes.
- */
 watch(
     () => props.selectedId,
     (id) => void nextTick(() => list.value?.querySelector(`[data-note-id="${id}"]`)?.scrollIntoView({ block: 'nearest' })),
@@ -41,9 +29,6 @@ const emptyMessage = computed(() => {
 
     return {
         notes: 'No notes yet.',
-        bookmarks: 'No bookmarked notes.',
-        recent: 'Notes you edit show up here.',
-        archive: 'The archive is empty.',
         trash: 'The trash is empty.',
     }[props.filters.view];
 });
@@ -77,12 +62,9 @@ const emptyMessage = computed(() => {
             <span class="flex items-center gap-1">
                 <span class="truncate text-sm font-semibold" :class="{ 'text-dimmed': !note.title }">{{ note.title || 'Empty note' }}</span>
                 <UiIcon v-if="note.pinned" name="i-lucide-pin" class="text-primary size-3 shrink-0" aria-label="Pinned" />
-                <UiIcon v-if="note.bookmarked" name="i-lucide-bookmark" class="text-dimmed size-3 shrink-0" aria-label="Bookmarked" />
             </span>
-            <span v-if="showSnippets && note.snippet" class="text-muted line-clamp-2 text-xs">{{ note.snippet }}</span>
-            <time class="text-dimmed text-xs" :datetime="note.updated_at">{{
-                relativeDates ? note.updated_at_for_humans : absoluteDate(note.updated_at)
-            }}</time>
+            <span v-if="note.snippet" class="text-muted line-clamp-2 text-xs">{{ note.snippet }}</span>
+            <time class="text-dimmed text-xs" :datetime="note.updated_at">{{ note.updated_at_for_humans }}</time>
         </Link>
     </nav>
 </template>

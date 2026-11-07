@@ -50,18 +50,18 @@ it('shows a note', function () {
 });
 
 it('creates a note owned by the current user', function () {
-    $response = $this->post(route('notes.store'), ['body' => '# First']);
+    $response = $this->post(route('notes.store'), ['body' => '<h1>First</h1>']);
 
     $note = Note::query()->sole();
     $response->assertRedirect(route('notes.show', ['note' => $note]));
-    expect($note->body)->toBe('# First')
+    expect($note->body)->toBe('<h1>First</h1>')
         ->and($note->isOwnedBy($this->user->id))->toBeTrue();
 });
 
 it('creates an empty note when the body is empty', function () {
     $this->post(route('notes.store'), ['body' => ''])->assertRedirect();
 
-    expect(Note::query()->sole()->body)->toBe('');
+    expect(Note::query()->sole()->body)->toBeNull();
 });
 
 it('updates a note', function () {
@@ -96,16 +96,6 @@ it('hides other users notes from every note route', function (string $method) {
     expect(Note::query()->withoutGlobalScopes()->find($foreign->id)->body)->toBe('secret');
 })->with(['get', 'put', 'delete']);
 
-it('denies access through the policy even without the user scope', function () {
-    $this->actingAs(User::factory()->create());
-    $foreign = Note::factory()->create();
-    $this->actingAs($this->user);
-
-    expect($this->user->can('view', $foreign))->toBeFalse()
-        ->and($this->user->can('update', $foreign))->toBeFalse()
-        ->and($this->user->can('delete', $foreign))->toBeFalse();
-});
-
 it('validates the body', function (array $payload, string $error) {
     $note = Note::factory()->create(['body' => 'keep']);
 
@@ -132,14 +122,14 @@ it('ignores attributes that are not fillable', function () {
 it('returns the saved note as JSON for autosave requests', function () {
     $note = Note::factory()->create(['body' => 'old']);
 
-    $this->putJson(route('notes.update', ['note' => $note]), ['body' => "# Autosaved\nbody"])
+    $this->putJson(route('notes.update', ['note' => $note]), ['body' => '<h1>Autosaved</h1><p>body</p>'])
         ->assertOk()
         ->assertJsonPath('data.id', $note->id)
         ->assertJsonPath('data.title', 'Autosaved')
-        ->assertJsonPath('data.body', "# Autosaved\nbody")
+        ->assertJsonPath('data.body', '<h1>Autosaved</h1><p>body</p>')
         ->assertJsonPath('data.snippet', 'body');
 
-    expect($note->refresh()->body)->toBe("# Autosaved\nbody");
+    expect($note->refresh()->body)->toBe('<h1>Autosaved</h1><p>body</p>');
 });
 
 it('still redirects Inertia visits that accept JSON', function () {

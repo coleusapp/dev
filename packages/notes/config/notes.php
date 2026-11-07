@@ -15,11 +15,4 @@ return [
      * Default: notes
      */
     'route_prefix' => 'notes',
-
-    /*
-     * Prefix of the Notes preferences in coleus/settings ("notes.list.sort").
-     *
-     * Default: notes
-     */
-    'settings_prefix' => 'notes',
 ];

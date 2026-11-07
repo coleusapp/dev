@@ -9,7 +9,7 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import formkitConfig from '../../formkit.config';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Notes';
 
 createInertiaApp({
     title: (title: string) => `${title} - ${appName}`,

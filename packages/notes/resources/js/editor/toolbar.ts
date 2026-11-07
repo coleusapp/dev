@@ -1,9 +1,5 @@
 import type { Editor } from '@tiptap/vue-3';
 
-/**
- * One editor toolbar button: what it shows, what it does, and when it
- * shows as on (the cursor is in that block or the selection has that mark).
- */
 export type ToolbarAction = {
     id: string;
     label: string;
@@ -12,7 +8,7 @@ export type ToolbarAction = {
     isActive: (editor: Editor) => boolean;
 };
 
-const heading = (level: 1 | 2 | 3): ToolbarAction => ({
+const heading = (level: 1 | 2 | 3 | 4 | 5 | 6): ToolbarAction => ({
     id: `heading-${level}`,
     label: `Heading ${level}`,
     icon: `i-lucide-heading-${level}`,
@@ -33,11 +29,8 @@ const mark = (name: 'bold' | 'italic' | 'strike' | 'code', label: string, icon: 
     isActive: (editor) => editor.isActive(name),
 });
 
-/**
- * The toolbar, in groups (a separator between each).
- */
 export const TOOLBAR_GROUPS: ToolbarAction[][] = [
-    [heading(1), heading(2), heading(3)],
+    [heading(1), heading(2), heading(3), heading(4), heading(5), heading(6)],
     [
         mark('bold', 'Bold', 'i-lucide-bold'),
         mark('italic', 'Italic', 'i-lucide-italic'),

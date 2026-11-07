@@ -109,6 +109,18 @@ const links = [
             to: '/finance',
         },
         {
+            label: 'IoT',
+            icon: 'i-lucide-cpu',
+            type: 'trigger',
+            open: route().current('frame.*'),
+            children: [
+                {
+                    label: 'Frame',
+                    to: '/frame',
+                },
+            ],
+        },
+        {
             label: 'Settings',
             to: '/settings',
             icon: 'i-lucide-settings',

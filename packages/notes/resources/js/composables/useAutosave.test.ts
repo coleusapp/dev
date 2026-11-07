@@ -4,21 +4,27 @@ import { useAutosave } from '@/composables/useAutosave';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp, defineComponent, ref, type Ref } from 'vue';
 
-vi.mock('@inertiajs/vue3', () => ({ router: { on: () => () => undefined } }));
+const requests: { url: string; body: unknown }[] = [];
 
-const requests: { url: string; body: unknown; keepalive?: boolean }[] = [];
+vi.mock('@inertiajs/vue3', () => ({
+    useHttp: (data: { body: string }) => {
+        const http = {
+            ...data,
+            errors: {},
+            put: async (url: string) => {
+                requests.push({ url, body: { body: http.body } });
+
+                return { data: { id: 1, body: http.body } };
+            },
+        };
+
+        return http;
+    },
+}));
 
 beforeEach(() => {
     vi.useFakeTimers();
     vi.stubGlobal('route', (name: string, params: { note: number }) => `/${name}/${params.note}`);
-    vi.stubGlobal(
-        'fetch',
-        vi.fn(async (url: string, init: { body: string; keepalive?: boolean }) => {
-            requests.push({ url, body: JSON.parse(init.body), keepalive: init.keepalive });
-
-            return { ok: true, json: async () => ({ data: { id: 1, body: '' } }) };
-        }),
-    );
 });
 
 afterEach(() => {
@@ -46,11 +52,12 @@ const mount = () => {
 
 describe('useAutosave', () => {
     it('saves plain text to notes.update by default', async () => {
-        const { body } = mount();
+        const { body, autosave } = mount();
 
         body.value = 'changed';
+        autosave.save();
         await vi.advanceTimersByTimeAsync(100);
 
-        expect(requests).toEqual([{ url: '/notes.update/1', body: { body: 'changed' }, keepalive: undefined }]);
+        expect(requests).toEqual([{ url: '/notes.update/1', body: { body: 'changed' } }]);
     });
 });

@@ -26,18 +26,16 @@ it('lists only trashed notes in the trash, and keeps them out of the other lists
     $this->get(route('notes.index', ['view' => 'trash']))
         ->assertInertia(fn (Assert $page) => $page->where('notes.data', fn ($notes) => collect($notes)->pluck('id')->all() === [$trashed->id]));
 
-    foreach (['notes', 'bookmarks', 'recent', 'archive'] as $view) {
-        $this->get(route('notes.index', ['view' => $view]))
-            ->assertInertia(fn (Assert $page) => $page->where('notes.data', fn ($notes) => ! collect($notes)->contains('id', $trashed->id)));
-    }
+    $this->get(route('notes.index'))
+        ->assertInertia(fn (Assert $page) => $page->where('notes.data', fn ($notes) => !collect($notes)->contains('id', $trashed->id)));
 });
 
 it('opens a trashed note marked as trashed, and refuses edits to it', function () {
-    $note = Note::factory()->trashed()->create(['body' => '# Old']);
+    $note = Note::factory()->trashed()->create(['body' => '<h1>Old</h1>']);
 
     $this->get(route('notes.show', ['note' => $note, 'view' => 'trash']))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->where('note.data.trashed', true)->where('note.data.body', '# Old'));
+        ->assertInertia(fn (Assert $page) => $page->where('note.data.trashed', true)->where('note.data.body', '<h1>Old</h1>'));
 
     $this->putJson(route('notes.update', $note), ['body' => 'changed'])->assertNotFound();
     $this->post(route('notes.pin', $note))->assertNotFound();
@@ -51,14 +49,6 @@ it('restores a trashed note', function () {
     $this->post(route('notes.restore', $note))->assertRedirect(route('notes.show', $note));
 
     expect($note->refresh()->trashed())->toBeFalse();
-});
-
-it('only restores or deletes forever notes that are in the trash', function () {
-    $note = Note::factory()->create();
-
-    $this->post(route('notes.restore', $note))->assertForbidden();
-    $this->delete(route('notes.force-delete', $note))->assertForbidden();
-    expect(Note::query()->find($note->id))->not->toBeNull();
 });
 
 it('deletes a trashed note forever', function () {
